@@ -1,0 +1,985 @@
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  Z I L C H  S C R E E N  E D I T O R
+                  ===================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                          William P. Wood, Jr.
+                 R&D Data Processing and Communications
+                   Smith Kline & French Laboratories
+                       1500 Spring Garden Street
+                             P.O. Box 7929
+                        Philadelphia, Pa. 19101
+                                                                Page 2
+
+
+     Zilch is a screen editor which can display and  edit  one  or  more
+files  at  a time.  The file(s) being edited are displayed on a terminal
+and the screen is updated as changes are made to the files.   Zilch  has
+several features which make it a very powerful editor:
+
+     1.  Multiple files may be displayed and edited at the same time.
+
+     2.  Zilch saves an editing  session  when  it  exits  so  that  the
+         session can be continued at a later date.
+
+     3.  Zilch checkpoints an editing session after every  400  commands
+         in case of a system crash.
+
+     4.  A macro may be  defined  to  execute  repetitive  sequences  of
+         keystrokes.
+
+     5.  Special programming language specific character mappings may be
+         used  to  abbreviate  commonly  typed  words  and  do automatic
+         indentation.
+
+     6.  Zilch can spawn a subprocess to enter DCL and can redirect  the
+         output of DCL commands to an internal buffer.
+
+
+     Zilch is descended from several editors.  Character  mappings  were
+first  implemented  by  Bob Stodola on a Hewlett-Packard computer at The
+Institute for  Cancer  Research.   Many  of  the  commands  emulate  the
+commands  of  Bill  Cael's Teco screen editor at ICR.  Many other ideas,
+such as editing and  windowing  multiple  files,  come  from  the  EMACS
+editor.
+
+This document is split into five parts:
+
+     1.  Getting started with Zilch.
+
+     2.  Cursor control and edit functions.
+
+     3.  Zilch command line switches.
+
+     4.  Mapping Sequences
+
+     5.  Description of language-specific mapping characters.
+
+
+     This document is intended as a reference  manual  for  Zilch.   The
+best  way  for  a beginner to learn Zilch is to try the Zilch tutorials.
+Instructions for starting the tutorials are in DPC_DOC:ZCAI.DOC, or just
+type  ZCAI  INTRO  for the beginner's tutorial, or ZCAI ADVANCED for the
+advanced tutorial.
+                                                                Page 3
+
+
+1  GETTING STARTED WITH ZILCH
+
+1.1  Buffers, Files, Windows, And Pages
+
+     The purpose of Zilch is to type in and modify text.  Text is stored
+on  the  computer  in  files.   When Zilch reads a file or creates a new
+file, it holds the file in an internal buffer.  Editing changes  can  be
+made  to  the  buffer,  and  then the buffer may be written out as a new
+version of the original file.
+
+There may be multiple buffers in Zilch at  once.   Buffers  have  names.
+Generally  the  name  is  composed  of  the  associated  file's name and
+extension.  It is possible to create buffers within Zilch  that  do  not
+have  files associated with them, in which case Zilch prompts for a file
+name if you attempt to write out the buffer.
+
+     Zilch divides the terminal screen into  areas  called  windows.   A
+window  is a visible portion of a buffer.  There may be multiple windows
+displayed on the screen at once.  Each window has the name of its buffer
+displayed  below the window in reverse video or on the right side of the
+screen.  The terminal's cursor appears in one of the windows, and may be
+moved  about  the  text in the window using the cursor control keys.  If
+the cursor is moved outside of the window, the window is redrawn so that
+the  cursor  is visible.  The cursor may be moved from window to window,
+and windows may be added and deleted,  using  the  window  control  keys
+described  in  section 2.  At no time does the creation or deletion of a
+window change the contents of the buffer associated with the window.
+
+     A page is a collection of windows.  Only one page is visible  at  a
+time.   When you switch to another page, the windows in that page become
+visible on the screen.
+
+
+
+1.2  Checkpointing
+
+     To protect against a system crash, Zilch  checkpoints  the  buffers
+which  have  file  names  associated with them after every 400 commands.
+This takes a few seconds and Zilch does not respond during a  checkpoint
+operation,  although  it remembers the characters you typed and executes
+them when it is done.  Each buffer is checkpointed  to  FILE.CKP,  where
+FILE  is the file name of the buffer.  When a buffer is written out, any
+checkpoint files created for it are deleted.  If  you  accidently  don't
+save  a  buffer,  you  may  be able to recover it through its .CKP file.
+Occasionally you may have to delete old .CKP files by hand.
+
+
+
+1.3  Prompt Strings
+
+     Some commands cause Zilch to prompt for information at  the  bottom
+of  the  screen.   If you wish to abort one of these commands during the
+prompt, type Control-G to abort the command.   Typing  Control-U  causes
+any  characters  you  have  typed  to be deleted.  Typing the DELETE key
+deletes the last character typed.  Typing carriage-return completes  the
+                                                                Page 4
+
+
+prompt.   Typing  \ (backwards slash) causes the next character typed to
+be inserted literally as itself, even if it is a control character  such
+as Control-U.  To insert a literal \, type \\.  Typing \@ inserts a null
+character (0).
+
+
+
+1.4  Invoking Zilch
+
+     To enter the editor, you must issue a  valid  ZILCH  command  line.
+Zilch command lines have one of the following forms:
+
+
+     ZILCH file [file...]   Edit existing or new file(s).  If more  than
+                            one  file  name  is specified, then to place
+                            the files on the first  page  (in  different
+                            windows)  separate  each  file  name  with a
+                            space; to place each file on it's own  page,
+                            separate  each  file  name with a comma.  To
+                            see a file on another page, use one  of  the
+                            page movement commands (+,-, or #) described
+                            in section 2.  Note  that  "file"  may  have
+                            wild  cards in it, causing Zilch to read all
+                            of the matching files  into  buffers.   Each
+                            file  which matches a wild card file name is
+                            placed on it's own page.  The  exception  is
+                            that when more than one file name is entered
+                            and the names are separated by spaces,  then
+                            the  first file which matches each file name
+                            is placed on the first page if possible, and
+                            subsequent  matching  files  are  placed  on
+                            their own page.
+
+       or
+
+     ZILCH                  Resume a previous editing session, including
+                            all  windows  and pages that were present at
+                            the end of the last session.
+
+Zilch also has several command line  switches  which  are  described  in
+section 3.
+
+
+
+1.5  Miscellaneous Notes
+
+
+     1.  File version numbers - When Zilch writes a file  it  creates  a
+         new  version  of  the  file unless the user specified a version
+         number in the file name.  In this case, the version  number  is
+         displayed  in  the  buffer  and file names and Zilch writes the
+         file to that version of the file.
+                                                                Page 5
+
+
+     2.  File protection - When Zilch writes a file it  gives  the  file
+         the  same  protection  it  had  originally.  In the case of new
+         files, the file is given the user's default protection.
+
+                                                                Page 6
+
+
+2  CURSOR CONTROL AND EDIT FUNCTIONS
+
+     The screen editor operates in two modes:  control and  insert.   In
+control  mode  the  user may move the cursor through buffers, create and
+delete windows, search for strings, change strings, etc.  In insert mode
+typed text is inserted at the cursor location.
+
+
+
+
+2.1  CONTROL MODE
+
+     This section describes the  commands  available  in  control  mode.
+Most of the commands are just a single keystroke, although some, notably
+the window and buffer  manipulation  commands,  are  several  keystrokes
+long.  Any of the commands may be preceded by typing a number which acts
+as a repeat count, repeating the command that many times.  For  example,
+3j moves the cursor down 3 lines.
+
+
+  COMMAND
+  CHARACTER       FUNCTION
+  ==========      ========================================================
+
+  ?               Displays the Help page.  Normal editing  commands  may
+                  be  given  to move about the Help buffer.  To exit the
+                  Help display, type a carriage-return.
+
+  Control-G       Aborts command or prompt entry.  May be used to  abort
+                  a partially entered keystroke sequence.
+
+  Escape or `     Enter insert mode.  (see section 2.2).
+
+  H               Move the cursor back one character.
+  L               Move the cursor forward one character.
+
+  K               Move the cursor to the beginning of the previous line.
+  Control-K       Scroll down one line.
+  I               Move to the previous line  but  stay  in  the  current
+                  column.
+  J               Move the cursor to the beginning of the next line.
+  Control-J       Scroll up one line.
+  U               Move to the next line but stay in the current column.
+
+  M               Move the cursor to the beginning of the  current  line
+                  or to the end of the line if already at the beginning.
+
+  O               Move the cursor to the front of the previous word.
+  P               Move the cursor to the end of the next word.
+
+  G               Move the cursor back by half the window size.
+  B               Move the cursor forward by half the window size.
+
+  Y               Move the cursor back a window-full.
+  N               Move the cursor forward a window-full if the cursor is
+                                                                Page 7
+
+
+                  on  the  top  line.  Otherwise the line containing the
+                  cursor is moved to the top of the window.
+
+  T               Move the cursor to the top of the buffer.
+  E               Move the cursor to the last lines of the buffer.
+
+  F               Move the cursor back to  the  beginning  of  the  last
+                  subroutine,  function,  or paragraph in a text buffer.
+                  The  behavior  of  this  key  is  dependent   on   the
+                  programming  language  as  determined  by  the  file's
+                  extension or the WM command.
+  V               Move the cursor ahead to the  beginning  of  the  next
+                  subroutine,  function,  or paragraph in a text buffer.
+                  The  behavior  of  this  key  is  dependent   on   the
+                  programming  language  as  determined  by  the  file's
+                  extension or the WM command.
+
+  /               Search forward in  the  current  buffer  for  a  given
+                  string.   Zilch  prompts  for  the  string.  If only a
+                  carriage-return is entered in response to the  prompt,
+                  Zilch  searches  for  the  last search string entered.
+                  The cursor does not  move  if  the  string  cannot  be
+                  located.   If  a repeat count is specified before this
+                  command, then the Nth  occurrence  of  the  string  is
+                  found,  where N is the repeat count.  To search for an
+                  end of line,  insert  a  LINE  FEED  into  the  search
+                  string.
+  \               Search backward in the  current  buffer  for  a  given
+                  string.   Zilch  prompts  for  the  string.  If only a
+                  carriage-return is entered in response to the  prompt,
+                  Zilch  searches  for  the  last search string entered.
+                  The cursor does not  move  if  the  string  cannot  be
+                  located.   If  a repeat count is specified before this
+                  command, then the Nth  occurrence  of  the  string  is
+                  found,  where N is the repeat count.  To search for an
+                  end of line,  insert  a  LINE  FEED  into  the  search
+                  string.
+
+  C               Change occurrences of one string  to  another.   Zilch
+                  prompts  for  the  string  to be changed, then for the
+                  string to change it  to.   Then  Zilch  positions  the
+                  cursor  to  each  occurrence of the first string after
+                  the original cursor position and waits for a  command.
+                  The following commands may be typed to tell Zilch what
+                  to do:
+
+          <space>         Change this occurrence and continue  with  the
+                          next.
+          n               Don't change  this  occurrence,  but  continue
+                          with the next.
+          !               Change  this  occurrence  and  all   following
+                          occurrences without asking.
+          .               Change  this  occurrence  and  then  stop  the
+                          change function.
+          Control-G       Stop the change function.
+                                                                Page 8
+
+
+                  If a repeat  count  is  specified  before  the  change
+                  command,  then  N occurrences of the search string are
+                  changed without asking, unless N equals 1.
+
+
+  Control-U       Delete the remainder of the current  line.   The  next
+                  line is appended to the current line.
+  Control-R       Undelete  the  text  last  deleted  by  the  Control-U
+                  command.
+
+  <               Place the first text  marker  at  the  current  cursor
+                  position.
+  >               Place the second text marker  at  the  current  cursor
+                  position.
+  Control-D       Delete all text between the first and second markers.
+  S               Save all text between the markers.
+  Control-E       Extract all text between the markers -  equivalent  to
+                  "S" followed by "Control-D".
+  Control-A       Insert the text saved by "S"  or  "Control-E"  at  the
+                  cursor position.
+  X^              Change the case of characters between  the  first  and
+                  second markers to the case of the current buffer.  See
+                  the W^ command.
+
+  Tab             Set the first tab stop to  the  current  line's  first
+                  non-blank position.
+  Control-B       Move line right by two spaces, set the first tab  stop
+                  to  the first non-blank position in the line, and move
+                  to next line.
+  Control-V       Move line left by two spaces, set the first  tab  stop
+                  to  the first non-blank position in the line, and move
+                  to next line.
+
+  R               Redraw the screen.
+
+  [               Begin defining the  keystroke  macro.   All  following
+                  keystrokes  are remembered and executed by Zilch until
+                  the "]" command.
+  ]               End the keystroke macro definition.
+  XM              Execute the keystrokes remembered by the "["  and  "]"
+                  commands.
+
+  =               Mark the current cursor location.  This  location  may
+                  be returned to later using the "*" or "^" commands.
+  ^               Goto the marker position saved by the last "=" or  "*"
+                  command.
+  *               Exchange the current location with the location  saved
+                  by  the  last "=" or "*" command.  This command may be
+                  used to switch back and forth in the buffer.
+
+  Control-Z       Write all modified buffers which have file  names  and
+                  exit Zilch if all went well.
+  Return          Exit Zilch.  If the buffer associated with the current
+                  window has been modified, Zilch asks if it should save
+                  the file before exiting.  Typing anything but  an  "n"
+                                                                Page 9
+
+
+                  or  "N"  followed by a carriage-return causes the file
+                  to be saved.  If other  buffers  have  been  modified,
+                  Zilch  then  asks  if  you  wish to exit before saving
+                  these buffers; typing anything but "y" or "Y" followed
+                  by a carriage-return causes Zilch not to exit.
+
+  Control-T       Write out  the  buffer  associated  with  the  current
+                  window.   If  the  buffer  does not have an associated
+                  file name (for example, if it was created with the  WB
+                  command), then Zilch prompts for the name of a file to
+                  write the buffer to.
+
+
+  WV              Visit file.  Zilch  prompts  for  a  file  name,  then
+                  splits the current window in two, reads the file if it
+                  was not already  read  in  before,  and  displays  the
+                  file's  buffer  in the new bottom window.  If the file
+                  was previously read, Zilch positions the window  where
+                  it was the last time the buffer was displayed.  If the
+                  file does not exist, Zilch creates an empty buffer for
+                  the  file,  but does not create the file on disk until
+                  the file is explicitly written out.  If more than  one
+                  file  name  is entered, and the names are separated by
+                  spaces, then each file will be windowed on the current
+                  page  if possible.  If the file names are separated by
+                  commas, then each file excepting  the  first  will  be
+                  windowed on it's own page.
+  WC              Change file.  Zilch prompts for a file name, reads the
+                  file  if  it  was not read in before, and displays the
+                  file  in  the  current  window.   If  the   file   was
+                  previously  read,  Zilch positions the window where it
+                  was the last time the buffer was  displayed.   If  the
+                  file does not exist, Zilch creates an empty buffer for
+                  the file, but does not create the file on  disk  until
+                  the  file is explicitly written out.  If more than one
+                  file name is entered, and the names are  separated  by
+                  spaces, then each file will be windowed on the current
+                  page if possible.  If the file names are separated  by
+                  commas,  then  each  file  excepting the first will be
+                  windowed on it's own page.
+  WB              Visit buffer.  Zilch prompts for  a  buffer  name  and
+                  then splits the current window in two and displays the
+                  buffer in  the  new  bottom  window.   If  the  buffer
+                  already  exists,  Zilch  positions the window where it
+                  was the last time the buffer was displayed.  Otherwise
+                  a  new, empty buffer is created.  Buffers created with
+                  this  command  do  not  have  associated  file  names,
+                  although  if  the buffer is written out, Zilch prompts
+                  for the file name and then associates that  name  with
+                  the buffer.
+  WX              Exchange buffers.  Zilch prompts for  a  buffer  name,
+                  then  displays  the  buffer in the current window.  If
+                  the buffer already exists, Zilch positions the  window
+                  where  it  was the last time the buffer was displayed.
+                  Otherwise a new, empty buffer is created.
+                                                               Page 10
+
+
+  WH              Splits the current window in  half  and  displays  the
+                  current buffer in both windows.  The cursor is left in
+                  the bottom window at the same location it  was  in  in
+                  the  original  window.  With this command you can have
+                  different parts of the same buffer on  the  screen  at
+                  the same time.
+
+  WD              Deletes the current window from the screen.
+  WO              Deletes all other windows from the screen  except  the
+                  window the cursor is in.
+
+  WN              Moves the cursor to the next window below the  current
+                  window  on  the  screen,  or  to the top window if the
+                  current window is at the bottom of the screen.
+  WP              Moves the cursor to  the  previous  window  above  the
+                  current  window on the screen, or to the bottom window
+                  if the current window is at the top of the screen.
+
+  WE              Enlarges the current window by one line.
+  WS              Shrinks the current window by one line.
+  WF              Fills the screen as much as possible with the  portion
+                  of  the  current  buffer after the cursor by enlarging
+                  the current window and shrinking other windows.
+  WQ              Equalizes the size of all windows on the screen.
+
+  WT              Places the cursor at the top of the current window.
+
+  WA              Writes out all the modified file buffers.
+  WW              Writes the current buffer  to  a  new  file  name  and
+                  associates  the  new file name with the buffer.  Zilch
+                  prompts for the file name.
+  WR              Reads a file into the current buffer and replaces  the
+                  previous  contents.   Zilch prompts for the file name.
+                  The file  name  associated  with  the  buffer  is  not
+                  changed.
+
+  WL              Lists  information  about  all  the  buffers  in   the
+                  session.   The  buffer name, size in characters, first
+                  page on which the buffer is visible, and file name are
+                  displayed.   An  "M"  beside the buffer name indicates
+                  that the buffer  has  been  modified.   If  the  whole
+                  buffer list display does not fit on one screen, normal
+                  editing commands  may  be  given  to  move  about  the
+                  display.   To  exit  the  buffer  list display, type a
+                  carriage-return.
+
+  W^              Toggles the case of the current buffer.  In lower case
+                  mode,  both  upper  and  lower  case characters may be
+                  inserted into the buffer.  In upper  case  mode,  only
+                  upper case characters may be inserted into the buffer.
+                  The "/CASE=" command line switch controls the  default
+                  case of newly created buffers (see section 3).  The X^
+                  command changes the case of selected characters to the
+                  current buffer case.
+                                                               Page 11
+
+
+  WM              Changes the mapping type of the current buffer.  Zilch
+                  prompts for the new mapping type.  See section 4.
+
+
+  #               Zilch prompts for a page number and then  switches  to
+                  that  page.   If  the  page has never been used, it is
+                  initialized with the windows on the current page.  New
+                  editing sessions begin in page 0.
+  +               Switch to next higher numbered page.
+  -               Switch to previous lower numbered page.
+
+
+  DCL             Enters a subprocess on the same subdirectory you  were
+                  on  when  Zilch  was invoked.  To return to Zilch from
+                  DCL type "logo".
+  XDCL            This command prompts for a DCL  command  and  executes
+                  it.   Output  from  the  command is placed in a window
+                  called the Session log, where it can be manipulated as
+                  text.   If only a carriage-return is given in response
+                  to the prompt, you are placed in DCL  and  the  output
+                  from  whatever  you  do  is placed in the Session log.
+                  Exit DCL with "logo".
+
+
+  Control-C       Abort the XM command or repeating commands.
+                                                               Page 12
+
+
+2.2  INSERT MODE
+
+     Insert mode is entered from control mode by typing an ESCAPE or  an
+`  (accent).   In  insert mode typed characters are inserted directly at
+the cursor position.  The  characters  listed  below,  however,  perform
+special functions.
+
+
+  CHARACTER       FUNCTION
+  =========       ========================================================
+
+  Escape or `     Exit insert mode unless special mapping characters are
+                  waiting  to  be  inserted,  in  which  case  they  are
+                  inserted and you remain in insert  mode  (see  section
+                  4).
+  Control-Z       Exit  insert  mode  without  inserting   any   mapping
+                  characters  which  are  waiting  to be inserted.  They
+                  will be inserted the next time an Escape or ` is typed
+                  from insert mode.  See section 4.
+
+  Return          End the current line and start a new one.
+
+  Delete
+    or
+  Rubout          Delete previous character.
+  Control-U       Delete all text in current line preceeding the cursor.
+  Control-R       Undelete the text  last  deleted  by  the  "Control-U"
+                  command.
+  Control-A       Insert text saved by last "S" or  "Control-E"  control
+                  mode command.
+
+  Control-H
+    or
+  Back-space      Move the cursor back over one character.
+  Control-L       Move the cursor forward over one character.
+  Control-K       Move the cursor to the previous line.
+  Control-J       Move the cursor to the next line.
+
+  Control-P       Move the cursor over to the end of the next word.
+
+  Tab             Insert tabs and/or spaces to the  first  tab  stop  if
+                  before  it, otherwise tab to the next eighth character
+                  position.
+  Control-E       Move initial tab stop right by two.
+  Control-W       Move initial tab stop left by two.
+  Control-D       Set initial tab stop to current cursor position.
+
+  \               Instead of being inserted, the next character will  be
+                  used  to  start  a  mapping  sequence.   If  the  next
+                  character does not select a mapping  sequence,  it  is
+                  inserted  literally  even if it is a control character
+                  such as Escape, `, or Control-U.   Thus  to  insert  a
+                  "\", type "\\".  The behavior of this key is dependent
+                  on the  programming  language  as  determined  by  the
+                  file's extension or the WM command.  See section 4 for
+                                                               Page 13
+
+
+                  more information.
+                                                               Page 14
+
+
+3  ZILCH COMMAND LINE SWITCHES
+
+     Zilch has several command line switches which may be placed on  the
+ZILCH command.  As noted below in the switch descriptions, many of these
+switches are given default values when the Zilch command is  defined  in
+the system login command file.
+
+/Restore=file-spec
+     Specifies a file from  which  Zilch  restores  a  previous  editing
+     session  if  no  files  were  specified  on  the  command line.  By
+     default, Zilch is defined in the system login command file to  save
+     and  restore  sessions  from 'username'.zil where 'username' is the
+     first 9 letters of the currently logged in user's name.
+
+/Save=file-spec
+     Specifies a file in which Zilch saves the current  editing  session
+     when  it  exits.   By default, Zilch is defined in the system login
+     command file to save and restore sessions from 'username'.zil where
+     'username' is the first 9 letters of the currently logged in user's
+     name.
+
+/Help=file-spec
+     Specifies a file which Zilch displays during the "?" help  command.
+     By  default,  Zilch  is defined in the system login command file to
+     read DPC_EDIT:ZHELP.
+
+/INItialize=file-spec
+     Specifies a file  containing  Zilch  keyboard  commands  which  are
+     executed  before  control  is  given  to the terminal.  There is no
+     default initialization file.
+
+/Terminal=term
+     Overrides Zilch's default selection of terminal type.   By  default
+     Zilch  assumes  the  terminal is a VT52 if the system terminal type
+     (as displayed by the SHOW TERMINAL command) is VT52.  Otherwise  if
+     the  terminal  has the DECCRT characteristic Zilch assumes that the
+     terminal is a VT100 compatible terminal.  Otherwise  Zilch  assumes
+     the  terminal  is  an  ADM3A.  To use an ADM5, /TERM=ADM5 should be
+     specified on Zilch's command line, or the DCL command "Z5"  may  be
+     used.
+
+     "term" may be one of the following:
+
+         1.  VT100
+
+         2.  VT52
+
+         3.  ADM3A
+
+         4.  ADM5
+
+
+/Length=n
+     Specifies the page size of the terminal.  24 lines is  the  default
+     length.  The following terminals accept the following lengths:
+                                                               Page 15
+
+
+         1.  VT100 - 3-24 lines
+
+         2.  VT52 - 3-24 lines
+
+         3.  ADM3A - 3-24 lines
+
+         4.  ADM5 - 3-24 lines
+
+
+/Width=n
+     Specifies the width of the terminal.  80  columns  is  the  default
+     width.  The following terminals accept the following widths:
+
+         1.  VT100 - 1-132 columns
+
+         2.  VT52 - 1-80 columns
+
+         3.  ADM3A - 1-80 columns
+
+         4.  ADM5 - 1-80 columns
+
+
+/INDent=n
+     Specifies the incremental  indent.   Two  columns  is  the  default
+     incremental  indent.   The  incremental  indent  affects the indent
+     performed by the Control-B and Control-V control mode commands  and
+     the Control-W, Control-E, and mapping character indent functions in
+     insert mode.
+
+/CAse=case
+     Specifies the default initial case  for  buffers.   "case"  may  be
+     UPPER  or  LOWER.   If the /CAse switch isn't specified, Zilch uses
+     LOWER as the initial case, which allows insertion of upper or lower
+     case characters in the buffer.
+
+/FORMAP=file-spec
+     Specifies a file which  contains  mapping  characters  for  Fortran
+     programs.  By default, Zilch is defined in the system login command
+     file to read DPC_EDIT:FORMAP.
+
+/PASMAP=file-spec
+     Specifies a file  which  contains  mapping  characters  for  Pascal
+     programs.  By default, Zilch is defined in the system login command
+     file to read DPC_EDIT:PASMAP.
+
+/RATMAP=file-spec
+     Specifies a file  which  contains  mapping  characters  for  Ratfiv
+     programs.  By default, Zilch is defined in the system login command
+     file to read DPC_EDIT:RATMAP.
+
+/TEXTMAP=file-spec
+     Specifies a file which contains mapping characters for text  files.
+     By  default,  Zilch  is defined in the system login command file to
+     read DPC_EDIT:RNOMAP.
+                                                               Page 16
+
+
+4  MAPPING SEQUENCES
+
+     Mapping sequences allow the user to abbreviate commonly used  words
+and  do  automatic  indentation.   They  are primarily used when writing
+programs.  Zilch has special mappings for Pascal, Fortran,  Ratfiv,  and
+Runoff.   Hopefully  there  will  be  a  tutorial  soon on using mapping
+sequences.
+
+     A mapping sequence is started by typing a backwards slash (\)  from
+insert  mode.  When you type a backwards slash, Zilch waits for the next
+character to be typed and uses that character to select some  characters
+to  insert.   For  instance,  typing \a when editing a Fortran or Ratfiv
+program causes the Fortran statement "accept" to be  inserted  into  the
+text.   Typing  \a  when  editing  a  Pascal  program  causes the Pascal
+statement "read" to be inserted.
+
+     Most mapping sequences do automatic indentation to  the  first  tab
+stop  before  inserting  the selected text, unless the current column is
+beyond the first tab stop, in which case  a  single  space  is  inserted
+before  the  selected  text.   Thus,  typing  \a  when editing a Fortran
+program actually causes a tab to the first tab stop before  "accept"  is
+inserted.   The first tab stop is set with the control mode commands ^B,
+^V, and TAB, and with the insert mode commands ^D, ^W, and ^E.
+
+     Mapping sequences which insert structured statements such  as  "if"
+cause  the  position of the first tab stop to be changed.  For instance,
+typing \i in a Pascal program tabs to the first tab stop,  then  inserts
+"if ", then increases the first tab stop position by two.
+
+     Some mapping sequences, such as \i ("if") in  Fortran  and  Pascal,
+push  additional  characters onto an internal stack in the editor.  Then
+when an ESCAPE or ` is typed, instead of exiting insert mode,  the  next
+group  of  characters is taken off the stack and inserted into the text.
+For instance, typing \i in  a  Fortran  program  pushes  the  characters
+" then"  and  "endif".   When  you  type \i, Zilch tabs to the first tab
+stop, inserts "if (", increments the first tab stop position by two, and
+waits  for  more  input.   After you type the conditional part of the IF
+statement, type ESCAPE or `, and Zilch inserts " then".  Then you  would
+type  a  carriage-return  and  the  statements  to be executed if the IF
+statement is true.  When you type ESCAPE or ` again, Zilch tabs  to  the
+first  tab  stop  and inserts "endif", then decreases the first tab stop
+position by two.  If you type ESCAPE or ` again, Zilch exits insert mode
+since there are no more characters waiting to be inserted.
+
+If you type Control-Z instead of ESCAPE or `, Zilch  exits  insert  mode
+without popping any mapping sequences.  They are popped the next time an
+ESCAPE or ` is typed from insert mode.
+
+     Typing \[ inserts the beginning of  a  structured  block  into  the
+text,  increments  the first tab stop by two, and pushes the end part of
+the structured block on the stack.  When the end part is popped from the
+stack by typing ESCAPE or `, the first tab stop is decreased by two.  In
+Pascal, the two parts of a structured block are "begin" and  "end".   In
+Ratfiv, they are "{" and "}".
+                                                               Page 17
+
+
+     Typing \DEL causes the last insertion of a mapping sequence  to  be
+deleted.
+
+     Typing \{ tabs to column 41 or 49  (depending  on  the  programming
+language)  and  starts  a  comment.   In  Pascal,  the  end  of  comment
+characters (" *)") are pushed on the stack.
+
+     Typing \ before  any  character  which  doesn't  select  a  mapping
+function  causes  that character to be inserted literally into the text,
+even if it is a special  character  such  as  Control-U.   To  insert  a
+literal "\", type \\.
+
+     Following is a list of  the  special  mapping  sequences  for  each
+language.   The  character  which selects the mapping sequence is in the
+first column.
+
+A tab (displayed below as <tab>) in a mapping sequence causes a  tab  to
+the  first  tab  stop unless the cursor is beyond the first tab stop, in
+which case a single space is inserted before the following text.
+
+An escape (displayed below as $) in a mapping  sequence  indicates  that
+the next two characters have a special meaning.  These characters may be
+one of "+", "-", or "0".  The first character determines how  the  first
+tab  stop is changed before the preceding characters in the sequence are
+inserted.  "0"  means  don't  change  the  first  tab  stop,  "-"  means
+decrement  it  by  two,  and  "+" means increment it by two.  The second
+character after an escape determines how the first tab stop  is  changed
+after the preceding characters in the mapping sequence are inserted.  As
+above, "0" means don't change the first tab stop, "-" means decrement it
+by  two,  and "+" means increment it by two.  Any characters after a $xx
+sequence are not inserted immediately but are pushed onto  the  internal
+stack to be popped by the next escape entered from insert mode.
+
+For example, typing \c in a Pascal program inserts  "case "  and  pushes
+"of"  and  "end (* case *);".   The  first tab stop is incremented after
+inserting "case", and decremented after "end (* case *);" is popped.
+
+A carriage-return (displayed as ^M) in a mapping sequence causes  a  new
+line to be inserted into the buffer in place of the carriage-return.
+
+A Control-P (displayed as ^P) in  a  mapping  sequence  causes  all  the
+following  characters  in  the  mapping sequence until the next ^P to be
+displayed on Zilch's message line.  This feature can be used  to  prompt
+for input.
+
+A backslash (\) in a mapping sequence causes the next character  in  the
+mapping sequence to be inserted literally into the buffer as itself.
+
+Text in mapping sequences is converted to  upper  case  if  the  current
+buffer  case  is  upper,  otherwise  no  case  conversion is done.  If a
+character is preceded by a backslash, no case conversion is done on that
+character.
+                                                               Page 18
+
+
+Pascal Mapping Characters
+
+A<tab>READ
+B<tab>WRITE
+C<tab>CASE $0+<tab>OF$00<tab>END (* CASE *);$0-
+D<tab>DOWNTO 
+E<tab>ELSE$0+
+F<tab>FOR $0+<tab>DO
+G<tab>PROCEDURE $00<tab>EXTERN;
+H<tab>FUNCTION $00<tab>EXTERN;
+I<tab>IF $0+<tab>THEN
+J<tab>ELSE IF $0+<tab>THEN
+M<tab>MODULE $00<tab>END (** MODULE **).
+P<tab>PACKED
+R<tab>REPEAT$0+<tab>UNTIL $0-
+T<tab>TO 
+V<tab>WITH $0+<tab>DO
+W<tab>WHILE $0+<tab>DO
+X<tab>PROGRAM $00<tab>BEGIN (* PROGRAM *)$0+<tab>END (** PROGRAM **).$-0
+Y<tab>PROCEDURE $00<tab>BEGIN (* PROC *)$0+<tab>END (** PROC **);$-0
+Z<tab>FUNCTION $00<tab>BEGIN (* FUNC *)$0+<tab>END (** FUNC **);$-0
+0<tab>RECORD$0+<tab>END (* RECORD *);$0-
+1<tab>CONST$0+
+2<tab>TYPE$0+
+3<tab>VAR$0+
+4: INTEGER;
+5: BOOLEAN;
+6: CHAR;
+7<tab>ARRAY [$00] OF 
+8: REAL;
+9: SET OF 
+/<tab>DIV 
+{(* $00 *)
+@<tab>%INCLUDE '
+= = 
+, < 
+< <= 
+. > 
+> >= 
+# <> 
+  = 
+: := 
+; := 
+                                                               Page 19
+
+
+Fortran Mapping Characters
+
+A<tab>ACCEPT 
+B<tab>BYTE 
+C<tab>CONTINUE
+D<tab>DO 
+E<tab>ELSE$-+
+F<tab>FORMAT (
+G<tab>GO TO 
+H<tab>COMMON /
+I<tab>IF ($0+<tab>THEN$00<tab>ENDIF$0-
+1<tab>CHARACTER*
+2<tab>INTEGER*2 
+4<tab>INTEGER*4 
+8<tab>REAL*8 
+6<tab>REAL*16 
+J<tab>DIMENSION 
+K<tab>CALL 
+L<tab>LOGICAL
+M<tab>END
+N<tab>FUNCTION 
+O<tab>READ (
+P<tab>PARAMETER 
+Q<tab>IF (
+R<tab>RETURN
+S<tab>SUBROUTINE 
+T<tab>TYPE 
+U<tab>REAL 
+W<tab>WRITE (
+X<tab>DO WHILE ($0+<tab>ENDDO$0-
+Z<tab>ELSE IF ($-+<tab>THEN$00
+=<tab>EQUIVALENCE (
+-<tab>IMPLICIT INTEGER*4 (A - Z)
+(<tab>OPEN (UNIT=
+)<tab>CLOSE (UNIT=
+{! 
+@<tab>INCLUDE '
+  = 
+                                                               Page 20
+
+
+Ratfiv Mapping Characters
+
+A<tab>ACCEPT 
+B<tab>BYTE 
+C<tab>CONTINUE
+D<tab>DO $0+
+E<tab>ELSE$0+
+F<tab>FOR ($0+
+G<tab>GOTO 
+H<tab>COMMON /
+I<tab>IF ($0+
+1<tab>CHARACTER*
+2<tab>INTEGER*2 
+4<tab>INTEGER*4 
+8<tab>REAL*8 
+6<tab>REAL*16 
+J<tab>DIMENSION 
+K<tab>CALL 
+L<tab>LOGICAL
+M<tab>END
+N<tab>FUNCTION 
+O<tab>READ (
+P<tab>PARAMETER 
+Q<tab>SWITCH ($0+<tab>{$00<tab>}$0-
+R<tab>RETURN
+S<tab>SUBROUTINE 
+T<tab>TYPE 
+U<tab>REAL 
+W<tab>WRITE (
+X<tab>WHILE ($0+
+Z<tab>ELSE IF ($0+
+=<tab>EQUIVALENCE (
+-<tab>IMPLICIT INTEGER*4 (A - Z)
+(<tab>OPEN (UNIT = 
+)<tab>CLOSE (UNIT = 
+@<tab>INCLUDE "
+{# 
+  = 
+                                                               Page 21
+
+
+Runoff Mapping Characters
+
+C.CENTER;
+P.PARAGRAPH 
+S.SKIP 
+H.HEADER LEVEL 
+L.LIST $00.END LIST 
+E.LE;
+G.PAGE
+B.BREAK
+I.INDENT 
+M.LEFT MARGIN 
+R.RIGHT MARGIN 
+N.NOTE $00.END NOTE 
+F.FOOTNOTE$00.END FOOTNOTE
+T.TEST PAGE 
+K.BLANK 
+X.INDEX 
+Y.ENTRY 
+Z.PAGE SIZE 
+>\\\\$00^^
+<^<$00^^
+*^*$00\\*
+&^&$00\\&
+_.LITERAL$00.END LITERAL
+<tab>.TAB STOPS 
+ .SPACING 
+{! 
+@.REQUIRE "
+

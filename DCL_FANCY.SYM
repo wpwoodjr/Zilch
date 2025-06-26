@@ -1,0 +1,7 @@
+_repdef(dcl_next,me_mem($1))
+_repdef(dcl_in_channel,me_mem(1+$1))
+_repdef(dcl_out_channel,me_mem(2+$1))
+_repdef(dcl_buffer,me_mem(3+$1))
+_repdef(dcl_pid,me_mem(4+$1))
+_repdef(dcl_sizeof,5)
+_repdef(dcl_map,for ($2 = $1; $2 != null; $2 = dcl_next($2)))

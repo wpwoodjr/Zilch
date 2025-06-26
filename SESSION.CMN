@@ -1,0 +1,13 @@
+define(MAX_WORD_CLASS,10)
+common /session/ _
+	se_save,se_restore,se_macros,
+	se_buffers,se_windows,se_current_window,
+	se_pages,se_current_page,
+	se_command_count,se_count,
+	se_default_case,se_indent,
+	se_search_string,se_search_mask,se_search_length,
+	se_error_occurred,se_in_prompt,se_cross_lines,
+	se_word_definition(-128:127, 0:MAX_WORD_CLASS)
+
+  logical*1 se_error_occurred,se_in_prompt,se_cross_lines
+  byte se_word_definition

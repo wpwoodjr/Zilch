@@ -1,0 +1,109 @@
+define(header,implicit integer (a - z)
+  include "[--]memory.cmn"
+  include "[--]session.cmn"
+  include "czilch")
+
+include "[--]buffer.sym"
+
+  function getlin(buf)
+  header
+  byte buf(MAXLINE)
+
+  if (se_error_occurred) {
+    bu_out_marker = bu_size(bu_out) + 1
+    buf(1) = EOF
+    buf(2) = EOS
+    return(EOF)
+    }
+  if (bu_in_dot > bu_size(bu_in)) {
+    if (bu_in_dot == bu_in_marker)
+      bu_out_marker = bu_size(bu_out) + 1
+    buf(1) = EOF
+    buf(2) = EOS
+    return(EOF)
+    }
+  savdot = bu_in_dot
+  getlin = 0
+  repeat {
+    getlin = getlin + 1
+    if (getlin >= MAXLINE) {
+      call ms_error("Input line too long!")
+      buf(1) = EOF
+      buf(2) = EOS
+      bu_out_marker = bu_size(bu_out) + 1
+      return(EOF)
+      }
+    buf(getlin) = tx_text(tx_in_pointer + bu_in_dot)
+    bu_in_dot = bu_in_dot + 1
+    } until (buf(getlin) == NEWLINE)
+  if (savdot <= bu_in_marker & bu_in_dot > bu_in_marker)
+    bu_out_marker = bu_size(bu_out) + 1
+  buf(getlin + 1) = EOS
+  return
+  end
+
+  logical function q_getch(c)
+  header
+  byte c
+
+  if (se_error_occurred) {
+    bu_out_marker = bu_size(bu_out) + 1
+    c = EOF
+    return(.false.)
+    }
+  if (bu_in_dot > bu_size(bu_in)) {
+    if (bu_in_dot == bu_in_marker)
+      bu_out_marker = bu_size(bu_out) + 1
+    c = EOF
+    return(.false.)
+    }
+  c = tx_text(tx_in_pointer + bu_in_dot)
+  if (bu_in_dot == bu_in_marker)
+    bu_out_marker = bu_size(bu_out) + 1
+  bu_in_dot = bu_in_dot + 1
+  return(.true.)
+  end
+
+  subroutine putch(c)
+  header
+  byte c
+
+  if (bu_gap_size(bu_out) <= 0) {
+    im = (float(bu_size(bu_out))/float(bu_in_dot))*
+		float(bu_size(bu_in) + 1 - bu_in_dot)
+    call tx_more_memory_please(bu_out, im + 4*512)
+    }
+  tx_text(bu_gap(bu_out)) = c
+  bu_gap(bu_out) = bu_gap(bu_out) + 1
+  bu_gap_size(bu_out) = bu_gap_size(bu_out) - 1
+  bu_size(bu_out) = bu_size(bu_out) + 1
+  return
+  end
+
+  subroutine putlin(buf)
+  header
+  byte buf(ARB)
+
+  for (i = 1; buf(i) != EOS; i = i + 1)
+    call putch(buf(i))
+  return
+  end
+
+  subroutine putln2(buf, len)
+  header
+  byte buf(ARB)
+
+  if (len > 0) {
+    if (bu_gap_size(bu_out) < len) {
+      im = (float(bu_size(bu_out) + len)/float(bu_in_dot))*
+		  float(bu_size(bu_in) + 1 - bu_in_dot)
+      call tx_more_memory_please(bu_out, im + len + 4*512)
+      }
+    call movc(buf, tx_text(bu_gap(bu_out)), len)
+    bu_gap(bu_out) = bu_gap(bu_out) + len
+    bu_gap_size(bu_out) = bu_gap_size(bu_out) - len
+    bu_size(bu_out) = bu_size(bu_out) + len
+    }
+  return
+  end
+

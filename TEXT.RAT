@@ -1,0 +1,254 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "session.cmn"
+include "memory.cmn")
+
+  function tx_address(bu,x)
+  header
+
+  i = x + bu_base(bu)
+  if (i >= bu_gap(bu))
+    return(i+bu_gap_size(bu))
+  else
+    return(i)
+  end
+
+  subroutine tx_set_gap(bu,x)
+  header
+
+  gap = bu_gap(bu)
+  loc = bu_base(bu)+x
+  if (gap < loc)
+    call tx_movc(gap+bu_gap_size(bu),gap,loc-gap)
+  else if (gap > loc)
+    call tx_movc(loc,loc+bu_gap_size(bu),gap-loc)
+  bu_gap(bu) = loc
+  return
+  end
+
+  subroutine tx_movc(from,to,len)
+  header
+
+  if (from >= to)
+    for (i = 0; i < len; i = i+65535)
+      call movc(tx_text(from+i),tx_text(to+i),min(len-i,65535))
+  else
+    for (i = len; i > 0; i = i-65535)
+      call movc(tx_text(from+max(0,i-65535)),tx_text(to+max(0,i-65535)),
+      								min(i,65535))
+  return
+  end
+
+  subroutine tx_delete(bu, ttx1, ttx2)
+  header
+
+  call tx_set_gap(bu,ttx1)
+  if (ttx1 < 1) {
+    call ms_report_number("Bad argument to delete text: ",ttx1,EOS)
+    call ms_error(EOS)
+    }
+  else if (ttx2 > bu_size(bu)) {
+    call ms_report_number("Bad argument to delete text: ",ttx2,EOS)
+    call ms_error(EOS)
+    }
+  else {
+    tx1 = ttx1
+    tx2 = ttx2
+    len = tx2 - tx1 + 1
+    if (len > 0) {
+      bu_gap_size(bu) = bu_gap_size(bu) + len
+      bu_modified(bu) = 1
+      bu_size(bu) = bu_size(bu) - len
+      bu_map_windows(bu,wi) {
+	if (wi_dot(wi) > tx2)		# ok
+	  wi_dot(wi) = wi_dot(wi) - len
+	else if (wi_dot(wi) > tx1)	# ok
+	  wi_dot(wi) = tx1
+	if (wi_bow(wi) > tx2)		# ok
+	  wi_bow(wi) = find_bol(bu,wi_bow(wi) - len)
+	else if (wi_bow(wi) > tx1)	# ok
+	  wi_bow(wi) = find_bol(bu,tx1)
+	wi_modified(wi) = 1
+	}
+      }
+    }
+  return
+  end
+
+  subroutine tx_insert_character(bu, c, ttx)
+  header
+  byte c
+
+  tx = ttx
+  if (bu_gap_size(bu) <= 0)
+    call tx_more_memory_please(bu,4*512)
+  call tx_set_gap(bu,tx)
+  tx_text(bu_gap(bu)) = c
+  bu_gap(bu) = bu_gap(bu) + 1
+  bu_gap_size(bu) = bu_gap_size(bu) - 1
+  bu_modified(bu) = 1
+  bu_size(bu) = bu_size(bu) + 1
+  bu_map_windows(bu,wi) {
+    if (wi_dot(wi) > tx)		# ok
+      wi_dot(wi) = wi_dot(wi) + 1
+    if (wi_bow(wi) > tx)		# ok
+      wi_bow(wi) = wi_bow(wi) + 1
+    else
+      wi_modified(wi) = 1
+    }
+  return
+  end
+
+  subroutine tx_insert_buffer(bu, ttx, buf, len)
+  header
+  byte buf(ARB)
+
+  tx = ttx
+  if (bu_gap_size(bu) < len)
+    call tx_more_memory_please(bu,4*512+len)
+  if (len > 0) {
+    call tx_set_gap(bu,tx)
+    call movc(buf, tx_text(bu_gap(bu)), len)
+    bu_gap(bu) = bu_gap(bu) + len
+    bu_gap_size(bu) = bu_gap_size(bu) - len
+    bu_modified(bu) = 1
+    bu_size(bu) = bu_size(bu) + len
+    bu_map_windows(bu,wi) {
+      if (wi_dot(wi) > tx)		# ok
+	wi_dot(wi) = wi_dot(wi) + len
+      if (wi_bow(wi) > tx)		# ok
+	wi_bow(wi) = wi_bow(wi) + len
+      else
+	wi_modified(wi) = 1
+      }
+    }
+  return
+  end
+
+  subroutine tx_add_character(bu, c)
+  header
+  byte c
+
+  if (bu_gap_size(bu) <= 0)
+    call tx_more_memory_please(bu,4*512)
+  tx_text(bu_gap(bu)) = c
+  bu_gap(bu) = bu_gap(bu) + 1
+  bu_gap_size(bu) = bu_gap_size(bu) - 1
+  bu_size(bu) = bu_size(bu) + 1
+  return
+  end
+
+  subroutine tx_copy_text(buf, tfrom, but, tto, len)
+  header
+
+  from = tfrom
+  to = tto
+  if (len > bu_gap_size(but))
+    call tx_more_memory_please(but,4*512+len)
+  if (len > 0) {
+    call tx_set_gap(but,to)
+    call tx_set_gap(buf,from)
+    call tx_movc(tx_address(buf,from), bu_gap(but), len)
+    bu_gap(but) = bu_gap(but) + len
+    bu_gap_size(but) = bu_gap_size(but) - len
+    bu_modified(but) = 1
+    bu_size(but) = bu_size(but) + len
+    bu_map_windows(but,wi) {
+      if (wi_dot(wi) > to)		# ok
+	wi_dot(wi) = wi_dot(wi) + len
+      if (wi_bow(wi) > to)		# ok
+	wi_bow(wi) = wi_bow(wi) + len
+      else
+	wi_modified(wi) = 1
+      }
+    }
+  return
+  end
+
+  subroutine tx_more_memory_please(bu,tsize)
+  header
+
+  size = tsize
+  if (size == 0 | bu_gap_size(bu) != size) {
+    st = st_allocate(size + bu_size(bu) + SCREEN_SIZE - 2)
+    gapoff = bu_gap(bu) - (bu_base(bu) + 1)
+    if (gapoff > 0)
+      call tx_movc(bu_base(bu)+1, st, gapoff)
+    len = bu_size(bu) - gapoff
+    if (len > 0)
+      call tx_movc(bu_gap(bu) + bu_gap_size(bu),
+			  st + gapoff + size, len)
+    do i = 1, SCREEN_SIZE-2			# bit of hocus-pocus here...
+      tx_text(st + bu_size(bu) + size + i - 1) = NEWLINE # makes things easier
+    call st_deallocate(bu_base(bu) + 1)
+    bu_base(bu) = st - 1
+    bu_gap_size(bu) = size
+    bu_gap(bu) = st + gapoff
+    }
+  return
+  end
+
+  function q_tx_search_forward(bu,tx1,tx2,buf,mask,len,loc)
+  header
+  byte buf(0:ARB), mask(0:ARB)
+
+  if (bu_gap(bu) > bu_base(bu) + tx1)
+    call tx_set_gap(bu,tx1)
+  for ([tx = tx_address(bu,tx1); end = tx_address(bu,tx2+1)];
+			tx+len <= end; tx = tx+1) {
+    for (j = 0; j < len; j = j+1)
+      if (buf(j) != (mask(j) | tx_text(j+tx)))
+	next 2
+    loc = tx-bu_base(bu)-bu_gap_size(bu)
+    return(true)
+    }
+  return(false)
+  end
+
+  function q_tx_search_reverse(bu,tx1,tx2,buf,mask,len,loc)
+  header
+  byte buf(0:ARB), mask(0:ARB)
+
+  if (tx2 > 0) {
+    if (bu_gap(bu) < bu_base(bu) + tx2 + 1)
+      call tx_set_gap(bu,tx2 + 1)
+    for ([tx = tx_address(bu,tx2+1-len); beg = tx_address(bu,tx1)];
+			  tx >= beg; tx = tx-1) {
+      for (j = 0; j < len; j = j+1)
+	if (buf(j) != (mask(j) | tx_text(j+tx)))
+	  next 2
+      loc = tx-bu_base(bu)
+      return(true)
+      }
+    }
+  return(false)
+  end
+
+  subroutine tx_case_change(bu,t1,t2)
+  header
+
+  if (t2 >= t1) {
+    for (tx = t1; tx <= t2; tx = tx + 1) {
+      addr = tx_address(bu,tx)
+      if (bu_case(bu) == 1)
+	tx_text(addr) = ho_cupper(tx_text(addr))
+      else
+	tx_text(addr) = ho_clower(tx_text(addr))
+      }
+    bu_modified(bu) = 1
+    bu_map_windows(bu,wi)
+      if (wi_bow(wi) <= t2)
+	wi_modified(wi) = 1
+    }
+  return
+  end
+
+  subroutine tx_copy_text_to_string(bu,t1,t2,st)
+  header
+
+  if (t2 >= t1)
+    for ([i = st; tx = t1]; tx <= t2; [i = i + 1; tx = tx + 1])
+      st_buffer(i) = tx_text(tx_address(bu,tx))
+  return
+  end

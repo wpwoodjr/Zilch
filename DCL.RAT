@@ -1,0 +1,139 @@
+#	Zilch Screen Editor, Copyright (c) 1982,1983,1984 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "memory.cmn"
+include "session.cmn"
+include "screen.cmn")
+
+  subroutine dcl_call
+  header
+  character process_name*15, ch_curpid*8
+  integer pid
+  save pid
+  data pid/0/
+
+  call te_finish
+  call te_pos(sc_size,1)
+  call ti_flush
+  call ti_finish
+  if (pid != 0)
+    if (! lib$attach(pid))
+      pid = 0
+  if (pid == 0) {
+    status = get_process_info(process_name, plen, curpid,
+						  biocnt, bytcnt, astcnt)
+    if (status) {
+      write(ch_curpid,(z8.8)) curpid
+      status = lib$spawn(_
+		'$ lo*goff := attach/id='//ch_curpid,
+		"SYS$COMMAND", "SYS$COMMAND", , , pid)
+      if (! status) {
+	call ms_report_number(_
+      "Error number ", status, " occurred while trying to spawn a subprocess.")
+	call ms_error(EOS)
+	}
+      }
+    else {
+      call ms_report_number(_
+"Error number ", status, " occurred while trying to get process information.")
+      call ms_error(EOS)
+      }
+    }
+  call ti_initialize
+  call redraw
+  return
+
+  entry dcl_finish
+  if (pid != 0)
+    status = sys$delprc(pid, )
+  return
+  end
+
+  subroutine dcl_xcall
+  header
+  include "terminal.cmn"
+  real*8 icr_stdescr
+  character mbx*63
+
+  st = st_allocate(MAX_PROMPT)
+  wi = se_current_window
+  if (q_pr_read_prompt("$ ",st,len))
+    if (q_bu_find_window("Session log")) {
+      size = bu_size(se_current_buffer)
+      wi_dot(se_current_window) = size + 1
+      call line_to_top_of_window
+      call insert_string("$ ")
+      for (i = st; i < st+len; i = i+1)
+	call insert_character(st_buffer(i))
+      if (len > 0) {
+	if (mbx_channel != 0) {
+	  call icr_trnlog_str(mbx_name, mbx)
+	  status = lib$spawn(icr_stdescr(%descr(st_buffer(st)),len), "nl:",
+		  mbx, 1)
+	  }
+	else {
+	  call sc_update(0)
+	  status = lib$spawn(icr_stdescr(%descr(st_buffer(st)),len), "nl:",
+		  "sys$login:session.log")
+	  }
+	call insert_character(NEWLINE)
+	}
+      else {
+	call sc_update(0)
+	call te_finish
+	call te_pos(sc_size,1)
+	call ti_flush
+	call ti_finish
+	status = lib$spawn( , "SYS$COMMAND", "sys$login:session.log")
+	call ti_initialize
+	call redraw
+	}
+      if (! status) {
+	call ms_report_number(_
+      "Error number ", status, " occurred while trying to spawn a subprocess.")
+	call ms_error(EOS)
+	}
+      else if (mbx_channel != 0 & len > 0)
+	;
+      else if (! q_fi_read_file(se_current_buffer,"sys$login:session.log",'A',
+									false))
+	call ms_error("Can't read sys$login:session.log")
+      else
+	call q_fi_delete(WRITE_UNIT,"sys$login:session.log")
+      bu_modified(se_current_buffer) = 0
+      wi_dot(se_current_window) = size + 1
+      call line_to_top_of_window
+      if (mbx_channel != 0 & len > 0)
+	while (wi != se_current_window)
+	  call next_window
+      }
+  call st_deallocate(st)
+  return
+  end
+
+  function get_process_info(process_name, plen, pid, biocnt, bytcnt, astcnt)
+  header
+%	include '($jpidef)/nolist'
+  integer*4 jpibuf(16)
+  character*(*) process_name
+
+  plen = 0
+  jpibuf(1) = ishft(jpi$_prcnam,16) | len(process_name)
+  jpibuf(2) = %loc(process_name)
+  jpibuf(3) = %loc(plen)
+  jpibuf(4) = ishft(jpi$_pid,16) | 4
+  jpibuf(5) = %loc(pid)
+  jpibuf(6) = 0
+  jpibuf(7) = ishft(jpi$_biocnt,16) | 4
+  jpibuf(8) = %loc(biocnt)
+  jpibuf(9) = 0
+  jpibuf(10) = ishft(jpi$_bytcnt,16) | 4
+  jpibuf(11) = %loc(bytcnt)
+  jpibuf(12) = 0
+  jpibuf(13) = ishft(jpi$_astcnt,16) | 4
+  jpibuf(14) = %loc(astcnt)
+  jpibuf(15) = 0
+  jpibuf(16) = 0
+
+  return(sys$getjpi(,,,jpibuf,,,))
+  end

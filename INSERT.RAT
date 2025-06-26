@@ -1,0 +1,172 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "session.cmn"
+include "insert.cmn"
+include "mappings.cmn"
+include "memory.cmn")
+
+  subroutine in_enter
+  header
+  include "terminal.cmn"
+
+  in_cr = false
+  if (te_in)
+    in_deol = false
+  else
+    in_deol = true
+  st = st_allocate(st_length(wi_mode_line(se_current_window)) + 5)
+  call ho_scopy('<I> ', 1, st_buffer(st), 1)
+  call st_scopy(wi_mode_line(se_current_window), st+4)
+  wi_mode_line(se_current_window) = st
+  wi_modified(se_current_window) = 1
+  call in_reenter
+  call bi_use_keymap(INSERT_MODE)
+  return
+  end
+
+  subroutine in_reenter
+  header
+
+  modif = bu_modified(se_current_buffer)
+  tdot = wi_dot(se_current_window)
+  if (in_cr)
+    do i = 1, wi_size(se_current_window)
+      call insert_character(NEWLINE)
+  else if (in_deol)
+    call delete_region_to_buffer("insert-tmp",tdot,
+    					find_eol(se_current_buffer,tdot))
+  else {
+    i = current_column()
+    call insert_character(NEWLINE)
+    call tab_to_column(i)
+    }
+  in_nchars = wi_dot(se_current_window) - tdot
+  wi_dot(se_current_window) = tdot
+  bu_modified(se_current_buffer) = modif
+  call sc_fill_new
+  return
+  end
+
+  subroutine in_exit
+  header
+
+  call in_post_inserted_text
+  call st_deallocate(wi_mode_line(se_current_window))
+  wi_mode_line(se_current_window) = bu_name(se_current_buffer)
+  wi_modified(se_current_window) = 1
+  call bi_use_keymap(CONTROL_MODE)
+  return
+  end
+
+  subroutine in_post_inserted_text
+  header
+
+  mp_mark = 0
+  modif = bu_modified(se_current_buffer)
+  if (in_deol) {
+    tdot = wi_dot(se_current_window)
+    call yank_buffer("insert-tmp")
+    wi_dot(se_current_window) = tdot
+    }
+  else if (in_nchars > 0)
+    call delete_region(wi_dot(se_current_window),
+		  wi_dot(se_current_window) + in_nchars)
+  bu_modified(se_current_buffer) = modif
+  return
+  end
+
+  subroutine in_escape
+  header
+
+  if (q_mp_empty())
+    call in_exit
+  else
+    call mp_pop
+  return
+  end
+
+  subroutine in_carriage_return
+  header
+  include "terminal.cmn"
+
+  call insert_character(NEWLINE)
+  call in_post_inserted_text
+  if (wi_size(se_current_window) > 1 & !(te_in | in_cr)) {
+    in_cr = true
+    in_deol = false
+    }
+  call in_reenter
+  return
+  end
+
+  subroutine in_increase_indent
+  header
+
+  call mp_beginning_of_line
+  if (! q_mp_at_comment()) {
+    call delete_white_space
+    call set_indent(bu_indent(se_current_buffer) + se_indent)
+    call tab_to_column(bu_indent(se_current_buffer))
+    }
+  call end_of_line
+  return
+  end
+
+  subroutine in_decrease_indent
+  header
+
+  call mp_beginning_of_line
+  if (! q_mp_at_comment()) {
+    call delete_white_space
+    call set_indent(bu_indent(se_current_buffer) - se_indent)
+    call tab_to_column(bu_indent(se_current_buffer))
+    }
+  call end_of_line
+  return
+  end
+
+  subroutine in_self_insert
+  header
+  include "pushb.cmn"
+  include "screen.cmn"
+  byte c
+
+  c = pu_last_key_struck
+  if (bu_case(se_current_buffer) == 1)
+    if (pu_last_key_struck >= 'a' & pu_last_key_struck <= 'z')
+      c = pu_last_key_struck - 8%40
+  if (wi_modified(se_current_window) == 0) {
+    call insert_character(c)
+    wi_modified(se_current_window) = 0
+    call sc_add_to_line(sc_cursor_y,c,1)
+    }
+  else
+    call insert_character(c)
+  return
+  end
+
+  subroutine in_delete_previous_character
+  header
+  include "screen.cmn"
+  byte c
+
+  if (wi_dot(se_current_window) > 1)
+    switch (tx_text(tx_address(se_current_buffer,
+	  			wi_dot(se_current_window) - 1))) {
+      case NEWLINE:
+	if (se_cross_lines)
+	  call delete_previous_character
+      case ' '-'~':
+	call delete_previous_character
+	if (wi_modified(se_current_window) == 0 &
+				sc_new_length(sc_cursor_y) < sc_width) {
+	  wi_modified(se_current_window) = 0
+	  sc_new_length(sc_cursor_y) = sc_new_length(sc_cursor_y) - 1
+	  sc_modified(sc_cursor_y) = true
+	  }
+      default:
+	call delete_previous_character
+      }
+  return
+  end

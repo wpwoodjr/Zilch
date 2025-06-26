@@ -1,0 +1,7 @@
+	.psect dpc_transfer,exe,nowrt,pic,shr,gbl
+
+	.transfer sub
+	.mask sub
+	jmp	l^sub+2
+
+	.end

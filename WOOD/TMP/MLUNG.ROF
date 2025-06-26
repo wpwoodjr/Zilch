@@ -1,0 +1,920 @@
+.rm 75
+.ls 1
+.sp 4
+.ce 5
+A Cohort Analysis of
+
+Lung Cancer and Smoking in
+
+British Males
+.sp 8
+Richard G. Stevens
+
+Suresh H. Moolgavkar
+.bp
+.ls 2
+The Institute for Cancer Research, Fox Chase Cancer Center,
+7701 Burholme Ave., Philadelphia, PA, 19111, U.S.A.
+.sp 3
+Supported by Public Health Service (PHS) grant CA 25588, CA#06927,
+CA#22780, and CA#23321 from National Institutes of Health (U.S.A.).
+.sp 3
+.bp
+.ce
+Abstract
+
+     Stevens, RG (Institute for Cancer Research, Philadelphia, PA, 19111)
+SH Moolgavkar.  A Cohort Analysis of Lung Cancer and Smoking in
+British Males.
+
+     Lung cancer mortality in England and Wales among males in the age group
+25 to 84, over the years 1941 to 1975
+was analyzed.  Using cigarette consumption information from the Tobacco
+Research Council and a statistical model, relative and attributable risks
+were estimated.  The relative risk associated with
+smoking the equivalent of 20 pack years
+was 4.4, and 88% of male lung cancer deaths during the study period
+could be attributed to smoking.
+The lung cancer deaths could be partitioned into deaths among smokers
+and deaths among non-smokers.
+Whereas the mortality rate among smokers increased over
+the entire span of the analysis, the rate among non-smokers rose gradually
+until 1956-60 and then declined until 1971-75.
+In order to address possible systematic biases in the smoking data,
+Monte Carlo simulations were performed.
+.eh ///Lung Cancer and Smoking in Britain
+.oh /Lung Cancer and Smoking in Britain
+.bp 1
+.fo //- # -
+
+     Lung cancer mortality has increased in England & Wales
+since the early 1900\`s (1).
+The consumption of cigarettes has also
+increased (2).  Given the high attributable risk associated with
+the habit (3),
+changes in lung cancer rates due to factors other than
+smoking are difficult to detect (4).
+National vital statistics provide the
+only estimates of time trends, but are not reported by smoking status.
+Therefore, data on cigarette consumption and
+a statistical model to relate mortality rates to cigarette consumption
+are also needed in order to estimate time trends in rates and the relation
+of age to risk in non-smokers.
+
+     It is the purpose of this paper to do what cannot be done in any other
+manner: investigate time trends and age effects.
+
+     In previous papers (5,6)
+we used vital data
+from England & Wales in concert with information on cigarette consumption
+to study the association between smoking and cancers of the lung, the
+bladder, and the pancreas.
+In this paper we expand on the analysis of male lung cancer deaths in
+England and Wales.
+After controlling for cigarette consumption, we examine the effect of
+age on lung cancer mortality, and the temporal
+trends in the disease among non-smokers.
+.bp
+.ce
+Data Sources
+.sp 1
+
+     Data on male lung cancer mortality in England and Wales, ages 25-29
+to 80-84 over the years 1941-45 to 1971-75 were obtained from (7).
+Diagnostic improvement in lung cancer has accounted for a large rise in
+lung cancer since 1916, but has had much smaller effect since 1941 (8).
+
+     Data on proportion of smokers and cumulative cigarette consumption were
+taken from publications of the Tobacco Research Council (2).
+Percentages of smokers in 5 broad age ranges are presented in Table
+12 of (2).  We used a weighted average of these percentages over
+the age range.  The data on percentages goes back only to 1948, therefore
+we assumed that the percentages in 1941-45 and 1946-47 were equal to the
+percentages in 1948-50.  In Table 32M, average cumulative
+constant tar manufactured
+cigarette consumption per adult is shown.  We obtained the average per
+smoker by dividing these quantities by the proportion of smokers.
+The lung cancer mortality information comes from England and Wales alone,
+whereas the data on cumulative consumption per adult were estimated for the
+United Kingdom (England & Wales, Scotland, and Northern Ireland).
+.BR
+However,
+the consumption data for England and Wales are probably very similar (1).
+.bp
+.ce
+Methods
+.sp 1
+
+     The analyses performed in this paper are extensions of cohort analysis
+and have been described in previous publications (5,6,9).
+Among the first to articulate the importance of year of birth in
+determination of chronic disease rates was Derrick (10).  Later, Frost (11)
+analyzed tuberculosis mortality in terms of birth cohorts and showed that
+although the age risk relationship was changing with successive time
+periods of observation in Massachusetts, this relationship was very
+similar when the same data were plotted by birth cohort.  Only the
+magnitude of risk was changing with each cohort.
+
+     In 1934, Kermack et al (12) quantified cohort analysis and
+postulated that age specific mortality could
+be described by multiplicative effects of age and birth cohort in the
+following manner:
+.ls 1
+.sp 1
+.ti 15
+M(a,b) = f(a)g(b)
+.sp 1
+.ls 2
+
+     In this formulation, M(a,b) is the mortality at age \`a\` during the year
+\`a + b\`, where \`b\` is year of birth of those aged \`a\`.  The function g(b)
+depends on year of birth alone, and the function f(a) depends on age alone.
+Although originally intended as a description of general mortality,
+this model can be used to describe mortality from any specific chronic disease.
+A third factor, reflecting a year-of-event (death or incident case) effect can
+be introduced (13).
+It is tantamount to an interaction between age and
+year-of-birth that is constant along period of observation (cross-section).
+In the phraseaology of Case (14), the function f(a) reflects
+that component of cancer mortality "...which is biological and
+inescapable"; the g(b) reflects "...that which is due to early
+nurture"; and the year-of-event effect reflects "...that which is
+due to constantly changing environment and therapy (i.e. later
+nurture)".
+
+     We assume the number of deaths in each age group and birth cohort is
+a Poisson random variable which is independent of the deaths
+in all other age groups and birth cohorts.
+The expectation of this random variable is specified by the particular
+hypothesis under consideration.
+
+     Cigarette smoking increased in England and Wales in a cohort-wise fashion
+(1)(figure 4), and graphical techniques indicate that lung cancer
+mortality did likewise (14)(figure 2).
+In order to test whether temporal trends in lung cancer can be described
+largely in terms of cohort effects, we used the model
+.ls 1
+.sp 2
+.ti 15
+E`ij~ = A`i~B`j~N`ij~
+.rj
+Model I
+.sp 1
+.ls 2
+where E`ij~ is the expected number of deaths in age group i and birth
+cohort j, A`i~ is the effect of age group i,
+B`j~ is the effect of birth cohort
+j, and N`ij~ is the population at risk.  The effect of environmental changes
+at a particular period in time can be introduced via parameters C`k~
+representing the effect of period of observation k,
+.ls 1
+.sp 2
+.ti 15
+E`ij~ = A`i~B`j~C`k~N`ij~
+.rj
+Model II
+.sp 1
+.ls 2
+
+     Of course, age at death and birth cohort completely determine the time
+period during which the death occurred.  Thus, the value of k is determined
+once the values of i and j are specified.
+We found that model II significantly improved the fit to the data (see
+results below), indicating that cohort effects alone cannot explain the
+temporal trends in lung cancer mortality.
+
+     The cohort effects of models I and II are nonspecific in that they reflect
+the total of all environmental effects.  To study the cohort-wise impact
+of a particular environmental agent, namely smoking, we used a model
+constructed as follows.
+The number of deaths in any age group and birth cohort is the sum
+of the deaths among smokers and those among non-smokers.  Thus, our
+model specifies that the total expected number of deaths is the sum of
+two expectations.  If P`ij~ is the proportion of smokers in age group i and
+cohort j, the expectation for non-smokers is the product of the total person
+years at risk N`ij~, the proportion of non-smokers (1-P`ij~),
+the effect of age A`i~, and the effect of period of observation C`k~.
+The non-specific cohort effects in model II are replaced by the effects of
+smoking, which make no contribution to the expected number of deaths among
+non-smokers.
+The expectation for smokers is the product of
+N`ij~, P`ij~, A`i~, C`k~, and a term
+X`ij~, which represents the average relative risk associated with smoking
+in age group i and cohort j.
+In formulating the average relative risk, we define X(n) as the relative
+risk associated with a cumulative consumption of n units, and define a unit
+as 146,000 cigarettes (20 per day for 20 years).  If we assume that relative
+risks are multiplicative (i.e. X(n)=X~n`, where X=X(1)), then a good
+approximation to X`ij~, the average relative risk,
+is given by X~~G`ij`, where G`ij~ is the average cumulative
+consumption of cigarette units by smokers at age i in cohort j.
+This approximation is discussed in previous publications (5,6).
+.ls 1
+.sp 2
+.C 105;E`ij~ = N`ij~A`i~C`k~[1 - P`ij~ + P`ij~X~~G`ij`]###Model III
+.sp 1
+.ls 2
+
+     The values of P`ij~ and G`ij~ are available from the Tobacco Research
+Council (2).  We note that model III requires the estimation
+of many fewer parameters than model II since it replaces the nonspecific
+cohort effect parameters by a single smoking related parameter X.
+For example, in the data analyzed here there are 18 birth cohorts
+and hence 18 cohort effect parameters which are replaced in model III
+by a single parameter reflecting the effect of smoking.
+
+     All parameters were estimated using the BMDP3R~*` package for
+iteratively re-weighted non-linear
+least squares.  For the exponential family of distributions, this is
+equivalent to maximum likelihood.
+Since we have assumed deaths to be Poisson distributed,
+the weight used is the inverse of the expected value for each age-time period
+number of deaths based on the model.  It is re-weighted based
+on the current values of the parameter estimates at each iteration.
+.ls 1
+.FN 
+.LM 15
+.ls 1
+.sp 1
+* Biomedical Computer Programs, P-series, 1979, Health Sciences Computing
+Facility, University of California at Los Angeles.
+.EFN
+.ls 2
+
+     The estimation procedure was initialized with all year-of-death
+effects set to 1, the relative risk set to 1, and the age effects set to
+the average age-specific rates for males over the years
+1941 to 1975.  This initialization corresponds to the null hypothesis that
+year-of-death effects and cigarette consumption have not influenced
+age-specific lung cancer mortality.  Analogous initializations were
+made for models I and II with birth cohort effect set to equal 1.
+For details, see appendix 1.
+
+     We have not attempted to incorporate forms of tobacco consumption other
+than manufactured cigarettes.  Doll and Peto (3) found an excess
+risk of lung cancer in male doctors in Britain who claimed to be pipe
+and/or cigar smokers and not to have ever smoked cigarettes.
+The risk was about
+one third that of current cigarette smokers, and these pipe and/or
+cigar smokers were small in number.
+
+     The models used in this analysis are statistical in nature.
+Our model III uses an exponential effect of dose in analogy
+with logistic regression.  The models are not motivated by biological
+considerations; they are like regression models in that they are of value
+in describing the data.  Biological inferences might be made on the basis
+of the fits of the models, and the values of, or trends in, the parameters.
+
+     The estimates of cumulative consumption reported by the TRC (1,2)
+sum average annual consumption per adult over age for each cohort.  These
+estimates do not take account of differential mortality between smokers
+and non-smokers and therefore tend to overestimate consumption.
+In addition, constant tar cigarettes may still overestimate actual
+tar consumption in recent time periods (15).
+We performed Monte Carlo simulations in order to
+examine the impact of such systematic biases on the conclusions of our
+analysis (details in appendix 2).
+.sp 2
+.ce
+Results
+.sp 1
+
+     Male lung cancer mortality has increased steadily since 1941 at ages above
+65, but has been dropping at ages under 65 (figure 1).  The age-specific
+rates for birth cohorts rose from the cohort of 1866 to that of 1901, but have
+since begun to decline (figure 2).  Cumulative consumption of constant
+tar cigarettes in thousands (from Lee (2)) are plotted in figure
+3.  Age-specific trends in consumption are similar to trends in mortality
+(figures 3 & 4).
+
+     We applied models I, II, and III to these data in order to
+quantify the relationship between consumption and mortality.
+
+     The likelihood ratio test showed that model II did a significantly
+better job in describing the data than model I (chi-squared statistic
+of 2169 on 5 degrees of freedom; 2 degrees of freedom are lost due to
+2 additional indeterminancies among the 3 sets of parameters; ref 16).
+Model III explained better than 95 percent of the variation in rates
+(table 1; see appendix 1 for discussion of R~2`).
+
+     The results of the fitting procedure are shown in tables 1 and 2.
+The cohort effect parameters of models I and II rise until about the
+birth cohort of 1901, and then begin to decline.  The year-of-death
+parameters from model II increase steadily over the period from 1941 to
+1975, whereas those from model III rise until 1951-55 and then decline.
+
+     In table 3, the
+observed number of deaths in each period of observation, the expected
+number, the expected among smokers, and the Population
+Attributable Risk Percent (PAR) obtained by model III are presented.
+The product of the estimated parameters A`i~ and C`k~ and the populations
+at risk, N`ij~, yields the number of deaths that would have been expected
+from lung cancer in age group i, year-of-death k, if there had been no
+smokers in the population.  The expected number due to smoking was this
+number subtracted from the total expected number of deaths generated by
+the model.  The expected due to smoking was expressed as a percentage
+of the total to yield the PAR.
+The PAR increased from 66.4 % in 1941-45 to 95 % in 1971-75.  Over
+the entire period, 1941-75, nearly 500,000 or 88 % of the
+lung cancer deaths were attributable to smoking.
+
+     The age-adjusted rate among smokers as calculated from the model increased
+steadily from the period 1941-45 to 1971-75 (figure 6).  The rate
+among non-smokers rose gradually from 1941-45 to 1951-55, then declined
+by half by 1971-75.
+
+     The proportions of smokers are reported
+in Table 12 of (2) and in (5) we
+used the average over all
+ages.  Percentages in five broad age ranges are presented in Table 12
+and in the present work we used a weighted average of these
+percentages.  This does not make a substantive
+difference in our findings; in (5) we obtained
+an estimate of 4.32 for the relative risk associated with a cumulative
+consumption of 146,000 cigarettes, with these weighted averages we
+obtain an estimate of 4.2 from an analysis of the same age range (35 to 79).
+
+     We also fit model III to the age ranges 35-59 and 60-84
+separately using the reported percentages of smokers in each.  The
+estimates of relative risk were 3.04 and 4.2 respectively and the
+year-of-death effects showed the same pattern over time, i.e. the
+pattern was the same in each of these analyses as it was in the
+analysis of the entire age range 25-84.
+The population attributable risks are also similar.  The fact that the
+relative risk estimated from the older age group is higher than the one
+estimated from the young age group suggests the possibility that duration
+of smoking modifies the effect of a given cumulative consumption.
+The data do not permit the incorporation of duration of smoking.  However,
+our simple model describes the data well.
+
+     Incorporation of possible systematic biases in the smoking data by Monte
+Carlo simulations do not materially affect our conclusions (see appendix 2).
+.bp
+.ce
+Discussion
+.sp 1
+
+     It is appropriate to begin with a discussion of the limitations of the data
+and the methods.  The first problem concerns the reliability of death
+certification.  Changes in diagnostic criteria, revisions in the International
+Classification of Diseases, and errors made by the certifying physician all
+contribute to this problem.  Diagnostic misclassification as tuberculosis
+was a large problem in the first half of the century but has much less
+impact over the span of our analysis (8).
+These qualifications notwithstanding, vital data are the only resource
+available for examining time trends in cancer in the population at large.
+
+     Another potential source of error is the smoking data.
+The assumptions and approximations necessary to generate the cigarette
+consumption data are discussed by Todd et al (1).  Over the age range of
+interest to us, the proportions of smokers are reported in 3 broad age
+groups (25 to 34, 35 to 59, and 60 +).  We would, of course, have preferred
+to use proportions by five year age groups.  Since we could not, we chose to
+use a weighted average of the grouped proportions.  In Stevens & Moolgavkar
+(5) we used the average over all ages reported in Lee (2).  The
+two analyses yielded equivalent results.  In addition, we analyzed the age
+ranges 35 to 59 and 60 to 84 separately using the
+reported proportions and again
+obtained similar results.
+
+     Models I and II incorporate non-specific cohort effects.  In both instances
+these rise until the cohort of 1901 and then fall, more steeply in model II.
+The year-of-death effects of model II rise over the entire time period
+of observation, whereas the year-of-death effects of model III rise until
+1951-55 then begin a sharp decline.  Statistically, the year-of-death
+parameters of model II represent interactions between the effects of age and
+birth cohort and may be difficult to interpret.
+In any event, they reflect the increasing age-adjusted mortality
+from lung cancer.  Over the period of observation, the total consumption
+of cigarettes has increased with each cross-section while the later-born
+cohorts are smoking less.  This may account for the pattern observed
+in the parameters of model II.  Model III incorporates specific information
+on smoking and therefore takes into account both increasing cumulative
+consumption of each cross-section and the decrease in consumption of
+later cohorts.  Therefore, the year-of-death effects are probably not
+influenced by smoking and reflect more subtle environmental effects.
+The discussion that follows is based on the findings of model III.
+
+     There are three features of the epidemiology of lung cancer upon which
+our analysis has bearing.  First, the effect of age on risk; second,
+dose response; and third, changes in rates among non-smokers.
+.sp 1
+.ti -2
+Effect of Age on Risk:
+
+     Doll and Peto (17) found that "...even after standardization for dose,
+men aged 80-84 or 85+ both have lung cancer incidence rates which
+are only about half the rates for men aged 75-79."
+Our analysis indicates that the risk in men aged 80 to 84 is higher
+than that in men aged 75 to 79 after account has been taken of smoking.
+Figure 5 is a double logarithmic plot of the effect of age on risk
+after adjustment for smoking and temporal trends.
+This is clearly not a straight line since it exhibits downward curvature
+at the older ages, however, a linear regression fit yields a slope of 3.94
+which is comparable to the slope of 4 found by Doll (18) for incidence
+in non-smokers.
+
+     Doll and Peto (17) offer four possible
+explanations of their finding that men aged 80-84
+have half the risk of men aged 75-79.
+These are under-diagnosis,
+selective survival, unreported cohort differences of smoking patterns
+in early life, and the possibility that something about the biology
+of extreme old age reduces the risk of carcinoma.
+After adjustment for smoking and temporal trends, we do not find a decrease
+in risk in the old men, however, the downward curvature in the age effects
+curve at the later ages (figure 5) is consistent with the same four
+explanations.  The discrepency between our finding and that of Doll and
+Peto (17) could be the result of the way in which they estimated
+cigarette consumption.  They used reported daily consumption of individual
+men and inferred a life long dose among those
+who reported that they had started
+smoking in their early twenties.  In fact, when the very old heavy
+smokers were in their 20\`s, manufactured cigarettes were unavailable.
+Thus, their habits had to have changed during adult life.  The data
+we used from Lee (2) estimated cumulative consumption for each age
+group by reference to total pounds of tobacco consumed each year
+in the United Kingdom and by reference to sample surveys to partition
+the tobacco by age group and sex.  Sample surveys were available
+for particular years and consumption breakdowns for intervening
+years were estimated.
+These data have their own limitations (1) and
+tend to overestimate cigarette consumption
+at the older ages.  This certainly contributes to the downward
+curvature in the age effects.
+.sp 1
+.ti -2
+Dose Response:
+
+     A large study in the United States (19) found that for a given
+level of daily cigarette consumption, relative risk increased with age.
+For male smokers of 20-39 cigarettes per day the risk was 9.37
+at age 35-54 relative to non-smokers of the same age;
+13.82 at age 55-69, and 17.62 at age 70-84.
+Since the majority of smokers in this study began smoking in their
+early twenties, relative risk for a given daily consumption increased
+with duration of smoking.
+
+     In our formulation, relative risk is an exponential function of
+cumulative consumption, and for a given daily consumption, relative
+risk increases with duration.  For example, a male smoker of 20 cigarettes
+a day from age 20 has a risk of 4.4 relative to a non-smoker at age
+40, a risk of 9.2 at age 50, and a risk of 19.4 at age 60.
+As in all statistical fitting procedures, extrapolation of this dose-response
+relationship outside the range of consumption data is relatively risky.
+Thus, in the smoking data, cumulative consumption ranges between 0 and 2.7
+units and our formulation gives an adequate description of dose-response
+only in this range.
+
+     The dose-response relationship derived by
+Doll and Peto (17) for smokers of 40 or less cigarettes per day
+expresses the age-specific risk as the product of
+a power of duration of smoking and the square of the number per day plus six.
+.ls 1
+.LITERAL
+
+
+                               2            4 or 5
+        Incidence = C(dose + 6) (age - 22.5)
+
+        where: C is a constant, dose is number of cigarettes
+
+               per day.
+
+
+.END LITERAL
+.ls 2
+
+     Doll and Peto\`s (17) formulation for incidence given
+above when extrapolated to 0 dose (non-smokers) implies that the
+risk increases with the fourth or fifth power of age minus 22.5,
+which is very different from the observation (18) that
+risk in non-smokers increases with the fourth power of age.
+.bp
+.ti -2
+Year-of-death Effects:
+
+     The British stopped burning coal in their major urban centers shortly
+after the \`London smog\` of 1952-53 (4).  However, the impact
+of air pollution on lung cancer mortality is very difficult
+to investigate due to the powerful effect of cigarette smoking.
+Urban-rural differences in lung cancer rates are confounded by the
+fact that city dwellers smoke more (20),
+and since cigarette consumption
+has been rising rapidly in England & Wales over the past 70 years,
+the effect of changes in air pollution will have been masked.  The
+death rates themselves have been rising despite the Clean Air Act
+of 1956.
+
+     Higgins (20) examined lung cancer rates since the Clean Air Act in
+London and in other areas of England.  He reasoned that if pollution
+had had a large impact, then the rates in London would not have risen
+as fast as the rates in rural populations.  He found no striking results.
+Again, he could not control for smoking differences between town and
+country.  According to Waller (21), however, there are signs that the
+urban excess of lung cancer may be declining.
+
+     Doll (22) points out that urban/rural differences in lung cancer rates
+cannot be explained by specific occupational exposures and that "...trends
+in the mortality from lung cancer in young and middle-aged men in England
+and Wales provide uncertain evidence but support the belief that
+atmospheric pollution has contributed to the production of the disease."
+He states that air pollution accounts for not more than 5 cases
+of lung cancer per 100,000 persons per year in European populations.
+In addition, Doll (22) states that urban/rural differences in
+lung cancer rates among non-smokers are not major, and suggests that
+the effect of air pollution on lung cancer may be through an interaction
+with cigarette smoking.  However, Stocks (23) reported a two-fold
+difference in non-smokers.
+
+     An attempt has been made to quantify the effects of air pollution by use of
+a regression analysis on lung cancer rates, cigarette consumption, and
+measures of air pollution in 20 countries (24).  The conclusion
+is that the products of solid fuel combustion may be an important
+etiologic factor in lung cancer.
+
+     Lawther and Waller (4) conclude with "Many years may elapse yet before
+it becomes clear whether urban air pollution has played any substantial
+role in the aetiology of lung cancer, either independently or in
+combination with smoking, but the massive reductions in smoke
+concentrations achieved in the major cities of Britain during
+the last two decades may be creating a natural experiment that will
+help elucidate the problem."
+
+     Our analysis enables us to partition lung cancer mortality into two
+components: deaths among smokers and deaths among non-smokers.  The
+observed increase over the period 1941 to 1975 is entirely due to
+an increase among smokers.  As can be seen in figure 6 and table 3,
+the age adjusted rate increased from 61/100,000 in 1941-45 to 334/100,000
+in 1971-75 reflecting the increase in total cumulative consumption
+among smokers.  The rate in non-smokers increased from 15/100,000 in
+1941-45 to 19.3/100,000 in 1951-55 and then declined to 8.6/100,000
+in 1971-75.  The beginning of this decline is coincident
+with the Clean Air Act of 1956.
+Figure 7 shows the decline in levels of \`smoke\` and sulphur dioxide
+in London since the Clean Air Act.
+Cederloff et al (25) tentatively estimate the number of lung cancer
+cases in males attributable to air pollution in major cities to be
+between 5 and 10 per 100,000.  Stocks (23) reported a two-fold difference
+in lung cancer mortality rates between Liverpool and rural north Wales
+among non-smokers.  Our observation on non-smokers is consistent with
+these studies.
+
+     In a recent paper, Wald et al (15) suggest that the decline in lung cancer
+mortality in young men in Britain may be entirely due to a decrease in tar
+content of manufactured cigarettes.  Inasmuch as we used \`constant tar\`
+cigarettes in our analysis we have controlled for this decrease.  We still
+find that the reduction in tar content cannot entirely
+account for the fall in rates.  Our information on \`constant tar\`
+cigarettes comes from Lee (2) who believes that a substantial
+reduction in tar content occurred after 1965.  Wald et al (15) point out
+that some reduction could have occurred prior to this time.  However,
+their own data suggest that it was small.  Incorporation of their data
+into our analysis does not change our conclusions: while cigarette
+smoking remains the overwhelming determinant of lung cancer mortality,
+other factors, possibly air quality, have had a modest impact as well.
+
+     It may seem unreasonable that the reduction in Air Pollution should be
+reflected in mortality rates immediately.  However, the effect of quitting
+smoking on reduction in lung cancer risk occurs within 2 years of
+quitting (28).
+.sp 1
+.ti -2
+Concluding Remarks:
+
+     One of the principal objectives of our analysis was to study temporal
+trends of lung cancer in non-smokers.  Since lung cancer mortality
+is not reported by smoking status, use of a statistical model is
+necessary.  In order for the conclusions to be taken seriously the
+model must not only fit the data but must also yield results
+which are consistent with the known epidemiology of lung cancer.
+We have some degree of confidence in our findings for two reasons.
+First, our findings are consistent with those of other studies.  The
+estimate of relative risk of 9.2 associated with
+30 pack years of smoking is in good agreement with Hammond\`s
+estimate of 9.37 for a similar level (19); the age effects shown in figure 5
+reflect the age-specific mortality in non-smokers derived from the
+model, and the slope of this curve is 3.94
+in agreement with that reported by Doll (18);
+our estimate of population attributable risk percent over the span
+of the study is 88 and Doll (28) suggests that the figure is between
+88 and 93.  Our fourth finding, a risk reduction since the Clean
+Air Act of 1956 gains credibility due to the success of our analysis
+in estimating these other known quantities.
+
+     Second, our results are robust against systematic bias in the smoking
+data.  Wald et al (15) suggest that the reduction in tar
+content of cigarettes in the late 1950\`s was greater than the Tobacco
+Research Council recognized thereby rendering their estimates of
+constant tar cigarettes too high in later time periods.
+Also, the manner in which the
+Tobacco Research Council estimates cumulative consumption does not
+take account of the differential mortality between smokers and
+non-smokers thereby increasingly overestimating cumulative consumption
+with advancing age.
+We therefore performed a series
+of Monte Carlo (see appendix 2 for details)
+simulations which reduced cumulative consumption
+by year and age.  We generated 1,000 new data sets with randomly
+reduced cumlative consumptions and obtained the estimates of the
+parameters shown in figures 8 to 11.  The conclusions we have drawn on
+the basis of our analysis are hardly changed at all.  The estimates
+of relative risk, PAR percent, and slope of log age effects against
+log age cluster around the values obtained by fitting the unperturbed
+data.  Figure 11 shows the distribution of the ratio of age-adjusted
+mortality in non-smokers in 1950 to that in 1970.
+On the unperturbed data this ratio is 2.26.
+Again, as can be seen in the
+figure, the conclusion that rates declined between 1950 and 1970
+is not materially altered by introducing
+rather substantial reductions in cumulative consumption by age
+and year.  The ratio is still estimated to be on the order of 1.5 to 2.0,
+and in no case was it estimated to be less than 1.
+
+     The average percent reduction for each age and cross-section
+over the 1,000 data sets are shown in table 4.  With reductions averaging
+as much as 10 percent (and with extremes as much as 43 percent)
+in cumulative consumption, the conclusions of
+our analysis are unchanged.  Using these average reductions to generate one new
+data set yields an estimate of relative risk of 5.4, PAR percent of 90, slope
+of 4, and ratio of 1950 to 1970 of 2.2;  almost precisely the values of
+these parameters in the original analysis.  Analysis of a data set obtained
+by using the set of maximum
+percent reductions (table 5) yields a
+ratio of 1950 to 1970 adjusted rates of 2.
+The estimate of relative risk becomes 11 which is unreasonable.
+However, it seems clear that systematic bias in the smoking data does not
+account for the ratio in non-smoker rates which we obtain.
+.bp
+.ce
+Appendix 1
+.sp 1
+.ti -2
+Some remarks on R~2`:
+
+     Here, as
+usual, R~2` = 1 - (residual sum of squares/total sum of squares); however,
+the total sum of squares (tss) is defined by
+tss = ##(O`ij~ - E`n~)~2`, where O`ij~ is the observed
+number of deaths and E`n~ is the expected number of deaths
+under the null hypothesis that age, year-of-death, and smoking have
+no effect.  Specifically,
+E`n~ = N`ij~ ~___`~~O`++``N`++~~#.
+Since age has a large effect
+on mortality from lung cancer, we also calculated R`a~~2`, the proportion of
+variation explained after blocking on age.
+In this instance, tss = ##(O`ij~ - E`n~)~2`, where
+E`n~ = N`ij~ ~___`~~O`i+``N`i+~~#.
+We are not proposing R~2` as a rigorous goodness-of-fit statistic or as
+an estimate of multiple correlation; rather, R~2` is an overall measure
+of association.  Our analysis is to be thought of as a type of regression
+analysis for which rigorous goodness-of-fit tests are not usually available
+but in which estimates of parameters are nonetheless important.  Unlike
+the chi-squared statistic, R~2` can be interpreted without precise
+distributional assumptions about the number of deaths in each cell.
+.sp 1
+.ti -2
+Some remarks on parameter estimates for models I and II:
+
+     The estimates of the parameters in model I are unique only up to a
+multiplicative constant.  Thus, the age effects can be multiplied by any
+non-zero constant and the cohort effects divided by the same constant
+without changing the expected numbers in each cell.  Similarly, in model
+II, two sets of parameters (e.g. age effects and cohort effects) can be
+multiplied by aribitrary non-zero constants and the third set divided
+by the product of these constants to yield the same expected values.  This
+particular source of non-uniqueness raises no problems since the internal
+relationship of any set of parameters does not change, i.e. the ratios
+of any two age effects or any two cohorts effects or any two year-of-death
+effects do not change.
+
+     However, in model II there is another source of non-uniqueness.  This arises
+from the fact that age and year-of-death completely determine the birth
+cohort.  Various authors (16,26,27) have tried to eliminate this source
+of non-uniqueness by imposing constraints on the parameters.  Unfortunately,
+there is no good reason to choose any one set of constraints over another.
+We believe that of the three sets of parameters (age, cohort, and
+year-of-death), the most important in determining cancer incidence and
+mortality are the age effects.  Thus, we start off with a vector of initial
+values representing a "null" hypothesis and would like to find that
+point on the hypersurface of all possible solutions that is closest to the
+vector of initial values, as described in methods.
+.sp 1
+.ce
+Appendix 2
+.sp 1
+.ti -2
+Monte Carlo simulation:
+
+     As discussed in the Concluding Remarks, the reported cumulative consumption
+may be overestimated by age and time period.  Therefore, we generated new
+data sets based on the original data with randomly reduced cumulative
+consumption, fit our model, and
+obtained new estimates of the parameters.
+A normal (0,1) random deviate (called Y) was generated.
+For the cumulative consumption
+in each age-cohort population a new value of Y was
+multiplied by a preassigned constant (C), an age factor (A),
+a cross-section factor (B), and by the cumulative consumption
+itself.  The absolute value was subtracted from
+the cumulative consumption and recorded in the new
+data set.  Thus a random reduction, proportional to the magnitude of the
+cumulative consumption was independently made in the reported
+cumulative consumption in each cell.
+Specifically, the new cumulative consumption was calculated as,
+.ls 1
+.LIT
+
+
+    New Consumption = Old   - |Y  x C x A x B x Old  |
+                         ik     ik       i   k     ik
+
+     where:  A  = (i-1)/6   (i ranges from 1 to 12,
+              i              ages 25-29 to 80-84)
+
+             B  = 1 for k=1,2,3; (k-2)/2 for k=4,5,6,7
+              k     (k ranges from 1 to 7, 1941-45 to 1971-75)
+
+             C  = 0.025  (this constant determines the rapidity with
+                          which error increases with age and year)
+
+             Y   = normal (0,1) variable generated independently for
+              ik   each cell
+
+             Old   = reported cumulative consumption used in the original
+                ik   analysis
+
+
+.END LITERAL
+.ls 2
+
+     One thousand new data sets for cumulative consumption were
+randomly generated in this way.  The results obtained from these
+data sets are presented in the figures 8 thru 11.  The average reductions in
+each cell are shown in table 4.  These results are discussed in Concluding
+Remarks.
+
+     When the constant C is increased to 0.05, 1,000 simulated data sets yield
+estimates of the parameters which vary widely.  Estimates of the ratio
+of 1950 to 1970 adjusted rates cluster around 1, however, the expectation
+of this ratio is still greater than 1.
+In this set of simulations, the average percent reductions range up to 18
+percent, with maximum reductions of as much as 62 percent.
+.bp
+.LM 10
+.ls 2
+.ce
+References
+.sp 2
+.P -4,0,5
+1)##Todd, G.F., Lee, P.N., Wilson, M.J.:  COHORT ANALYSIS OF CIGARETTE
+SMOKING AND OF MORTALITY FROM FOUR ASSOCIATED DISEASES. Tobacco Research
+Council, Occasional Paper 3, London, 1976.
+.P -4,0,5
+2)##Lee, P.N., ed.:  STATISTICS OF SMOKING IN THE UNITED KINGDOM,
+RESEARCH PAPER I, 7th Edition, London: Tobacco Research Council, 1976.
+.P -4,0,5
+3)##Doll, R., Peto, R.:   MORTALITY IN RELATION TO SMOKING: 20 YEARS\`
+OBSERVATIONS ON MALE BRITISH DOCTORS. Brit. Med. J., 1976;2,1525.
+.P -4,0,5
+4)##Lawther, P.J., Waller, R.E.:   COAL FIRES, INDUSTRIAL EMISSIONS AND
+MOTOR VEHICLES AS SOURCES OF ENVIRONMENTAL CARCINOGENS. In: Environmental
+and Carcinogenic Risks, Inserm Symposia Series, Vol. 52, IARC, pp.27-40. 1976
+.P -4,0,5
+5)##Stevens, R.G., Moolgavkar, S.H.:   ESTIMATION OF RELATIVE RISK FROM
+VITAL DATA: SMOKING AND CANCERS OF THE LUNG AND BLADDER. JNCI,
+1979;63,1351.
+.P -4,0,5
+6)##Moolgavkar, S.H., Stevens, R.G.: SMOKING AND CANCERS OF BLADDER
+AND PANCREAS: RISKS AND TEMPORAL TRENDS. JNCI, 1981;67:15-23.
+.P -4,0,5
+7)##The Registrar General\`s Statistical Review of England and Wales:
+Office of Population Censuses and Surveys:   Cancer Mortality in England
+and Wales 1911-1970. Studies on Medical and Population Subjects,
+No. 29. London: HM Stat Off.
+The Registrar General\`s Statistical Review of England and Wales:
+Office of Population Censuses and Surveys: Annual Reports 1971 to 1975.
+.P -4,0,5
+8)##Royal College of Physicians:   SMOKING OR HEALTH: THE THIRD REPORT
+FROM THE ROYAL COLLEGE OF PHYSICIANS OF LONDON. Pitman Medical
+Publ. Co., London, 1977.
+.P -4,0,5
+9)##Breslow, N.E., Day, N.E.:   INDIRECT STANDARDIZATION AND MULTIPLICATIVE
+MODELS FOR RATES, WITH REFERENCE TO THE AGE ADJUSTMENT OF CANCER
+INCIDENCE AND RELATIVE FREQUENCY DATA.  J. Chron. Dis., 1975;28:289-303.
+.P -4,0,5
+10)#Derrick, V.P.:   ERRORS IN THE POPULATION STATISTICS AND CHANGES IN
+MORTALITY. J. Inst. Actuaries, 1927;58:117-146.
+.P -4,0,5
+11)#Frost, W.H.:   THE AGE SELECTION OF MORTALITY FROM TUBERCULOSIS
+IN SUCCESSIVE DECADES. Am. J. Hyg., 1939;30:91-96.
+.P -4,0,5
+12)#Kermack, W., McKendrick, A., McKinlay, P.:  
+DEATH RATES IN GREAT BRITAIN
+AND SWEDEN: EXPRESSION OF SPECIFIC MORTALITY RATES AS PRODUCTS OF TWO
+FACTORS, AND SOME CONSEQUENCES THEREOF. J. Hyg. (Camb), 1934;34:433-457.
+.P -4,0,5
+13)#Moolgavkar, S.H., Stevens, R.G., Lee, J.A.H.:   EFFECT OF AGE ON
+INCIDENCE OF BREAST CANCER IN FEMALES. JNCI, 1979;62:493-501.
+.P -4,0,5
+14)#Case, R.A.M.:   COHORT ANALYSIS OF MORTALITY RATES AS AN 
+HISTORICAL OR NARRATIVE TECHNIQUE. Brit. J. Prev. Soc. Med.,
+1956;10:159-171.
+.P -4,0,5
+15)#Wald, N., Doll, R., Copeland, G.:   TRENDS IN TAR, NICOTINE, AND
+CARBON MONOXIDE YILEDS OF U.K. CIGARETTES MANUFACTURED SINCE 1934.
+BMJ, 282:763-765. 1981
+.P -4,0,5
+16)#Sacher, GA: Analysis of life tables with secular terms.  The biology
+of aging, No. 6. Edited by Strehler, B, Washington, DC, American
+Institute of Biological Sciences, pp. 253-257, 1960.
+.P -4,0,5
+17)#Doll, R., Peto, R.:   CIGARETTE SMOKING AND BRONCHIAL CARCINOMA:
+DOSE AND TIME RELATIONSHIPS AMONG REGULAR SMOKERS AND LIFELONG
+NON-SMOKERS. J. Epidemiol. Comm. Health, 1978;32:303-313.
+.P -4,0,5
+18)#Doll, R.:   THE AGE DISTRIBUTION OF CANCER: IMPLICATIONS FOR MODELS
+OF CACINOGENESIS. J. Royal Stat. Soc., Series A, 1971;134:133-166.
+.P -4,0,5
+19)#Hammond, E.C.:   SMOKING IN RELATION TO THE DEATH RATES OF ONE
+MILLION MEN AND WOMEN. Natl. Cancer Inst. Monograph 19, pp. 127-204, 1966.
+.P -4,0,5
+20)#Higgins, I.T.T.:   EPIDEMIOLOGICAL EVIDENCE ON THE CARCINOGENIC RISK
+OF AIR POLLUTION. In: Environmental and Carcinogenic Risks, Inserm
+Symposia Series, Vol. 52, IARC, pp. 41-52. 1976
+.P -4,0,5
+21)#Waller, R.E.:   TOBACCO AND OTHER SUBSTANCES AS CAUSES OF RESPIRATORY
+CANCER. In: Symposium on the Prevention of Cancer, Raven, R.W., ed.,
+pp. 17-28. 1971
+.P -4,0,5
+22)#Doll, R.:   ATMOSPHERIC POLLUTION AND LUNG CANCER. Environmental
+Health Perspectives, 1978;22:23.
+.P -4,0,5
+23)#Stocks, P.:   REPORT ON CANCER IN NORTH WALES AND LIVERPOOL REGION.
+In: British Empire Cancer Campaign 35th Annual Report, 1957, Suppl.
+to part II. British Empire Cancer Campaign, London, 1958. 1958
+.P -4,0,5
+24)#Carnow, B.W.:   THE "URBAN FACTOR" AND LUNG CANCER: CIGARETTE
+SMOKING OR AIR POLLUTION_? Environmental Health Perspectives, 1978;22:17.
+.P -4,0,5
+25)#Cederlof, R., Doll, R., Fowler, B., et al, eds.:   AIR POLLUTION
+AND CANCER: RISK ASSESMENT OF METHODOLOGY AND EPIDEMIOLOGICAL EVIDENCE
+(REPORT OF A TASK GROUP). Environ. Health Perspect., 1978;22:1.
+.P -4,0,5
+26)#Barret, JC: Age, time, and cohort factors in mortality from cancer
+of the cervix. J Hyg (Camb), 1973;71:253-259.
+.P -4,0,5
+27)#Pottern, LM, Stone, BJ, Day, NE, et al: Thyroid cancer in
+Connecticut, 1935-1975: and analysis by cell type. Am J Epi, 1980;112:764-774.
+.P -4,0,5
+28)#Doll, R: Practical steps towards the prevention of bronchial
+carcinoma.  Scot Med J, 1970;15:433-446.
+.P -4,0,1
+29)#Segi, M.:   CANCER MORTALITY FOR SELECTED SITES IN 24 COUNTRIES
+(1950-1957). Sendai: Department of Public Health, Tohoku University,
+School of Medicine, 1960.
+.bp
+.ls 1
+.LM 15
+.ce
+Figure Legends
+.sp 1
+.P -4,1,3
+Figure 1:##Age-specific mortality from lung cancer in British males
+against year of birth.
+
+     Figure 2:##Age-specific mortality from lung cancer in birth cohorts
+of British males.
+
+     Figure 3:##Cumulative constant tar cigarette consumption per adult
+British male by age and year of birth.
+
+     Figure 4:##Cumulative consumption of constant tar cigarettes in birth
+cohorts of British males against age.
+
+     Figure 5:##Age-specific lung cancer death rates in males in England
+and Wales for 3 different time periods plotted with age effects estimated
+by the model.
+
+     Figure 6:##Age-adjusted lung cancer mortality rate among British males
+aged 25 to 84.  Observed rate, rate in smokers and in non-smokers
+estimated by the model.
+
+     Figure 7:##Levels of \`smoke\` and sulphur dioxide pollution in London from
+Lawther and Waller 4).
+
+     Figure 8:##Relative risk estimated by the model after introducing a random
+decrease in cumulative consumption.  Results of 1,000 Monte Carlo
+simulations.  Star shows result from original data.
+
+     Figure 9:##Population attributable risk percent estimated by the model
+after introducing a random decrease in cumulative consumption. Results
+of 1,000 Monte Carlo simulations.  Star shows result from original data.
+
+     Figure 10:##Slope of age effects in non-smokers estimated by the model
+after introducing a random decrease in cumulative consumption.  Results
+of 1,000 Monte Carlo simulations.  Star shows result from original data.
+
+     Figure 11:##Ratio 1950/1970 non-smoker rate estimated by the model after
+introducing a random decrease in cumulative consumption.  Results of
+1,000 Monte Carlo simulations.  Star shows result from original data.

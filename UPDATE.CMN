@@ -1,0 +1,38 @@
+_repdef(NUMBER_NODES,_arith(_incr(SCREEN_SIZE),*,_incr(SCREEN_SIZE)))
+
+common /update/ _
+	open, min_node, up_buffer_size,
+	up_father(NUMBER_NODES),
+	up_open(NUMBER_NODES),
+	up_prev(NUMBER_NODES),
+	up_cost(NUMBER_NODES),
+	up_old_pos(NUMBER_NODES),
+	up_new_pos(NUMBER_NODES),
+	up_neq(NUMBER_NODES),
+	up_operation(NUMBER_NODES),
+	up_insert_delete_count(NUMBER_NODES),
+	up_stat(NUMBER_NODES)
+
+  integer _
+	open,
+	min_node,
+	up_buffer_size,
+	up_old_pos,
+	up_new_pos
+
+  integer*2 _
+	up_father,
+	up_open,
+	up_prev,
+	up_cost,
+	up_neq
+
+  byte _
+	up_operation,
+	up_insert_delete_count,
+	up_stat
+
+  integer*2 _
+	up_son(NUMBER_NODES)
+
+  equivalence (up_prev, up_son)

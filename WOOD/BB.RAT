@@ -1,0 +1,30 @@
+define(VAX)
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "[-]terminal.cmn"
+  include "[-]syscodes.cmn")
+
+  implicit integer (a-z)
+  data handle /0/
+  integer*4 delta(2)
+  data delta/_arith(5,*,-100000), -1/		# wait in 100ths of seconds
+
+  accept *, n
+  call ti_initialize
+  call lib$init_timer(handle)
+  do i = 1, n {
+    c = 8%33
+    call ti_intrpret_alternate_escape(c)
+    }
+  call lib$show_timer(handle,0)
+  end
+
+  subroutine ti_intrpret_alternate_escape(c)
+  header
+  byte c, ta_characteristics(8), ta_character
+
+  call sys$qiow( , %val(ti_channel), %val(io$_sensemode | io$m_typeahdcnt),
+		, , , ta_characteristics, %val(8), , , , )
+  call sys$qiow( , %val(ti_channel), %val(ti_in_type_ahead_iofc),
+		iosb, , , c, %val(1), %val(0), , , )
+  return
+  end

@@ -1,0 +1,369 @@
+# Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "terminal.cmn")
+
+  subroutine ti_initialize
+  header
+  include "syscodes.sym"
+  character pnam*63, process_name*15
+
+  ti_flush_iofc = io$_writevblk | io$m_noformat
+  ti_in_type_ahead_iofc = io$_readvblk | io$m_trmnoecho | io$m_nofiltr |
+	io$m_noecho | io$m_timed
+  ti_in_character_iofc = io$_readvblk | io$m_trmnoecho | io$m_nofiltr |
+	io$m_noecho
+  call icr_trnlog_str('SYS$COMMAND', pnam)
+  ti_channel = 0
+  status = 0
+  if (get_process_info(process_name, plen, pid, biocnt, bytcnt, astcnt)) {
+    if (astcnt >= 3 & biocnt >= 3 &
+    				bytcnt >= BUFFER_SIZE + MBX_SIZE + 2048) {
+      encode(10, ('Z_',z8.8), mbx_name) pid
+      status = sys$crembx( , mbx_channel, %val(MBX_SIZE),
+			  %val(min(4*MBX_SIZE, bytcnt - BUFFER_SIZE - 2048)),
+			  %val(16%FF0F), , mbx_name)
+      if (status)
+	status = sys$assign(pnam, ti_channel, , mbx_name)
+      if (status) {
+	ef_in_mask = 2**TI_IN_EFN + 2**MBX_IN_EFN
+	call mbx_read
+	}
+      }
+    }
+  if (! status) {
+    mbx_channel = 0
+    ef_in_mask = 2**TI_IN_EFN
+    status = sys$assign(pnam, ti_channel, , )
+    }
+  call ti_get_characteristics
+  call ti_disable_ctrl
+  return
+  end
+
+  subroutine ti_disable_ctrl
+  header
+  include "syscodes.sym"
+  integer*4 di_mask(2)
+  external ti_ctrl_ast
+  data di_mask /0, 16%8/
+
+  if (ttclass == dc$_term) {
+    call lib$disable_ctrl(16%100000,ti_ctrl_mask)		# disable ^T
+    status = sys$qiow( , %val(ti_channel),			# enable ^C AST
+		  %val(io$_setmode | io$m_outband), iosb,
+		  , , ti_ctrl_ast, di_mask, %val(0), , , )
+    ttchar_save = ttchar
+    ttxchar_save = ttxchar
+    ttchar = (ttchar | tt$m_nobrdcst | tt$m_mechform) & (! tt$m_mechtab)
+    if (mbx_channel != 0) {
+      ttchar = ttchar | tt$m_mbxdsabl
+      ttxchar = ttxchar | tt2$m_brdcstmbx
+      }
+    status = sys$qiow( , %val(ti_channel), %val(io$_setmode), iosb,
+		       , , characteristics, %val(12), , , , )
+    ttchar = ttchar_save
+    ttxchar = ttxchar_save
+    }
+  return
+
+  entry ti_enable_ctrl
+  if (ttclass == dc$_term) {
+    status = sys$qiow( , %val(ti_channel), %val(io$_setmode), iosb,
+		       , , characteristics, %val(12), , , , )
+    status = sys$qiow( , %val(ti_channel),			# disable ^C AST
+		  %val(io$_setmode | io$m_outband), iosb,
+		  , , %val(0), di_mask, %val(0), , , )
+    call lib$enable_ctrl(ti_ctrl_mask)				# enable ^T
+    }
+  return
+  end
+
+  subroutine ti_ctrl_ast
+  header
+  include "memory.cmn"
+  include "pushb.cmn"
+  include "session.cmn"
+  include "screen.cmn"
+
+  if (se_count > 1) {				# abort repeating commands
+    se_count = 0
+    sc_error_occurred = true
+    se_error_occurred = true
+    }
+  else if (pu_buffer != null)
+    if (bu_size(pu_buffer) > 0) {		# abort pushed back commands
+      sc_error_occurred = true
+      se_error_occurred = true
+      }
+  return
+  end
+
+  subroutine ti_finish
+  header
+
+  call ti_enable_ctrl
+  status = sys$dassgn(%val(ti_channel))
+  if (mbx_channel != 0)
+    status = sys$dassgn(%val(mbx_channel))
+  return
+  end
+
+  subroutine ti_get_characteristics
+  header
+  include "syscodes.sym"
+  logical first
+  save first
+  data first /true/
+
+  if (first) {
+    first = false
+    status = sys$qiow( , %val(ti_channel), %val(io$_sensemode), iosb,
+		  , , characteristics, %val(12), , , , )
+    if (ttclass != dc$_term) {
+      ti_channel = 0
+      te_type = VT100
+      ti_fast = true
+      ti_lffill = 0
+      ti_width = 80
+      ti_length = 24
+      }
+    else {
+      if (tttype == tt$_vt52)
+	te_type = VT52
+      else if ((ttxchar & tt2$m_deccrt) != 0)
+	te_type = VT100
+      else if (tttype == tt$_vt100 |
+	       tttype == tt$_vt101 |
+	       tttype == tt$_vt102 |
+	       tttype == tt$_vt105 |
+	       tttype == tt$_vt125 |
+	       tttype == tt$_vt131 |
+	       tttype == tt$_vt132 |
+	       tttype == tt$_vt200_series)
+	te_type = VT100
+      else
+	te_type = ADM3A
+# ti_fast should be set true at speeds over 2400 baud.
+      if (ttspeed > tt$c_baud_2400)
+	ti_fast = true
+      else
+	ti_fast = false
+      ti_lffill = lffill
+      if (ti_lffill > 24 | ti_lffill < 0)
+	ti_lffill = 24
+      ti_width = ttwidth
+      ti_length = ttlength
+      }
+    }
+  return
+  end
+ 
+  subroutine ti_outch(output,count)
+  header
+  byte output(ARB)
+  data ti_count/0/
+
+  for (ip = 1; ip <= count; ip = ip+n) {
+    if (ti_count >= BUFFER_SIZE)
+      call ti_flush
+    n = min(count+1-ip, BUFFER_SIZE - ti_count)
+    call movc(output(ip), ti_buffer(ti_count+1), n)
+    ti_count = ti_count + n
+    }
+  return
+  end
+
+  subroutine ti_flush
+  header
+
+  if (ti_count > 0) {
+    call sys$qiow( , %val(ti_channel), %val(ti_flush_iofc), , , , ti_buffer,
+ 	%val(ti_count), , %val(0), , )
+    ti_count = 0
+    }
+  return
+  end
+
+  subroutine ti_kill
+  header
+
+  ti_count = 0
+  return
+  end
+
+  function q_ti_in_type_ahead(c)
+  header
+  byte c
+
+  call sys$qiow( , %val(ti_channel), %val(ti_in_type_ahead_iofc),
+		iosb, , , c, %val(1), %val(0), , , )
+  if (trm_offset + trm_size > 0) {
+    if (c == 8%33)
+      call ti_interpret_escape(c)
+    return(true)
+    }
+  return(false)
+  end
+
+  subroutine ti_queue_character_read
+  header
+  integer errcnt
+  save errcnt
+  data errcnt /0/
+
+  ti_character = 8%31				# ^Y
+  if (! sys$qio(%val(TI_IN_EFN), %val(ti_channel), %val(ti_in_character_iofc),
+	  iosb, , , ti_character, %val(1), , , , )) {
+    errcnt = errcnt + 1
+    if (errcnt > 6)
+      call ti_exit
+    ti_character = 0				# indicates QIO error
+    iosb_status = 1
+    }
+  return
+  end
+
+  subroutine ti_get_character(c)
+  header
+  byte c
+
+  if (! iosb_status) {
+10  call sys$wflor(%val(TI_IN_EFN), %val(ef_in_mask))
+    if (! iosb_status) {
+      call mbx_handler
+      goto 10
+      }
+    }
+  c = ti_character
+  if (c == 8%33)
+    call ti_interpret_escape(c)
+  return
+  end
+
+  subroutine ti_interpret_escape(c)
+  header
+  include "syscodes.sym"
+  include "bind.cmn"
+  byte c, ta_characteristics(8), ta_character
+  integer*2 ta_count
+  equivalence (ta_characteristics(1), ta_count),
+	      (ta_characteristics(3), ta_character)
+  integer*4 delta(2)
+  data delta/_arith(20,*,-100000), -1/		# wait in 100ths of seconds
+
+  if (bi_alternate_escape != EOS) {
+    call sys$qiow( , %val(ti_channel), %val(io$_sensemode | io$m_typeahdcnt),
+		  , , , ta_characteristics, %val(8), , , , )
+    if (ta_count == 0) {
+      call sys$setimr(%val(0), delta, , )
+      call sys$waitfr(%val(0))
+      call sys$qiow( , %val(ti_channel), %val(io$_sensemode | io$m_typeahdcnt),
+		    , , , ta_characteristics, %val(8), , , , )
+      }
+    if (ta_count != 0)
+      if (bi_alternate_escape_followers(ta_character))
+	c = bi_alternate_escape
+    }
+  return
+  end
+
+  subroutine ti_exit
+  header
+
+  call ti_kill
+  call te_finish
+  call ti_flush
+  call ti_finish
+  call dcl_finish
+  call checkpoint_modified_files
+  call ed_save_session
+  stop _
+"Zilch - QIO error! Attempted to checkpoint modified files. Exiting..."
+  end
+
+  subroutine mbx_handler
+  header
+  include "memory.cmn"
+  include "session.cmn"
+  include "screen.cmn"
+%	include '($msgdef)'
+  logical mbread
+  character date*23
+  string ctrlg "@g", crlf "@r@l", bname "Broadcast  9-Jul-1984 11:56:07.00"
+  equivalence (date, bname(11))
+
+  mbread = false
+  if (! mbx_iosb_status)
+    ;
+  else if (mbx_bdcst_type == msg$_trmbrdcst & mbx_iosb_byte_count >= 2) {
+    call lib$sys_asctim( , date)
+    mlen = mbx_bdcst_size
+    if (q_bu_pop_up_message(mbx_bdcst_msg, mlen, bname)) {
+      call sc_fill_line(sc_size,sc_buffer(1,sc_size,sc_old),
+			sc_old_length(sc_size))
+      call sc_update(0)
+      call ti_outch(ctrlg, 1)
+      }
+    else {
+      call send_tty(crlf, 2)
+      call send_tty(mbx_bdcst_msg, mlen)
+      }
+    call ti_flush
+    }
+  else if (mbx_iosb_byte_count < 2 |
+      (mbx_bdcst_type != msg$_trmhangup & mbx_bdcst_type != msg$_trmunsolic)) {
+    bu = bu_find_by_name("Session log")
+    if (bu != null) {
+      t = bu_size(bu) + 1
+      mlen = mbx_iosb_byte_count
+      if (bu_gap_size(bu) < mlen)
+	call tx_more_memory_please(bu,4*4*512+mlen)
+      call tx_insert_buffer(bu, bu_size(bu) + 1, mbx_buffer, mlen)
+      call mbx_read
+      mbread = true
+      call tx_insert_character(bu, NEWLINE, bu_size(bu) + 1)
+      bu_map_windows(bu,wi)
+	if (wi_dot(wi) == t) {			# display new stuff in window
+	  wi_dot(wi) = bu_size(bu) + 1
+	  t2 = wi_dot(wi)
+	  for (i = 1; i < wi_size(wi); i = i+1)
+	    t2 = find_bol(bu, max(1, t2 - 1))
+	  if (wi_bow(wi) < t2)
+	    wi_set_bow(wi,t2)
+	  }
+      bu_modified(bu) = 0
+      if (! mbx_iosb_status & ! iosb_status) {
+	call sc_fill_line(sc_size,sc_buffer(1,sc_size,sc_old),
+			  sc_old_length(sc_size))
+	call sc_update(0)
+	}
+      }
+    }
+  if (! mbread)
+    call mbx_read
+  return
+  end
+
+  subroutine mbx_read
+  header
+  include "syscodes.sym"
+  external mbx_ast
+
+  status = sys$qio(%val(MBX_IN_EFN), %val(mbx_channel), %val(io$_readvblk),
+	     mbx_iosb, mbx_ast, , mbx_buffer, %val(MBX_SIZE), , , , )
+  return
+  end
+
+  subroutine mbx_ast
+  header
+%	include '($msgdef)'
+
+  if (! mbx_iosb_status)
+    ;
+  else if (mbx_bdcst_type == msg$_trmhangup & mbx_iosb_byte_count >= 2) {
+    call checkpoint_modified_files
+    call ed_save_session
+    }
+  return
+  end
