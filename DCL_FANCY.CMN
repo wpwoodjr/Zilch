@@ -1,0 +1,9 @@
+  common /dcl/ pid, dcl_mbx_channel, ctrl_y_count, dcl_in_iosb(8)
+
+    integer pid, dcl_mbx_channel, ctrl_y_count
+    byte dcl_in_iosb
+
+    integer*2 dcl_in_iosb_status
+    equivalence (dcl_in_iosb(1), dcl_in_iosb_status)
+
+    data pid/0/, dcl_mbx_channel /0/

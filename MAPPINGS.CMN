@@ -1,0 +1,3 @@
+common /maping/ mp_mark,mp_save_indent,mp_stack
+
+  data mp_stack /null/

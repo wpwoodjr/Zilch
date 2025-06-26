@@ -1,0 +1,71 @@
+(This is from Cael and Wood)
+
+Ron -
+
+	As we mentioned the other day, we would not mind if Zilch and
+Emacs were left unsupported (as long as Zilch remains in the symbol
+tables); it would upset us if Emacs were to become supported and not Zilch.
+
+Here are some favorable points about Zilch:
+
+	* excellent CAI introductory and advanced courses
+	* Comprehensive reference manual
+	* already has happy local user base at SKB -
+		Regular users:
+			WOOD
+			CAEL
+			DUNCAN
+			GORDON
+			HYLTON
+			PETER YOUNG
+		Part-time users:
+			DON MATTES
+			PACKER
+	* ability to select files to edit with wild card file names
+		(this feature is used frequently)
+	* has multi-page capability - each page
+		is a collection of windows into one or more files.
+		(this feature is used frequently)
+	* maintains file protection of edited files
+		(this feature is essential)
+	* can re-write old versions of files if desired
+	* less buffered IO when setting host than Emacs
+	* developed in house - fast response to bugs, new OS versions,
+		compatible with in house communications,  etc.
+	* pride of local development
+	* inevitability - will be there anyway
+
+Here are some unfavorable points about Emacs:
+
+	* Emacs also takes development and maintenance time -
+		(eg. Rothaus, Wood, Magee.)
+	* Emacs takes startup time for interested analysts.
+		(ie. creating initialization files)
+	* no tutorials - how will it be taught?
+	* Emacs is more complex than Zilch - requires more training and support
+	* 2000+ cost/machine
+	* Maintenance timeliness on support of major OS releases is not
+	  predictable.
+	* no pages
+	* no maintenance of file protection
+	* no wild card file names
+
+Obviously Emacs has its good points too. In fact it is a really great editor,
+in some ways better than Zilch.  However we (and others - see below) feel that
+99% of the time Zilch is sufficient; also there are many little things in
+addition to the above points which make Zilch easier to use.
+
+Wood released Zilch about a year ago on the Decus tape;
+the person below (among others) called Wood up about Zilch -
+he said the following:
+
+Alan Broder
+CGR Medical
+7210 Ambassador Rd.
+Baltimore, MD. 21207
+301 298 3160
+
+Loves Zilch, their site uses it a lot.
+He wants to use it on Televideos Zenith terminals.
+Could I release source to add new terminals? (NO)
+--->  Cleaner than Emacs, Emacs too cluttered.   <---

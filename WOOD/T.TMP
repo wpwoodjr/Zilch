@@ -1,0 +1,5 @@
+$ ren [-]BUFFER.RAT_new .rat
+$ ren [-]EDIT.RAT_new .rat
+$ ren [-]HELP.RAT_new .rat
+$ ren [-]KEY.BND_new .bnd
+$ ren [-]PAGE.RAT_new .rat

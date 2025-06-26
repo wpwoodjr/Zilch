@@ -1,0 +1,47 @@
+.ap
+ What was the first thing you learned about file structures?
+That the key to fast, efficient access and update was to use
+random access files!
+The same is true of file editing, but in a different
+sense. The key to fast, efficient file editing is random access
+to your files.
+
+ Most editors allow only sequential access to the files involved
+in an editing task.
+Only one file may be edited at a time, and frequently
+one must leave the editor to edit another file.
+
+ Zilch belongs to a class of editors which is as radically different
+from other screen editors as screen editors are from line editors.
+Zilch allows random access to files.
+Most people claim productivity gains of 100% or more after using Zilch
+or a similar editor.
+
+ Consider the development of a large program. If modular
+programming techniques are used, the program is made up of many
+files which contain common blocks, subroutines, parameter definitions, etc.
+
+ Another example: a user has developed a useful program which he would
+like to share with his group.
+He has symbol definitions and logical name assignments for the program
+in his LOGIN.COM file.
+In order to share the program, he must:
+.list 
+.le;Place the symbol definitions and logical name assignments in a command
+file.
+.le;Remove them from his LOGIN.COM file.
+.le;Add a reference to the command file to his group's LOGIN.COM file.
+.end list 
+With Zilch, this is a five step process:
+.list 
+.le;Zilch the three files, say they are: LOGIN.COM, [-]LOGIN.COM, and
+[-]PROGRAM.COM.
+.le;Extract the symbol definitions and logical name assignments from
+LOGIN.COM.
+.le;Add the extracted text from LOGIN.COM to PROGRAM.COM.
+.le;Add the text "@[-]PROGRAM" to the group LOGIN.COM file.
+.le;Exit Zilch.
+.end list
+With many other editors, this simple editing task would involve
+entering and leaving the editor 2-3 times, or at least
+explicitly reading and re-writing the 3 files separately.

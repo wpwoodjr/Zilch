@@ -1,0 +1,30 @@
+  # Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986 William P. Wood, Jr.
+  # Keyboard bindings and function definitions for Sequence Editor Zilch
+  # Possible names for new editor: SeZ, Sludge, ZSeq, SeqZ
+
+%mode					control		# {control,insert,0-9}
+%include				[\-.wood]vt.bnd	# VTxxx bindings
+
+redraw
+	call redraw
+seq_search_forward
+seq_search_reverse
+seq_self_insert
+seq_next_insert
+seq_self_overstrike
+seq_next_overstrike
+seq_complement
+seq_reverse
+seq_next_character
+seq_previous_character
+seq_next_line
+seq_previous_line
+seq_write_file
+seq_exit
+seq_write_all_modified_files_and_exit
+seq_write_all_modified_files
+seq_write_current_buffer
+seq_write_named_file
+seq_read_named_file
+
+%mode					control

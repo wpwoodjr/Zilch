@@ -1,0 +1,9 @@
+Zilch is a screen editor which can display and edit one or more
+files at the same time.
+Many of it's features are particularly useful for programming.
+Zilch works on VT100, VT52, ADM3A, and ADM5 terminals.
+Complete documentation is in [.ZILCH]ZILCH.DOC.
+Typing ZCAI INTRO invokes an interactive beginner's tutorial on using Zilch.
+Typing ZCAI ADVANCED invokes an advanced tutorial on using Zilch.
+Documentation for the tutorials is in [.ZILCH]ZCAI.DOC.
+A VMS help file is in [.ZILCH]ZILCH.HLP.

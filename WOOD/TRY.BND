@@ -1,0 +1,47 @@
+%keypad					application
+
+%mode					2
+exit					^Z
+self_insert				\ -~
+tab_to_indent				^I
+newline					^M
+delete_previous_character		\177		# Rubout
+delete_next_character			^H		# backspace
+next_character				^[[\C
+previous_character			^[[\D
+next_line_and_hug_column		^[[\B
+previous_line_and_hug_column		^[[\A
+self_insert				^[\O\P\0-\37
+self_insert				^[\O\P\177
+self_insert				^[\O\P^[^[
+repeat_count				^[\O\P0-9
+
+help					^[\O\Q
+macro_x					^[\O\R			# fndnxt
+	^[OP^[OR^M
+goto_end_of_file			^[\O\P^[\O\t		# bottom
+goto_beginning_of_file			^[\O\P^[\O\u		# top
+set_mark2				^[\Z0
+extract_text				^[\Z1
+macro_x					^[\O\v			# cut
+	^[Z0^[Z1
+add_text_before_cursor			^[\O\P^[\O\v		# paste
+delete_next_character			^[\O\l			# del c
+open_line				^[\O\P^[\O\p
+set_mark1				^[\O\n			# select
+
+list_buffers				^[\O\Pl
+fill_window				^[\O\Pf
+equalize_window				^[\O\Pq
+visit_file				^[\O\Pv
+change_file				^[\O\Pc
+change_buffer				^[\O\Px
+visit_buffer				^[\O\Pb
+enlarge_window				^[\O\Pe
+shrink_window				^[\O\Ps
+split_window				^[\O\Ph
+previous_window				^[\O\Pp
+next_window				^[\O\Pn
+delete_window				^[\O\Pd
+delete_other_windows			^[\O\Po
+beginning_of_window			^[\O\Pt

@@ -1,0 +1,13 @@
+  # Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986 William P. Wood, Jr.
+  # Keyboard bindings and function definitions for standard Zilch
+
+%keypad					numeric		# {numeric,application}
+%include				[\-]key.bnd	# standard bindings
+
+%restart						# prompt subroutines
+%include				[\-]prompt.bnd
+
+%restart						# change subroutines
+%include				[\-]change.bnd
+
+%mode					control

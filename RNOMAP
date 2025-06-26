@@ -1,0 +1,28 @@
+
+c.center;
+p.paragraph 
+s.skip 
+h.header level 
+l.list 00.end list 
+e.le;
+g.page
+b.break
+i.indent 
+m.left margin 
+r.right margin 
+n.note 00.end note 
+f.footnote00.end footnote
+t.test page 
+k.blank 
+x.index 
+y.entry 
+z.page size 
+>\\\\00^^
+<^<00^^
+*^*00\\*
+&^&00\\&
+_.literal00.end literal
+	.tab stops 
+ .spacing 
+{! 
+@.require "

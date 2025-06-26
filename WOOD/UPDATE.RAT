@@ -1,0 +1,582 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(TIMER)
+define(NODE_INFO)
+# define(DEBUG)
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "update.cmn"
+include "screen.cmn"
+_ifdef(NODE_INFO)
+include "nodeinfo.cmn"
+_enddef)
+define(NONE,1)
+define(REPLACE,2)
+define(CLEAR,3)
+define(DELETE,-1)
+define(INSERT,-2)
+define(INSERT2,-3)
+define(UNTOUCHED,0)
+define(ON_OPEN,1)
+define(ON_CLOSED,2)
+define(succ,($1+1))
+ 
+  subroutine new_node(cst,idc,old,new,neq,op,fa)
+  header
+
+_ifdef(NODE_INFO)
+  nodes_generated = succ(nodes_generated)
+_enddef
+  index = min(old,sc_size+1) + (new - 1)*(sc_size+1)
+
+_ifdef(NOCUTOFF)
+
+  if (up_stat(index) != ON_CLOSED)
+    if (up_stat(index) == ON_OPEN) {
+      if (up_cost(index) > cst) {
+_ifdef(NODE_INFO)
+	nodes_replaced = succ(nodes_replaced)
+_enddef
+	up_cost(index) = cst
+	up_insert_delete_count(index) = idc
+	up_operation(index) = op
+	up_father(index) = fa
+	up_neq(index) = neq
+	}
+      }
+    else {
+_ifdef(NODE_INFO)
+      nodes_inserted = succ(nodes_inserted)
+_enddef
+      up_open(index) = open
+      up_prev(index) = null
+      if (open != null)
+	up_prev(open) = index
+      open = index
+      up_stat(index) = ON_OPEN
+      up_new_pos(index) = new
+      up_old_pos(index) = min(old,sc_size+1)
+      up_cost(index) = cst
+      up_insert_delete_count(index) = idc
+      up_operation(index) = op
+      up_father(index) = fa
+      up_neq(index) = neq
+      }
+
+_elsedef
+
+_ifdef(NODE_INFO)
+  if (up_stat(index) == UNTOUCHED)
+    nodes_inserted = succ(nodes_inserted)
+  else
+    nodes_replaced = succ(nodes_replaced)
+_enddef
+  if (up_stat(index) == UNTOUCHED | up_cost(index) > cst) {
+    up_new_pos(index) = new
+    up_old_pos(index) = min(old,sc_size+1)
+    up_cost(index) = cst
+    up_insert_delete_count(index) = idc
+    up_operation(index) = op
+    up_father(index) = fa
+    up_neq(index) = neq
+    }
+  if (up_stat(index) != ON_OPEN) {
+    up_open(index) = open
+    up_prev(index) = null
+    if (open != null)
+      up_prev(open) = index
+    open = index
+    up_stat(index) = ON_OPEN
+    }
+
+_enddef
+
+  return
+  end
+
+  subroutine remove_min_cost_node(cutoff)
+  header
+
+  if (cutoff < cutoff_count) {
+    min_node = open
+    min_cost = up_cost(open)
+    max_new_pos = up_new_pos(open)
+    insert_node = null
+    clear_node = null
+    op = open
+    while (op != null) {
+      i = up_new_pos(op)
+      if ((i > max_new_pos) |
+	 ((i == max_new_pos) & (up_cost(op) < min_cost))) {
+	min_cost = up_cost(op)
+	max_new_pos = i
+	min_node = op
+	}
+      if (insert_node == null) {
+	for (iop = op; up_operation(iop) == INSERT; iop = up_father(iop))
+	  ;
+	if (up_operation(iop) == NONE)
+	  insert_node = op
+	}
+      if (clear_node == null) {
+	for (iop = op; up_operation(iop) == REPLACE; iop = up_father(iop))
+	  ;
+	if (up_operation(iop) == CLEAR)
+	  clear_node = op
+	}
+      op = up_open(op)
+      }
+    op = open
+    while(op != null) {
+      if (op != insert_node & op != min_node & op != clear_node) {
+	if (up_open(op) != null)
+	  up_prev(up_open(op)) = up_prev(op)
+	if (up_prev(op) == null)
+	  open = up_open(op)
+	else
+	  up_open(up_prev(op)) = up_open(op)
+	up_stat(op) = ON_CLOSED
+	}
+      op = up_open(op)
+      }
+    cutoff_count = 0
+    }
+  min_node = open
+  min_cost = up_cost(open)
+  op = up_open(open)
+  while (op != null) {
+    i = up_cost(op)
+    if ((i < min_cost) |
+       ((i == min_cost) & (up_new_pos(op) > sc_size))) {
+      min_cost = i
+      min_node = op
+      }
+    op = up_open(op)
+    }
+  if (up_open(min_node) != null)
+    up_prev(up_open(min_node)) = up_prev(min_node)
+  if (up_prev(min_node) == null)
+    open = up_open(min_node)
+  else
+    up_open(up_prev(min_node)) = up_open(min_node)
+  up_stat(min_node) = ON_CLOSED
+  return
+  end
+
+  subroutine skip(neq)
+  header
+
+  while (up_new_pos(min_node) <= sc_size)
+# this compare compares for reverse video too
+    if (q_cmpc(sc_buffer(0,up_old_pos(min_node),sc_old),
+	     sc_old_length(up_old_pos(min_node))+1,
+	     sc_buffer(0,up_new_pos(min_node),sc_new),
+	     sc_new_length(up_new_pos(min_node))+1,
+	     neq)) {
+      up_new_pos(min_node) = succ(up_new_pos(min_node))
+      up_old_pos(min_node) = min(succ(up_old_pos(min_node)),sc_size+1)
+      }
+    else {
+      neq = max(0,neq - 1)	# because of reverse video
+      break
+      }
+  return
+  end
+
+  subroutine sc_update
+  header
+  include "terminal.cmn"
+  include "cost.ext"
+  string cntrlg "@g"
+  parameter ncut = 1
+  integer cut(ncut)
+  real ncost,sumcost(ncut),timm(ncut),nex(ncut)
+  data nup /0/
+_ifdef(TIMER)
+  data handle /0/
+_enddef
+
+  call sc_fill_new
+  for (modlin = 1; modlin <= sc_size; modlin = modlin+1)
+    if (sc_modified(modlin))
+      break
+  if (modlin <= sc_size | sc_redraw) {
+    if (sc_size < 60) {
+#      cut(1) = 600
+#      cut(2) = 300
+#      cut(3) = 100
+      cut(1) = 50
+      }
+    else {
+#      cut(1) = 5000
+#      cut(2) = 1500
+      cut(1) = 250
+#      cut(4) = 100
+      }
+    do ii = 1, ncut {
+_ifdef(TIMER)
+#      call lib$init_timer(handle)
+_enddef
+_ifdef(NODE_INFO)
+      nodes_generated = 0
+      nodes_examined = 0
+      nodes_inserted = 0
+      nodes_replaced = 0
+      cutoff_count = 0
+_enddef
+      call fillc(up_stat,(sc_size+1)*(sc_size+1),UNTOUCHED)
+      sc_old_length(sc_size+1) = 0
+      sc_reverse_video(sc_size+1,sc_old) = false
+      open = null
+      call new_node(0,0,modlin,modlin,0,NONE,null)
+      op = open
+      if (sc_redraw)
+	call remove_min_cost_node(10000) # only generate nodes after clear
+      switch (te_type) {
+	case ADM3A:
+	  call new_node(cs_adm3a_clear(),0,sc_size+1,1,0,CLEAR,op)
+	  call sc_find_a_way_2(cs_adm3a_replace,cs_adm3a_delete(),cut(ii))
+	case ADM5:
+	  call new_node(cs_adm3a_clear(),0,sc_size+1,1,0,CLEAR,op)
+	  call sc_find_a_way_2(cs_adm5_replace,cs_adm3a_delete(),cut(ii))
+	case VT100:
+	  call new_node(cs_vt100_clear(),0,sc_size+1,1,0,CLEAR,op)
+	  call sc_find_a_way(cs_vt100_replace,cs_vt100_delete,cs_vt100_insert,cut(ii))
+	case VT52:
+	  call new_node(cs_vt52_clear(),0,sc_size+1,1,0,CLEAR,op)
+	  call sc_find_a_way_2(cs_vt52_replace,cs_adm3a_delete(),cut(ii))
+	}
+_ifdef(JUNK)
+      call lib$stat_timer(2,itime,handle)
+      if (ii == 1)
+	ncost = up_cost(min_node)
+      if ((! sc_redraw) & ncost > 0 & up_cost(min_node) > 0) {
+	sumcost(ii) = sumcost(ii) + up_cost(min_node)
+	timm(ii) = timm(ii) + itime/100.0
+	nex(ii) = nex(ii) + nodes_examined
+	if (ii == 1)
+	  nup = nup + 1
+	write(11, (i10,f10.4,i10,5f10.4)) cut(ii),
+		  up_cost(min_node)/ncost, 
+		  nodes_examined,
+		  ncost/up_cost(min_node),
+		  itime/100.0,
+		  sumcost(ii)/sumcost(1),
+		  nex(ii)/nup,
+		  timm(ii)/nup
+	}
+_enddef
+      if (sc_redraw | ii == ncut)
+	call update_screen
+      if (sc_redraw)
+	break
+      }
+    sc_redraw = false
+    do i = modlin, sc_size
+      if (sc_modified(i)) {
+	call movc(sc_buffer(0,i,sc_new),sc_buffer(0,i,sc_old),
+      			sc_new_length(i)+1)
+	sc_old_length(i) = sc_new_length(i)
+	sc_modified(i) = false
+	}
+    if (sc_new_length(sc_size) != 0) {		# clear messages
+      sc_modified(sc_size) = true
+      sc_new_length(sc_size) = 0
+      }
+    }
+  call te_pos(sc_cursor_y,sc_cursor_x)
+  if (sc_error_occurred) {
+    call ti_outch(cntrlg,1)
+    sc_error_occurred = false
+    }
+  call ti_flush
+  return
+  end
+
+  subroutine sc_find_a_way(cs_replace,cs_delete,cs_insert,cut)
+  header
+
+_ifdef(DEBUG)
+  write(8,(" new page"))
+_enddef
+  repeat {
+    call remove_min_cost_node(cut)
+    old_new = up_new_pos(min_node)
+    call skip(neq)
+    op = up_old_pos(min_node)
+    np = up_new_pos(min_node)
+    cost = up_cost(min_node)
+    idc = up_insert_delete_count(min_node)
+_ifdef(DEBUG)
+    write(8,(6i8)) op, np, up_operation(min_node), neq, cost
+_enddef
+_ifdef(NODE_INFO)
+    nodes_examined = succ(nodes_examined)
+    cutoff_count = succ(cutoff_count)
+_enddef
+    if (np > sc_size)			# done?
+      break
+    if (up_operation(min_node) > 0 | np != old_new) {
+      call new_node(_
+	    cost + cs_replace(sc_old_length(op),sc_new_length(np),neq),
+	    idc,
+	    succ(op),
+	    succ(np),
+	    neq,
+	    REPLACE,
+	    min_node)
+      if (op < sc_size) {
+	call new_node(_
+	    cost + cs_delete(false, idc),
+	    idc - 1,
+	    succ(op),
+	    np,
+	    0,
+	    DELETE,
+	    min_node)
+	if (np < sc_size) {
+	  call q_cmpc(0,0,sc_buffer(1,np,sc_new),sc_new_length(np),neq)
+	  call new_node(_
+	      cost + cs_insert(sc_new_length(np), neq, false, idc),
+	      idc + 1,
+	      op,
+	      succ(np),
+	      neq,
+	      INSERT,
+	      min_node)
+	  }
+	}
+      }
+    else if (op < sc_size) {
+      if (up_operation(min_node) == DELETE)
+	call new_node(_
+	    cost + cs_delete(true, idc),
+	    idc - 1,
+	    succ(op),
+	    np,
+	    0,
+	    DELETE,
+	    min_node)
+      else if (up_operation(min_node) == INSERT & np < sc_size) {
+	call q_cmpc(0,0,sc_buffer(1,np,sc_new),sc_new_length(np),neq)
+	call new_node(_
+	    cost + cs_insert(sc_new_length(np), neq, true, idc),
+	    idc + 1,
+	    op,
+	    succ(np),
+	    neq,
+	    INSERT,
+	    min_node)
+	}
+      }
+    if (open == null) {
+      write(6,(" Open = null!!!!!!!!!!!!!!!!!!!!!"))
+      }
+    }
+  return
+  end
+
+  subroutine sc_find_a_way_2(cs_replace,cs_delete,cut)
+  header
+
+  repeat {
+    call remove_min_cost_node(cut)
+    if (up_operation(min_node) == NONE)
+      call new_node(cs_delete, 0, 2, 1, 0, DELETE, min_node)
+    else if (up_new_pos(min_node) == 1 & up_old_pos(min_node) < sc_size)
+      call new_node(_
+	    up_cost(min_node) + cs_delete,
+	    0,
+	    succ(up_old_pos(min_node)),
+	    1,
+	    0,
+	    DELETE,
+	    min_node)
+    call skip(neq)
+_ifdef(NODE_INFO)
+    nodes_examined = succ(nodes_examined)
+    cutoff_count = succ(cutoff_count)
+_enddef
+    if (up_new_pos(min_node) > sc_size)			# done?
+      break
+    call new_node(_
+	    up_cost(min_node) + cs_replace(sc_old_length(up_old_pos(min_node)),
+					   sc_new_length(up_new_pos(min_node)),
+					   neq),
+	    0,
+	    succ(up_old_pos(min_node)),
+	    succ(up_new_pos(min_node)),
+	    neq,
+	    REPLACE,
+	    min_node)
+    }
+  return
+  end
+
+  subroutine update_screen
+  header
+
+  up_son(min_node) = null
+  for (i = min_node; up_operation(i) != NONE; i = up_father(i)) {
+    up_son(up_father(i)) = i
+    up_old_pos(i) = up_old_pos(up_father(i))
+    up_new_pos(i) = up_new_pos(up_father(i))
+    }
+_ifdef(DEBUG)
+  j = i
+  write(7,(/" *** new page ***"))
+  for (i = up_son(i); i != null; i = up_son(i)) {
+    switch (up_operation(i)) {
+      case REPLACE:
+	write(7,(' Replace old line 'i2' with new line 'i2'; cost = 'i4)) _
+	  up_old_pos(i),up_new_pos(i),up_cost(i)
+      case DELETE:
+	write(7,(' Delete old line 'i2'; new line is 'i2'; cost = 'i4)) _
+	  up_old_pos(i),up_new_pos(i),up_cost(i)
+      case INSERT:
+	write(7,(' Insert new line 'i2' before old line 'i2'; cost = 'i4)) _
+	  up_new_pos(i),up_old_pos(i),up_cost(i)
+      case CLEAR:
+	write(7,(' Clear screen; cost = 'i4)) up_cost(i)
+      }
+    }
+  i = j
+_enddef
+_ifdef(NODE_INFO1)
+define(writeint,write(9,(' $&:',5i8)) $&)
+  writeint(nodes_generated)
+  writeint(nodes_examined)
+  writeint(nodes_inserted)
+  writeint(nodes_replaced)
+  writeint(nodes_inserted + nodes_replaced)
+_undef(writeint)
+_enddef
+  if (up_son(i) != null)
+    if (up_operation(up_son(i)) == CLEAR) {
+      if (sc_redraw)
+	call te_init_sequence
+      call te_clear
+      call do_replaces(up_son(up_son(i)))
+      }
+    else {
+      call do_deletes(up_son(i))
+      call do_inserts(up_son(i))
+      call do_replaces(up_son(i))
+      }
+  return
+  end
+
+  subroutine do_deletes(node)
+  header
+  integer*2 node
+
+  totdel = 0
+  for (i = node; i != null; )
+    if (up_operation(i) != DELETE)
+      i = up_son(i)
+    else {
+      nd = 1
+      lastd = i
+      for (j = up_son(i); j != null; j = up_son(j))
+	if (up_operation(j) == DELETE & up_new_pos(j) == up_new_pos(i)) {
+	  nd = nd+1
+	  lastd = j
+	  }
+	else
+	  break
+# try and merge insert-delete pairs into a scroll down
+      for (k = up_father(i); k != null & nd > 0; )
+	if (up_operation(k) == INSERT) {
+	  ns = 0
+	  for (m = k; k != null & ns < nd; k = up_father(k))
+	    if (up_operation(k) == INSERT & up_old_pos(k) == up_old_pos(m)) {
+	      ns = ns+1
+	      up_operation(k) = INSERT2
+	      }
+	    else
+	      break
+	  nd = nd-ns
+	  call te_scroll_down_lines(up_old_pos(m)-totdel,
+			    		up_old_pos(lastd)-totdel,ns)
+	  up_old_pos(i) = up_old_pos(i) + ns	# might have been scrolled
+	  }
+	else
+	  k = up_father(k)
+# try and merge delete-insert pairs into a scroll up
+      for (k = j; k != null & nd > 0; )
+	if (up_operation(k) == INSERT) {
+	  ns = 0
+	  for (m = k; k != null & ns < nd; k = up_son(k))
+	    if (up_operation(k) == INSERT & up_old_pos(k) == up_old_pos(m)) {
+	      ns = ns+1
+	      up_operation(k) = INSERT2
+	      }
+	    else
+	      break
+	  nd = nd-ns
+	  call te_scroll_up_lines(up_old_pos(i)-totdel,
+			    		up_old_pos(m)-1-totdel,ns)
+# fix up intervening deletes' delete position
+	  for (m = up_father(m); m != lastd; m = up_father(m))
+	    if (up_operation(m) == DELETE)
+	      up_old_pos(m) = up_old_pos(m)-ns
+	  }
+	else
+	  k = up_son(k)
+      if (nd > 0) {
+	call te_delete_lines(up_old_pos(i)-totdel,nd)
+	totdel = totdel + nd
+	}
+      up_son(up_father(i)) = j	# remove delete nodes from list
+      if (j != null)
+	up_father(j) = up_father(i)
+      i = j
+      }
+  return
+  end
+
+  subroutine do_inserts(node)
+  header
+  integer*2 node
+
+  for (i = node; i != null; )
+    if (up_operation(i) != INSERT)
+      i = up_son(i)
+    else {
+      ni = 1
+      for (j = up_son(i); j != null; j = up_son(j))
+	if (up_operation(j) == INSERT & up_old_pos(j) == up_old_pos(i))
+	  ni = ni+1
+	else
+	  break
+      call te_open_lines(up_new_pos(i),ni)
+      i = j
+      }
+  return
+  end
+
+  subroutine do_replaces(node)
+  header
+  integer*2 node
+  include "terminal.cmn"
+
+  for (i = node; i != null; i = up_son(i)) {
+    n = up_neq(i)
+    np = up_new_pos(i)
+    outlen = sc_new_length(np) - n
+    if (outlen > 0 | up_operation(i) == REPLACE) {
+      call te_pos(np, n + 1)
+      if (outlen > 0) {
+	if (sc_reverse_video(np,sc_new))
+	  call te_reverse_video
+	call ti_outch(sc_buffer(n+1,np,sc_new),outlen)
+	te_pos_x = te_pos_x + outlen
+	if (sc_reverse_video(np,sc_new))
+	  call te_reverse_video_off
+	}
+      if (up_operation(i) == REPLACE)
+	call te_erase_to_end_of_line(sc_old_length(up_old_pos(i)),
+			  max(n, sc_new_length(np)))
+      }
+    }
+  return
+  end

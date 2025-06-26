@@ -1,0 +1,380 @@
+# Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "terminal.cmn")
+
+  subroutine te_initialize
+  header
+
+  call ti_kill
+  switch (te_type) {
+    case VT100:
+      te_size_x = 80
+      te_size_y = 24
+      te_rv = true
+      te_in = true
+      te_application_keypad = false
+    case ADM3A,ADM5,VT52:
+      te_size_x = 80
+      te_size_y = 24
+      te_rv = false
+      te_in = false
+      te_application_keypad = false
+    }
+  te_pos_x = te_size_x + 1			# invalidate cursor position
+  return
+  end
+
+  function q_te_set_type(type)
+  header
+  byte type(ARB)
+
+  if (q_ho_equal(type, "vt100"))
+    te_type = VT100
+  else if (q_ho_equal(type, "adm3a"))
+    te_type = ADM3A
+  else if (q_ho_equal(type, "adm5"))
+    te_type = ADM5
+  else if (q_ho_equal(type, "vt52"))
+    te_type = VT52
+  else
+    return(false)
+  call te_initialize
+  return(true)
+  end
+
+  function q_te_set_width(width)
+  header
+
+  q_te_set_width = false
+  switch (te_type) {
+    case VT100:
+      if (width >= 1)
+	if (width <= 80) {
+	  te_size_x = 80
+	  q_te_set_width = true
+	  }
+	else if (width <= 132) {
+	  te_size_x = 132
+	  q_te_set_width = true
+	  }
+    case ADM3A,ADM5,VT52:
+      if (width >= 1 & width <= 80) {
+	te_size_x = 80
+	q_te_set_width = true
+	}
+    }
+  te_pos_x = te_size_x + 1			# invalidate cursor position
+  return
+  end
+
+  function q_te_set_length(length)
+  header
+
+  q_te_set_length = false
+  switch (te_type) {
+    case VT100:
+      if (length >= 1)
+	if (length <= SCREEN_SIZE) {
+	  te_size_y = max(ti_length, length)	# te_size_y is max screen len
+	  q_te_set_length = true
+	  }
+    case ADM3A,ADM5,VT52:
+      if (length >= 1)
+	if (length <= 24) {
+	  te_size_y = 24
+	  q_te_set_length = true
+	  }
+    }
+  return
+  end
+
+  subroutine te_pos(irow, icol)
+  header
+  define(len_adm_pos,2)
+  define(len_vt100_pos,2)
+  define(len_vt52_pos,2)
+  string adm_pos "@$="
+  string vt100_pos "@$["
+  string vt52_pos "@$Y"
+  string ctrlh "@10@10@10"
+
+  if (te_pos_x >= te_size_x | te_pos_x != icol | te_pos_y != irow) {
+    dif = te_pos_x - icol
+    if (te_pos_x < te_size_x & te_pos_y == irow & dif > 0 & dif < 4)
+      call ti_outch(ctrlh,dif)
+    else {
+      switch (te_type) {
+	case ADM3A,ADM5:
+	  call ti_outch(adm_pos,len_adm_pos)
+	  call ti_outch(irow + 31,1)
+	  call ti_outch(icol + 31,1)
+	case VT52:
+	  call ti_outch(vt52_pos,len_vt52_pos)
+	  call ti_outch(irow + 31,1)
+	  call ti_outch(icol + 31,1)
+	case VT100:
+	  call ti_outch(vt100_pos,len_vt100_pos)
+	  call te_output_number(irow)
+	  call ti_outch(';',1)
+	  call te_output_number(icol)
+	  call ti_outch('H',1)
+	}
+      }
+    te_pos_x = icol
+    te_pos_y = irow
+    }
+  return
+  end
+
+  subroutine te_clear
+  header
+  define(len_adm_clear,3)
+  define(len_vt100_clear,7)
+  define(len_vt52_clear,4)
+  string adm_clear "@$;@32"
+  string vt100_clear "@$[2J@$[H"
+  string vt52_clear "@$H@$J"
+
+  switch (te_type) {
+    case ADM3A,ADM5:
+      call ti_outch(adm_clear,len_adm_clear)
+    case VT100:
+      call ti_outch(vt100_clear,len_vt100_clear)
+    case VT52:
+      call ti_outch(vt52_clear,len_vt52_clear)
+    }
+  te_pos_x = 1
+  te_pos_y = 1
+  return
+  end
+
+  subroutine te_init_sequence
+  header
+  include "screen.cmn"
+  define(len_vt100_init,23)
+  string vt100_init "@$<@$[?6h@$[;r@$>@$[?7l@$[?1l"
+    						# enter ANSI mode,
+						# set origin mode - relative,
+						# set full screen scroll region
+						# key pad - numeric,
+						# no auto wrap,
+						# cursor mode reset
+  define(len_vt100_application,2)
+  string vt100_application "@$="		# key pad - application
+  define(len_vt100_set_80,5)
+  string vt100_set_80 "@$[?3l"			# set terminal width to 80
+  define(len_vt100_set_132,5)
+  string vt100_set_132 "@$[?3h"			# set terminal width to 132
+  define(len_vt52_init,2)
+  string vt52_init "@$>"			# key pad - numeric
+  define(len_vt52_application,2)
+  string vt52_application "@$="			# key pad - application
+
+  switch (te_type) {
+    case VT100:
+      call ti_outch(vt100_init,len_vt100_init)
+      if (te_application_keypad)
+	call ti_outch(vt100_application,len_vt100_application)
+      if (sc_width <= 80 & ti_width > 80)
+	call ti_outch(vt100_set_80,len_vt100_set_80)
+      else if (sc_width > 80 & ti_width <= 80)
+	call ti_outch(vt100_set_132,len_vt100_set_132)
+    case VT52:
+      call ti_outch(vt52_init,len_vt52_init)
+      if (te_application_keypad)
+	call ti_outch(vt52_application,len_vt52_application)
+    }
+  te_pos_x = te_size_x + 1			# invalidate cursor position
+  return
+  end
+
+  subroutine te_finish
+  header
+  include "screen.cmn"
+  define(len_vt100_finish,11)
+  string vt100_finish "@$[?6l@$[;r@$>"		# set origin mode - absolute,
+						# set full screen scroll region
+						# key pad - numeric
+  define(len_vt100_set_80,5)
+  string vt100_set_80 "@$[?3l"			# set terminal width to 80
+  define(len_vt100_set_132,5)
+  string vt100_set_132 "@$[?3h"			# set terminal width to 132
+  define(len_vt52_finish,2)
+  string vt52_finish "@$>"			# key pad - numeric
+
+  switch (te_type) {
+    case VT100:
+      call ti_outch(vt100_finish,len_vt100_finish)
+      if (ti_width <= 80 & sc_width > 80)
+	call ti_outch(vt100_set_80,len_vt100_set_80)
+      else if (ti_width > 80 & sc_width <= 80)
+	call ti_outch(vt100_set_132,len_vt100_set_132)
+    case VT52:
+      call ti_outch(vt52_finish,len_vt52_finish)
+    }
+  te_pos_x = te_size_x + 1			# invalidate cursor position
+  return
+  end
+
+  subroutine te_output_number(n)
+  byte ot(3)
+
+  if (n < 10)
+    call ti_outch(n+'0',1)
+  else if (n < 100) {
+    ot(1) = n/10+'0'
+    ot(2) = mod(n,10)+'0'
+    call ti_outch(ot,2)
+    }
+  else {
+    ot(1) = n/100+'0'
+    ot(2) = mod(n/10,10)+'0'
+    ot(3) = mod(n,10)+'0'
+    call ti_outch(ot,3)
+    }
+  return
+  end
+
+  subroutine te_scroll_up_lines(top,bot,nlines)
+  header
+  define(len_vt100_cursor_to_end,2)
+  string vt100_cursor_to_end "@$["
+  string lfnull "@l@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0@0"
+
+  switch (te_type) {
+    case VT100:
+      call te_set_window(top,bot)
+      call ti_outch(vt100_cursor_to_end,len_vt100_cursor_to_end)
+      call te_output_number(bot-top)
+      call ti_outch("B", 1)
+      do i = 1, nlines
+	call ti_outch(LF,1)
+      call te_set_window(1, 0)
+    case ADM3A,ADM5,VT52:			# can only be scroll screen
+      call te_pos(te_size_y,1)
+      do i = 1, nlines
+	call ti_outch(lfnull, 1 + ti_lffill)
+    }
+  return
+  end
+
+  subroutine te_scroll_down_lines(top,bot,nlines)
+  header
+  define(len_reverse_index,2)
+  string reverse_index "@$M"
+
+  call te_set_window(top,bot)
+  do i = 1, nlines
+    call ti_outch(reverse_index,len_reverse_index)
+  call te_set_window(1, 0)
+  return
+  end
+
+  subroutine te_erase_to_end_of_line(old,new)
+  header
+  byte blanks(80)
+  define(len_adm5_erase_to_eol,2)
+  define(len_vt100_erase_to_eol,3)
+  define(len_vt52_erase_to_eol,2)
+  string adm5_erase_to_eol "@$T"
+  string vt100_erase_to_eol "@$[K"
+  string vt52_erase_to_eol "@$K"
+  data blanks /80 *' '/
+
+  i = min(old,te_size_x) - min(new,te_size_x)
+  switch (te_type) {
+    case VT100:
+      if (i >= len_vt100_erase_to_eol)
+	call ti_outch(vt100_erase_to_eol,len_vt100_erase_to_eol)
+      else if (i > 0) {
+	call ti_outch(blanks,i)
+	te_pos_x = te_pos_x+i
+	}
+    case VT52:
+      if (i >= len_vt52_erase_to_eol)
+	call ti_outch(vt52_erase_to_eol,len_vt52_erase_to_eol)
+      else if (i > 0) {
+	call ti_outch(blanks,i)
+	te_pos_x = te_pos_x+i
+	}
+    case ADM5:
+      if (i >= len_adm5_erase_to_eol)
+	call ti_outch(adm5_erase_to_eol,len_adm5_erase_to_eol)
+      else if (i > 0) {
+	call ti_outch(blanks,i)
+	te_pos_x = te_pos_x+i
+	}
+    case ADM3A:
+      if (i > 0) {
+	call ti_outch(blanks,i)
+	te_pos_x = te_pos_x+i
+	}
+    }
+  return
+  end
+
+  subroutine te_set_window(top,bot)
+  header
+  define(len_set_window,2)
+  string set_window "@$["
+
+  call ti_outch(set_window,len_set_window)
+  if (top > 1)
+    call te_output_number(top)
+  call ti_outch(";", 1)
+  if (bot != 0)
+    call te_output_number(bot)
+  call ti_outch("r", 1)
+  te_pos_x = 1
+  te_pos_y = top
+  return
+  end
+
+  subroutine te_reverse_video
+  header
+  define(len_vt100_reverse_video,4)
+  string vt100_reverse_video "@$[7m"
+
+  switch (te_type) {
+    case VT100:
+      call ti_outch(vt100_reverse_video,len_vt100_reverse_video)
+    }
+  return
+  end
+
+  subroutine te_reverse_video_off
+  header
+  define(len_vt100_reverse_video_off,3)
+  string vt100_reverse_video_off "@$[m"
+
+  switch (te_type) {
+    case VT100:
+      call ti_outch(vt100_reverse_video_off,len_vt100_reverse_video_off)
+    }
+  return
+  end
+
+  subroutine te_printer_on
+  header
+  define(len_vt100_printer_on,4)
+  string vt100_printer_on "@$[5i"
+
+  switch (te_type) {
+    case VT100:
+      call ti_outch(vt100_printer_on,len_vt100_printer_on)
+    }
+  return
+  end
+
+  subroutine te_printer_off
+  header
+  define(len_vt100_printer_off,4)
+  string vt100_printer_off "@$[4i"
+
+  switch (te_type) {
+    case VT100:
+      call ti_outch(vt100_printer_off,len_vt100_printer_off)
+    }
+  return
+  end

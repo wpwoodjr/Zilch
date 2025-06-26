@@ -1,0 +1,79 @@
+#	Zilch Screen Editor, Copyright (c) 1982,1986 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q))
+
+  function cs_adm3a_clear
+  header
+
+  return(3)
+  end
+
+  function cs_adm3a_replace(old,new,neq)
+  header
+
+  return(4 + max(old,new) - neq)
+  end
+
+  function cs_adm3a_delete
+  header
+  include "terminal.cmn"
+
+  return(1 + ti_lffill)
+  end
+
+  function cs_adm5_replace(old,new,neq)
+  header
+
+  return(4 + max(0,new-neq) + max(0,min(2,old-max(neq,new))))
+  end
+
+  function cs_vt100_clear
+  header
+
+  return(7)
+  end
+
+  function cs_vt100_replace(old,new,neq)
+  header
+
+  return(7 + max(0,new-neq) + max(0,min(3,old-max(neq,new))))
+  end
+
+  function cs_vt100_insert(newlen,neq,cheap,idc)
+  header
+  logical cheap
+
+  cs_vt100_insert = newlen - neq
+  if (cs_vt100_insert > 0)
+    cs_vt100_insert = cs_vt100_insert + 7	# because of cursor positioning
+  if (idc < 0)
+    return(cs_vt100_insert)
+  else if (cheap)
+    return(cs_vt100_insert + 5)	# would be 2 if could resolve idc problem
+  else
+    return(cs_vt100_insert + _arith(7,+,2,+,4))
+  end
+
+  function cs_vt100_delete(cheap,idc)
+  header
+  logical cheap
+
+  if (idc > 0)
+    return(0)
+  else if (cheap)
+    return(5)			# would be 1 if could resolve idc problem
+  else
+    return(_arith(7,+,5,+,1,+,4))
+  end
+
+  function cs_vt52_clear
+  header
+
+  return(4)
+  end
+
+  function cs_vt52_replace(old,new,neq)
+  header
+
+  return(4 + max(0,new-neq) + max(0,min(2,old-max(neq,new))))
+  end

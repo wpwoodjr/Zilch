@@ -1,0 +1,82 @@
+.page size 60,75
+.header mixed
+.lm +5
+.rm 75
+.hy
+.autoparagraph
+.center;Z#I#L#C#H##S#C#R#E#E#N##E#D#I#T#O#R
+.center;===================================
+.skip 5
+ Zilch is a screen editor which can display and edit one or more
+files at a time.
+The file(s) being edited are displayed on a terminal and
+the screen is updated as changes are made to the files.
+Zilch has several features which make it a very powerful editor:
+.list
+.le;Multiple files may be displayed and edited at the same time.
+.le;Zilch saves an editing session when it exits so that
+the session can be continued at a later date.
+.le;Zilch checkpoints an editing session after every 400 commands
+in case of a system crash.
+.le;A macro may be defined to execute repetitive sequences of keystrokes.
+.le;Special programming language specific character mappings may be
+used to abbreviate commonly typed words and do automatic indentation.
+.le;Zilch can spawn a subprocess to enter DCL and can redirect
+the output of DCL commands to an internal buffer.
+.end list
+
+ Zilch is descended from several editors.
+Character mappings were first implemented by Bob Stodola
+on a Hewlett-Packard computer at ICR.
+Many of the commands emulate the commands of Bill Cael's Teco
+screen editor at ICR.
+Many other ideas, such as editing and windowing multiple files, come from the
+EMACS editor.
+
+ Zilch works on VT100, VT52, ADM3A, and ADM5 terminals.
+By  default
+Zilch  assumes  the  terminal is a VT52 if the system terminal type
+(as displayed by the SHOW TERMINAL command) is VT52.  Otherwise  if
+the  terminal  has the DECCRT characteristic Zilch assumes that the
+terminal is a VT100 compatible terminal.  Otherwise  Zilch  assumes
+the  terminal  is  an  ADM3A.
+To use an ADM5, /TERM=ADM5 should be specified on Zilch's command line,
+for example:
+.skip 
+.indent 5
+$ zilch/term=adm5 file.dat
+.skip 
+
+ Complete documentation is in ZILCH.DOC.
+Typing ZCAI INTRO invokes an interactive beginner's tutorial on using Zilch.
+Typing ZCAI ADVANCED invokes an advanced tutorial on using Zilch.
+Documentation for the tutorials is in ZCAI.DOC.
+A VMS help file is in ZILCH.HLP.
+
+ The file POCKET.LIS may be printed, scotch taped together, and reduced to
+produce a 14 by 6.75 inch pocket reference guide. When folded in half twice,
+the pocket reference is 8 pages long (4 on the front, 4 on the back)
+and is 3.5 by 6.75 inches big.
+The first four pages of POCKET.LIS should appear from left to right on the
+front of the reference, while the last 4 should go from left to right
+on the back page.
+
+ Zilch has several files which it reads in response to commands.
+They are the mapping character files and the help file.
+They are included on the ICR root directory.
+The names of these files must be specified on Zilch's command line.
+Please see the LOGIN.COM file in the ICR root directory to see
+an example of setting up the symbol definition for Zilch properly.
+
+.test page 10
+.skip 2
+Please address comments, bugs, and suggestions to:
+.skip 2
+.left margin +5
+.literal
+William P. Wood, Jr.
+Institute For Cancer Research
+7701 Burholme Ave.
+Philadelphia, Pa. 19111
+(215) 728-2760
+.end literal
