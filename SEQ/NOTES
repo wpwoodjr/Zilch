@@ -1,0 +1,34 @@
+wi_status - needs work
+mp_reread etc still needs work.
+should mp_read_file change mapping type?
+	its disconcerting, eg wvAAV2.SEQwrBUFFER.RAT reads, changes mapping
+	also, what todo when wmSEQ fails? reread under old map, keep dot/bow
+		could not delete text buffer till SEQ read successful
+		or save old dot,bow in bu_dot, bu_bow
+in q_mp_reread, should i use bu, or bu_parent(bu)?
+wmSEQ seems to work ok when file is not in SEQ format, except BOW and DOT
+	are lost.  maybe need a reread func which saves dot&bunny for text files
+have to STOP in q_fi_read_Seq_file when gap size too small?
+	actually, maybe FILEIO should stop! overwrites past end of buffer?!!!
+check uses of bu_map_sub_buffers and bu_parent
+check uses of wi_map_sub_buffers and wi_parent
+$ x aav2.seq
+wh
+wmtext
+wmseq
+
+no work - infloop
+$ x aav2.seq aav2    no work - infloop
+wi_switch_to_buffer should re-use old windows so that wi_min_size is constant
+write bu_delete_sub_buffer correctly
+q_mp_read_file in fi_read_named_file could screw up the buffer
+may need bu_delete to delete bu_seq buffer
+need to check mp_reread when bu_size = 0
+modified after change mapping to seq! must be insert_x in seq_read.????
+WW writes wrong buffer name into seq file
+need write_file for FI and SEQ?
+will need special code for WI probably
+>bu_modified = 2 ok in bu_new?
+>what about visiting buffers that have .seq extensions.  attempt is made
+	to read them?
+>if fail to re-read, should re-re-read with old bu_type

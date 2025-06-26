@@ -1,0 +1,723 @@
+# Zilch Screen Editor, Copyright (c) 1982,1986,1987 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "spfiles.cmn"
+  include "memory.cmn"
+  include "mappings.cmn"
+  include "session.cmn")
+
+  subroutine mp_get_mapping
+  header
+  byte get_tty_character
+  string search "@l "
+
+  bu = se_current_buffer
+  search(2) = get_tty_character()
+  switch (search(2)) {
+    case RUBOUT:
+      call mp_cancel
+    case '[':
+      call mp_get_block
+    default:
+      if (bu_mappings(bu) == null)
+	bu_mappings(bu) = mp_mappings(bu_type(bu))
+      maping = bu_mappings(bu)
+      if (maping != null) {
+	if (q_sr_buffer_search_forward(maping,search,2,1,
+      					bu_size(maping),loc)) {
+	  mp_mark = wi_dot(se_current_window)
+	  mp_save_indent = bu_indent(bu)
+	  call mp_push_character(END_OF_MAPPING)
+	  call mp_push_region(maping,loc+2,find_eol(maping,loc+2))
+	  if (search(2) == '{') {		# comment mapping
+	    switch (bu_type(bu)) {
+	      case FORTRAN,RATFIV:
+		col = 49
+	      default:
+		col = 41
+	      }
+	    if (current_column() >= col)
+	      call insert_character(' ')
+	    else
+	      call tab_to_column(col)
+	    }
+	  call mp_pop
+	  }
+	else
+	  call insert_character(search(2))
+	}
+      else
+	call insert_character(search(2))
+    }
+  return
+  end
+
+  function mp_mappings(typ)
+  header
+
+  switch (typ) {
+    case FORTRAN:
+      mp_mappings = sp_read_buffer("formap", sp_formap,
+				    "Can't read Fortran mapping file!")
+    case RATFIV:
+      mp_mappings = sp_read_buffer("ratmap", sp_ratmap,
+				    "Can't read Ratfiv mapping file!")
+    case PASCAL:
+      mp_mappings = sp_read_buffer("pasmap", sp_pasmap,
+				    "Can't read Pascal mapping file!")
+    case C:
+      mp_mappings = sp_read_buffer("cmap", sp_cmap,
+				    "Can't read C mapping file!")
+    case TEXT:
+      mp_mappings = sp_read_buffer("textmap", sp_textmap,
+				    "Can't read Text mapping file!")
+    default:
+      mp_mappings = null
+    }
+  return
+  end
+
+  subroutine mp_pop
+  header
+  byte c,ho_cupper
+
+  bu = se_current_buffer
+  call mp_nextc(c)
+  if (c == INDENT_FOLLOWS) {
+    call mp_nextc(c)
+    call set_indent(c & 8%377)
+    call mp_nextc(c)
+    }
+  while (c != END_OF_MAPPING & c != 8%33) {
+    if (c == TAB)
+      if (current_column() <= bu_indent(bu))
+	call tab_to_column(bu_indent(bu))
+      else
+	call insert_character(' ')
+    else if (c == CR)
+      call in_carriage_return
+    else if (c == '\') {
+      call mp_nextc(c)
+      if (c == END_OF_MAPPING)
+	break
+      call insert_character(c)
+      }
+    else if (c == MP_PROMPT) {
+      st = st_allocate(MAX_PROMPT)
+      for ([i = 0; call mp_nextc(c)]; c != END_OF_MAPPING & c != MP_PROMPT;
+						call mp_nextc(c))
+	if (i < MAX_PROMPT) {
+	  st_buffer(st+i) = c
+	  i = i + 1
+	  }
+      call ms_message3(EOS, st, i, i+1)
+      call st_deallocate(st)
+      }
+    else if (bu_case(bu) == 1)
+      if (bu_type(bu) == RATFIV & (c == '{' | c == '}'))
+	call insert_character(c - 8%40)
+      else
+	call insert_character(ho_cupper(c))
+    else
+      call insert_character(c)
+    call mp_nextc(c)
+    }
+  if (c == 8%33) {
+    call mp_nextc(c)
+    if (c == '+')
+      call in_increase_indent
+    else if (c == '-')
+      call in_decrease_indent
+    call mp_nextc(c)
+    if (c == '+')
+      call set_indent(bu_indent(bu) + se_indent)
+    else if (c == '-')
+      call set_indent(bu_indent(bu) - se_indent)
+    call mp_nextc(c)
+    if (c != END_OF_MAPPING) {
+      call mp_push_character(c)
+      call mp_push_character(bu_indent(bu))
+      call mp_push_character(INDENT_FOLLOWS)
+      }
+    }
+  if (c == END_OF_MAPPING)
+    if (mp_mark <= 0)
+      mp_mark = 0
+    else
+      mp_mark = -mp_mark
+  return
+  end
+
+  subroutine mp_set_mappings(bu,type)
+  header
+  string ftype "1234"
+
+  typ = type
+  if (typ == 0) {
+    i = ho_indexq(st_buffer(bu_name(bu)), '.')
+    if (i == 0)
+      ftype(1) = EOS
+    else
+      do j = 1, 4 {
+	ftype(j) = st_buffer(bu_name(bu)+i+j-2)
+	if (ftype(j) == EOS)
+	  break
+	else if (ftype(j) == ';' | ftype(j) == '<') {
+	  ftype(j) = EOS
+	  break
+	  }
+	}
+    if (q_ho_equal(ftype, ".for") | q_ho_equal(ftype, ".ftn"))
+      typ = FORTRAN
+    else if (q_ho_equal(ftype, ".rat"))
+      typ = RATFIV
+    else if (q_ho_equal(ftype, ".pas"))
+      typ = PASCAL
+    else if (q_ho_equal(ftype, ".c"))
+      typ = C
+    else if (q_ho_equal(ftype, ".seq") | q_ho_equal(ftype, ".pep"))
+      typ = SEQ
+    else
+      typ = TEXT
+    }
+  if (bu_type(bu) != typ & (typ == SEQ | bu_type(bu) == SEQ)) {	# re-read file
+    if (! q_mp_reread_buffer(bu, typ)) {
+      call ms_error("Can't switch mapping type!")
+      return
+      }
+    }
+  else
+    bu_type(bu) = typ
+  switch (typ) {
+    case FORTRAN, C:
+      bu_indent(bu) = 9
+    default:
+      bu_indent(bu) = 1
+    }
+  bu_mappings(bu) = null
+  return
+  end
+
+# This routine re-reads a file or buffer with a new mapping type in effect.
+# Sometimes it must first checkpoint the file, then re-read it.
+  function q_mp_reread_buffer(bu, typ)
+  header
+
+  otyp = bu_type(bu)
+  if (bu_modified(bu) == 2)
+    bu_type(bu) = typ
+  else if (bu_size(bu) == 0) {
+    call mp_setup_buffers_and_windows(bu, typ)
+    bu_type(bu) = typ
+    }
+  else if (bu_modified(bu) == 0) {
+    bu_type(bu) = typ
+    if (bu_file_name(bu) != null)
+      if (! q_mp_read_file(bu,st_buffer(bu_file_name(bu)),0,true))
+	bu_type(bu) = otyp
+    }
+  else if (mod(bu_modified(bu),2) == 1) { # write, then re-read checkpoint file
+    if (q_ch_buffer(bu)) {
+      bu_type(bu) = typ
+      if (! q_ch_recover(bu))
+	bu_type(bu) = otyp
+      if (bu_file_name(bu) == null)	# delete non-file-buffer checkpoints
+	call ch_delete(bu)
+      }
+    }
+  return(bu_type(bu) == typ)
+  end
+
+  function mp_minimum_indent(bu)
+  header
+
+  switch (bu_type(bu)) {
+    case FORTRAN:
+      mp_minimum_indent = 7
+    default:
+      mp_minimum_indent = 1
+    }
+  return
+  end
+
+  subroutine mp_change_mappings
+  header
+
+  typ = 0
+  st = st_allocate(MAX_PROMPT)
+  if (q_pr_read_prompt("Mapping type (Pascal, Fortran, Ratfiv, C, Text, Seq)? ",
+			st,len)) {
+    if (q_ho_equal(st_buffer(st),"fortran"))
+      typ = FORTRAN
+    else if (q_ho_equal(st_buffer(st),"pascal"))
+      typ = PASCAL
+    else if (q_ho_equal(st_buffer(st),"ratfiv"))
+      typ = RATFIV
+    else if (q_ho_equal(st_buffer(st),"c"))
+      typ = C
+    else if (q_ho_equal(st_buffer(st),"text"))
+      typ = TEXT
+    else if (q_ho_equal(st_buffer(st),"seq"))
+      typ = SEQ
+    else {
+      call ms_message2("Illegal mapping type: ",st)
+      call ms_error(EOS)
+      }
+    if (typ != 0) {
+      call mp_set_mappings(se_current_buffer,typ)
+      call ms_message2("Mapping type is now ",st)
+      }
+    }
+  call st_deallocate(st)
+  return
+  end
+
+  subroutine mp_cancel
+  header
+  byte c
+
+  if (mp_mark == 0)
+    call ms_error("Can't cancel mapping!")
+  else {
+    if (mp_mark > 0)
+      for (call mp_nextc(c); c != END_OF_MAPPING; call mp_nextc(c))
+	;
+    else
+      mp_mark = -mp_mark
+    if (wi_dot(se_current_window) > mp_mark)
+      call delete_region(wi_dot(se_current_window),mp_mark)
+    mp_mark = 0
+    call set_indent(mp_save_indent)
+    }
+  return
+  end
+
+  subroutine mp_initialize
+  header
+
+  if (mp_stack == null) {
+    mp_stack = bu_find_by_name("mapping stack")
+    if (mp_stack == null)
+      mp_stack = bu_new("mapping stack",EOS)
+    }
+  mp_mark = 0
+  return
+  end
+
+  function q_mp_empty
+  header
+
+  return(bu_size(mp_stack) == 0)
+  end
+
+  subroutine mp_get_block
+  header
+
+  switch (bu_type(se_current_buffer)) {
+    case RATFIV,C:
+      call mp_ratfiv_block
+    case PASCAL:
+      call mp_pascal_block
+    default:
+      call ms_error(EOS)
+    }
+  return
+  end
+
+  subroutine mp_ratfiv_block
+  header
+  string s "@t{@$00@t}@$0-"
+
+  mp_mark = wi_dot(se_current_window)
+  mp_save_indent = bu_indent(se_current_buffer)
+  call mp_push_character(END_OF_MAPPING)
+  call mp_push_string(s)
+  call mp_pop
+  return
+  end
+
+  subroutine mp_pascal_block
+  header
+  string s1 "@tbegin@$00@tend (* ", s2 " *);@$0-"
+  string s3 "@tbegin@$0+@tend;@$-0"
+
+  mp_mark = wi_dot(se_current_window)
+  mp_save_indent = bu_indent(se_current_buffer)
+  call mp_push_character(END_OF_MAPPING)
+  if (q_mp_get_first_word(wb,we)) {
+    call mp_push_string(s2)
+    call mp_push_region(se_current_buffer,wb,we)
+    call mp_push_string(s1)
+    }
+  else
+    call mp_push_string(s3)
+  call mp_pop
+  return
+  end
+
+  function q_mp_get_first_word(wb,we)
+  header
+
+  dot = wi_dot(se_current_window)
+  end = bu_size(se_current_buffer) + 1
+  call beginning_of_line
+  call wo_skip_non_word(end,1,false,1)
+  wb = wi_dot(se_current_window)
+  call wo_skip_word(end,1,1)
+  we = wi_dot(se_current_window)
+  wi_dot(se_current_window) = dot
+  return(wb != we)
+  end
+
+  subroutine mp_next_procedure
+  header
+  logical found
+
+  call beginning_of_line
+  while (wi_dot(se_current_window) > 1) {
+    call advance_over_white_space
+    if (! q_eol())
+      break
+    call previous_line
+    }
+  switch (bu_type(se_current_buffer)) {
+    case RATFIV,FORTRAN:
+      found = q_mp_next_fortran_procedure()
+    case PASCAL:
+      found = q_mp_next_pascal_procedure()
+    case C:
+      found = q_mp_next_c_procedure()
+    default:
+      found = q_mp_next_paragraph()
+    }
+  if (found) {
+    while (wi_dot(se_current_window) <= bu_size(se_current_buffer) & q_eol()) {
+      wi_dot(se_current_window) = wi_dot(se_current_window) + 1
+      call advance_over_white_space
+      }
+    call beginning_of_line
+    }
+  else
+    call end_of_file
+  call line_to_top_of_window
+  return
+  end
+
+  subroutine mp_previous_procedure
+  header
+  logical found
+
+  dot = wi_dot(se_current_window)
+  n = 1
+  repeat {
+    do i = 1, n
+      switch (bu_type(se_current_buffer)) {
+	case RATFIV,FORTRAN:
+	  found = q_mp_previous_fortran_procedure()
+	case PASCAL:
+	  found = q_mp_previous_pascal_procedure()
+	case C:
+	  found = q_mp_previous_c_procedure()
+	default:
+	  found = q_mp_previous_paragraph()
+	}
+    if (found)
+      call mp_next_procedure
+    else
+      call beginning_of_file
+    n = n + 1
+    } until (wi_dot(se_current_window) == 1 | wi_dot(se_current_window) < dot)
+  return
+  end
+
+  function q_mp_next_pascal_procedure
+  header
+
+  call beginning_of_line
+  if (q_sr_buffer_search_forward(se_current_buffer,"(**",3,
+  				wi_dot(se_current_window),
+  				bu_size(se_current_buffer),
+  				wi_dot(se_current_window))) {
+    call end_of_line
+    return(true)
+    }
+  return(false)
+  end
+
+  function q_mp_previous_pascal_procedure
+  header
+
+  call beginning_of_line
+  if (q_sr_buffer_search_reverse(se_current_buffer,"(**",3,
+				1,
+  				wi_dot(se_current_window),
+  				wi_dot(se_current_window)))
+    return(true)
+  return(false)
+  end
+
+  function q_mp_next_fortran_procedure
+  header
+
+  call beginning_of_line
+  while (q_sr_buffer_search_forward(se_current_buffer,"end",3,
+  				wi_dot(se_current_window),
+  				bu_size(se_current_buffer),
+  				wi_dot(se_current_window))) {
+    if (q_mp_is_fortran_eop()) {
+      call end_of_line
+      return(true)
+      }
+    else
+      call next_line
+    }
+  return(false)
+  end
+
+  function q_mp_previous_fortran_procedure
+  header
+
+  call beginning_of_line
+  while (q_sr_buffer_search_reverse(se_current_buffer,"end",3,
+				1,
+  				wi_dot(se_current_window),
+  				wi_dot(se_current_window))) {
+    if (q_mp_is_fortran_eop())
+      return(true)
+    else
+      call beginning_of_line
+    }
+  return(false)
+  end
+
+  function q_mp_is_fortran_eop
+  header
+
+  loc = wi_dot(se_current_window)
+  call mp_beginning_of_line
+  if (loc == wi_dot(se_current_window)) {
+    wi_dot(se_current_window) = wi_dot(se_current_window) + 3
+    call advance_over_white_space
+    if (q_eol())
+      return(true)
+    else if (q_mp_at_comment())
+      return(true)
+    }
+  return(false)
+  end
+
+  function q_mp_next_c_procedure
+  header
+  string eop "@n}"
+
+  eop(1) = NEWLINE
+  call beginning_of_line
+  if (q_sr_buffer_search_forward(se_current_buffer,eop,2,
+  				wi_dot(se_current_window),
+  				bu_size(se_current_buffer),
+  				wi_dot(se_current_window))) {
+    wi_dot(se_current_window) = wi_dot(se_current_window) + 2
+    call end_of_line
+    return(true)
+    }
+  return(false)
+  end
+
+  function q_mp_previous_c_procedure
+  header
+  string eop "@n}"
+
+  eop(1) = NEWLINE
+  call beginning_of_line
+  if (q_sr_buffer_search_reverse(se_current_buffer,eop,2,
+				1,
+  				wi_dot(se_current_window),
+  				wi_dot(se_current_window)))
+    return(true)
+  return(false)
+  end
+
+  function q_mp_next_paragraph
+  header
+
+  call beginning_of_line
+  repeat {
+    call advance_over_white_space
+    if (q_eol())
+      return(true)
+    call next_line
+    }
+  end
+
+  function q_mp_previous_paragraph
+  header
+
+  call beginning_of_line
+  while (wi_dot(se_current_window) > 1) {
+    call advance_over_white_space
+    if (q_eol()) {
+      repeat {
+	call previous_line
+	call advance_over_white_space
+	} until ((! q_eol()) | wi_dot(se_current_window) == 1)
+      return(true)
+      }
+    call previous_line
+    }
+  return(false)
+  end
+
+  function q_mp_at_comment
+  header
+  byte c, c2, ho_clower
+
+  q_mp_at_comment = false
+  tx = wi_dot(se_current_window)
+  bu = se_current_buffer
+  if (tx <= bu_size(bu)) {
+    c = tx_text(tx_address(bu,tx))
+    switch (bu_type(bu)) {
+      case FORTRAN:
+	cc = current_column()
+	if (cc > 72 | c == '!' | (cc == 1 & (ho_clower(c) == 'c' | c == '*')))
+	  q_mp_at_comment = true
+      case RATFIV:
+	if (c == '#')
+	  q_mp_at_comment = true
+      case PASCAL:
+	if (c == '{' | c == '}')
+	  q_mp_at_comment = true
+	else if (tx + 1 <= bu_size(bu)) {
+	  c2 = tx_text(tx_address(bu,tx+1))
+	  if ((c == '(' & c2 == '*') | (c == '*' & c2 == ')'))
+	    q_mp_at_comment = true
+	  }
+      case C:
+	if (tx + 1 <= bu_size(bu)) {
+	  c2 = tx_text(tx_address(bu,tx+1))
+	  if ((c == '/' & c2 == '*') |
+	      (c == '*' & (c2 == '/' | c2 == ' ' | c2 == TAB | c2 == NEWLINE)) |
+	      (c == '/' & c2 == '/'))		# for C++
+	    q_mp_at_comment = true
+	  }
+      case TEXT:
+	if (c == '!')
+	  q_mp_at_comment = true
+      }
+    }
+  return
+  end
+
+  subroutine mp_beginning_of_line
+  header
+  byte c
+
+  call beginning_of_line
+  bu = se_current_buffer
+  tx = wi_dot(se_current_window)
+  switch (bu_type(bu)) {
+    case FORTRAN:
+      if (! q_mp_at_comment()) {
+	call goto_column(6)
+	tx = wi_dot(se_current_window)
+	if (tx <= bu_size(bu)) {
+	  c = tx_text(tx_address(bu,tx))
+	  if (c != ' ' & c != TAB & c != NEWLINE & current_column() == 6)
+	    tx = tx+1
+	  else {
+	    call advance_over_white_space
+	    tx = wi_dot(se_current_window)
+	    if (current_column() == 9 & tx <= bu_size(bu)) {
+	      c = tx_text(tx_address(bu,tx))
+	      if (c >= '1' & c <= '9')
+		tx = tx + 1
+	      }
+	    }
+	  }
+	}
+    case RATFIV:
+      for ( ; tx <= bu_size(bu); tx = tx+1) {
+	c = tx_text(tx_address(bu,tx))
+	if (c < '0' | c > '9')
+	  break
+	}
+    case TEXT:
+      if (tx <= bu_size(bu))
+	if (tx_text(tx_address(bu,tx)) == '$')		# for DCL command files
+	  tx = tx+1
+    }
+  wi_dot(se_current_window) = tx
+  call advance_over_white_space
+  return
+  end
+
+# read a file with appropriate mapping.  return false if ANYTHING goes wrong,
+# even if file is successfully read in, for instance with a different mapping.
+  function q_mp_read_file(bu,name,dot,setpro)
+  header
+  byte name(ARB)
+  logical setpro
+
+  if (dot != 0)				# Insert file into middle of buffer
+    return(q_fi_read_file(bu, name, dot, setpro))
+  if (bu_type(bu) == SEQ) {
+    call mp_setup_buffers_and_windows(bu, SEQ)
+    if (q_fi_read_seq_file(bu_parent(bu), name, setpro, stat))
+      return(true)
+    if (stat != FI_OPEN_ERROR) {
+      bu_type(bu) = TEXT
+      call mp_setup_buffers_and_windows(bu, TEXT)
+      call q_fi_read_file(bu, name, dot, setpro)
+      }
+    return(false)
+    }
+  else {
+    call mp_setup_buffers_and_windows(bu, bu_type(bu))
+    return(q_fi_read_file(bu, name, dot, setpro))
+    }
+  end
+
+  function q_mp_write_file(bu,name,type,stat)
+  header
+  byte name(ARB),type
+
+  if (bu_type(bu) == SEQ)
+    q_mp_write_file = q_fi_write_seq_file(bu,name,type,stat)
+  else
+    q_mp_write_file = q_fi_write_region(bu,name,1,bu_size(bu),type,stat)
+  if (q_mp_write_file) {
+    bu_modified(bu) = 0
+    call ms_message("Wrote ")
+    call ms_add_to_message(name)
+    if (type == 'N')		# NEW file - not writing checkpoint file
+      call ch_delete(bu)
+    }
+  return
+  end
+
+  subroutine mp_setup_buffers_and_windows(buf, typ)
+  header
+
+  bu = bu_parent(buf)
+  if (typ == SEQ) {
+    if (bu_sub_buffers(bu) == null) {
+      bu_sub_buffers(bu) = bu_new_sub_buffer(bu, 1)
+      bu_sub_buffers(bu_sub_buffers(bu)) = bu_new_sub_buffer(bu, 2)
+      for (wi = bu_windows(bu); wi != null; ) {
+	wi2 = wi_next_bu_window(wi)
+	call wi_switch_to_buffer(wi, bu)
+	wi = wi2
+	}
+      }
+    }
+  else {
+    bu_sub_buffers(bu) = null			# fix later
+    bu_current(bu) = 1
+#    pa_map(se_pages, pa)
+#      wi_map(pa_windows(pa), wi)
+#	if (wi_buffer(wi) == bu) {
+#	  break 2
+#	  }
+    }
+  return
+  end

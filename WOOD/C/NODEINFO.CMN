@@ -1,0 +1,5 @@
+static int
+	nodes_generated,
+	nodes_examined,
+	nodes_inserted,
+	nodes_replaced;

@@ -1,0 +1,1 @@
+_macro(sc_buffer,`sc_buffer`[$3][$2-1][$1])

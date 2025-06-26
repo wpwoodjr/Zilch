@@ -1,0 +1,54 @@
+  # Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986,1987 William P. Wood, Jr.
+  # This file is %included by KEY.BND
+  # It contains the second part of the standard Zilch bindings
+
+	end_function_definition	#MAKEBIND isn't smart enough to put this at end
+
+  # Begin final code
+	}
+      }
+  10
+    call st_deallocate(st)
+    return
+    end
+
+    subroutine ky_repeat_count(count,cmd)
+    header
+
+    if (pu_last_key_struck >= '0' && pu_last_key_struck <= '9')
+      call pu_push_back_character(pu_last_key_struck)
+    if (q_get_tty_number(n,"Repeat count: ")) {
+      count = n + 1
+      cmd = bi_get_command()
+      }
+    return
+    end
+
+    subroutine ky_macro(num)
+    header
+
+    if (num < 0 || num >= NUM_MACROS)
+      goto 10
+    else if (bind.macros[num] == null) {
+  10  call ms_report_number("Undefined macro: ", num, EOS)
+      call ms_error(EOS)
+      }
+    else {
+      mlen = bi_mem(bind.macros[num])
+      call pu_push_back_buf(bi_mem(bind.macros[num] + 1), mlen)
+      }
+    return
+    end
+
+    subroutine ky_bind_keys
+    header
+    include "terminal.cmn"
+
+    if (bind.keypad == KEYPAD_APPLICATION)
+      te_application_keypad = true
+    else
+      te_application_keypad = false
+    return
+    end
+
+  # End final code

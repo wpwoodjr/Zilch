@@ -1,0 +1,50 @@
+_repdef(bu_parent,me_mem($1))		# parent buffer of this buffer
+_repdef(bu_next,me_mem(1+bu_parent($1)))# next buffer in list
+_repdef(bu_name,me_mem(2+bu_parent($1)))# pointer to buffer name
+_repdef(bu_file_name,
+	  me_mem(3+bu_parent($1)))	# pointer to buffer file name
+_repdef(bu_modified,
+	  me_mem(4+bu_parent($1)))	# modified flag:
+					#  if even, buffer not modified
+					#    if 0, not modified
+					#    if 2, file not read yet
+					#  if odd, buffer was modified
+					#    if 1, modified
+					#    if 3, has valid checkpoint file
+_repdef(bu_type,me_mem(5+bu_parent($1)))# mapping type of buffer
+_repdef(bu_mappings,
+	  me_mem(6+bu_parent($1)))	# pointer to mappings buffer
+_repdef(bu_protection,
+	  me_mem(7+bu_parent($1)))	# file protection code
+_repdef(bu_indent,
+	  me_mem(8+bu_parent($1)))	# current indent in buffer
+_repdef(bu_case,me_mem(9+bu_parent($1)))# 1 - upper case; 0 - upper/lower
+_repdef(bu_windows,me_mem(10+$1))	# list of windows onto the buffer
+_repdef(bu_size,me_mem(11+$1))		# size in chars of text buffer
+_repdef(bu_base,me_mem(12+$1))		# address-1 of text buffer
+_repdef(bu_gap,me_mem(13+$1))		# address of gap in text buffer
+_repdef(bu_gap_size,me_mem(14+$1))	# size of gap
+_repdef(bu_dot,me_mem(15+$1))		# hold cursor pos when text not visible
+_repdef(bu_bow,me_mem(16+$1))		# hold beg of window when text not vis
+_repdef(bu_save_dot_ptr,me_mem(17+$1))	# cursor position at last position save
+_repdef(bu_save_dot,mk_mark(bu_save_dot_ptr($1)))
+_repdef(bu_save_bow_ptr,me_mem(18+$1))	# beg. of window at last position save
+_repdef(bu_save_bow,mk_mark(bu_save_bow_ptr($1)))
+_repdef(bu_mark1_ptr,me_mem(19+$1))	# text mark 1
+_repdef(bu_mark1,mk_mark(bu_mark1_ptr($1)))
+_repdef(bu_mark2_ptr,me_mem(20+$1))	# text mark 2
+_repdef(bu_mark2,mk_mark(bu_mark2_ptr($1)))
+_repdef(bu_markers,me_mem(21+$1))	# list of text markers
+_repdef(bu_id,me_mem(22+$1))		# id of buffer
+_repdef(bu_current,me_mem(23+$1))	# tells which sub-buf was last current
+_repdef(bu_sub_buffers,me_mem(24+$1))	# list of sub-buffers - sub-buffers do
+					# not appear in the list of session 
+					# buffers
+_repdef(bu_sizeof,25)
+
+_repdef(bu_map,
+	  for ($2 = $1; $2 != null; $2 = bu_next($2)))
+_repdef(bu_map_windows,
+	  for ($2 = bu_windows($1); $2 != null; $2 = wi_next_bu_window($2)))
+_repdef(bu_map_sub_buffers,
+	  for ($2 = bu_parent($1); $2 != null; $2 = bu_sub_buffers($2)))

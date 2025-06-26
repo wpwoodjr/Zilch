@@ -1,0 +1,7 @@
+$ take_files == ""
+$ take_files == take_files + "[.SEQ]MAPPINGS,"
+$ take_files == take_files + "[.SEQ]SCREEN,"
+$ take_files == take_files + "[.SEQ]GENLIB,"
+$ take_files == take_files + "[.SEQ]MAPSEQ,"
+$ take_files == take_files + "[.SEQ]BUFFER,"
+$ take_files == take_files + "[.SEQ]WINDOW,"

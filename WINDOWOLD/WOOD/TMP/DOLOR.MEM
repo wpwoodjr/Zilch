@@ -1,37 +1,0 @@
-
-
-                                                                  
-
-
-Maximizing     over     all     three     unknowns,     we    find
-
-      ^ ^  ^                                                      ~
-log L( ,  ,  ) = -82.94.  If X is fixed and just      and      are\1      a b  b                                      b        b      \0~
-         1  2                                      1        2     
-
-                                                  ^  ^            ~
-allowed     to     vary,    we    find    log L(0,  ,  ) = -83.14.\1                                                  b  b            \0~
-                                                   1  2           
-
-        ^  ^            ~
-log L(1,  ,  ) = -85.45.\1        b  b            \0~
-         1  2           
-
-
-
-
-
-      ^ \1~
-      b \0~
-^      2     ___~
-   =    \1b       \0~
- 1    ^ \1~
-      b \0~
-       3
-
-
-
-   ^  ^  ^ ~
-a^,  ,  ,  \1   b  b  b \0~
-    1  2  3
-

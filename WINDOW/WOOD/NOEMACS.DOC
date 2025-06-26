@@ -1,9 +1,0 @@
-newline_and_indent to current indent on current line
-beginning_of_line
-end_of_line
-write_current_file_exit
-kill_to_end_of_line
-search_again_reverse
-search_again_forward
-transpose_characters
-append to kill buffer unless

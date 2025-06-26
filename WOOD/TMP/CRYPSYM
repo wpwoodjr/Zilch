@@ -1,0 +1,7 @@
+ # definitions for crypt tool
+ # put on a file called 'crypsym'
+ # Used only by crypt
+ 
+ define(MAXKEY,MAXLINE)
+ define(putc,putch(%&,STDOUT))
+ define(getc,getch _ifelse(%&,,,(%&,STDIN)))

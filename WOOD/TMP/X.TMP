@@ -1,0 +1,587 @@
+.rm 80
+.ls 2
+
+
+
+INTRODUCTION
+.he ///Page #
+
+
+.ne 2
+.ti +5
+The C-glycosyl thiazole tiazofurin (2-\1b\0-D-ribofuranosylthiazole
+ -4-carboxamide; 
+NSC286193 (1))
+has demonstrated significant antitumor activity in several in vivo model
+tumor systems. In the mouse leukemias P388 and L1210,it prolongs mean survival
+time (T/C) by 245% and 230% respectively ~2`.  Further, the drug is essentially
+curative for the Lewis lung carcinoma in mice over a broad dosage range ~3`.
+Tiazofuriu has also demonstrated in vitro antiviral activity (1).
+In comparison, both the corresponding  2'deoxynucleoside 
+(2-(2-deoxy-\1b\0-D-erythro-pentofuronosyl) thiazole-4-carboxamide;II) and
+the alpha-anomer (2-\1a\0-D-ribofuranosylthiozole-4-carboxamide;III)
+are inactive ~4`.
+In order to investigate the structural requirements for drug activity, we have
+completed single crystal X-ray diffraction studies of all three compounds.
+These results are presented and discussed in light of the currently known 
+biochemical functions of the active drug.
+
+
+
+EXPERIMENTAL SECTION
+
+
+
+.ne 2
+.ti +5
+
+X-ray Data Collection
+
+
+.ne 2
+.ti +5
+(a) 2-\1b\0-D-ribofuranosylthiazole-4-carboxamide (I)
+
+
+.ne 2
+.ti +5
+Colorless crystals were grown at room temperature by slow evaporation from
+a l0 mM aqueous solution of I. Precession photographs and a preliminary rapid
+data scan by diffractometer revealed an orthorhombic crystal system. The only
+observed systematic abscences were h00 for h=2n+1, 0k0 for k=2n+1, and
+00l for l=2n+1 indicating unambiguously space group P2`1~2`1~2`1~.
+Cell dimension and intensity data were collected at room temperature from a
+thick rectangular plate of approximate dimensions 0.15 x 0.10 x 0.05 mm
+mounted roughly parallel to the a axis. A Nonius CAD-4 diffractometer was 
+employed using a graphite monochromater and Cuk\1a\0 radiation. Lattice constants
+were obtained by least-squares refinement of the angular settings of 24
+reflections in the range 2\1R\0=25-30\1"\0.
+ These are indicated in Table I. Reflections
+were measured in the range 2|1"\0<2\1R\0<70\1"\0 using the
+ \1l\02\1l\0 scan method with a 
+variable scan width \1Wl\0= (1.0 + 0.15 TAN\1R\0)#, this angle being extended 25% on
+each side for background measurements. The scan rate varied between 0.4 and
+2.0 deg/min depending upon the value of \1s\0 (I)/I for each reflection. 
+  Data were collected in four octants (-h,#k,#l). 
+Only identical redundantly measured intensities were averaged, yielding a total
+of 4500 reflections . Of these, 80 had values of \F\1`0~\0|\1~2`\0<0.2\1s\
+0(F\1`0~~2\0)
+where \1s\0(F\1`"~~2`\0)=[\1s~2`\0(I)+(0.02|F\1`0~\0|\1~2`\0)\1~2`\0]\1~1-2`\0,
+ and were reset to 0.2\1s\0(F\1`0~~2\0). However,
+all data were used in the subsequent analysis and refinements. Three standard
+reflections measured every two hours of X-ray exposure time showed no
+decline in intensity. Corrections for Lorentz and polarization factors were
+ applied and, in addition, data were corrected for absorption using the 
+semi-empirical psi-scan technique ~5`.  A single psi scan was employed, consisting
+of 36 measurements of a standard reflection in 10 degree steps of phi with the crystal in
+an approximate equi-inclincation setting.
+
+
+
+
+.ne 2
+.ti +5
+(b) 2-(2-deoxy-beta-D-erythro-pentofuranosyl)-thiazole-4-carboxamide(II)
+
+
+.ne 2
+.ti +5
+Crystals were obtained as described in reference ~6`.  Preliminary photographic
+and counter measurements indicated a monoclinic system with systematic absences
+0k0 for k=2n+1, uniquely defining the space group as P2`1~.  Cell dimension
+and intensity data were obtained from a crystal of approximate dimensions
+0.05 x 0.10 x 0.10  mm mounted roughly parallel to the [101] direction.
+The CAD-4 diffractometer was again used with graphite monochromatized CuK\1a\0 
+radiation. Lattice constants were obtained as described  above and are listed
+in Table I. Intensity data were collected using the parameters and methods
+described above with the exception that the variable scan width was
+\1Wl\0= (1.17 + 0.15 TAN\1R\0 )\1~"`\0.  2655 reflections (including standards) were
+measured in the two equivalent but non-centrosymetrically related octants
+(h,k,\1>\01) and (-h,k,\1>01).  In this case the data were averaged, yielding
+1132 unique reflections, of which 59 had values of |F\1`"~\0|\1~2`\0<0.2\1a\0
+(F\1`0~~2\0)
+and were reset to 0.2\1a\0F\1`0~~2\0). All data were used in the 
+subsequent analysis. Standard reflections measured as above revealed an 
+approximate 5% decline in intensity over the course of the data collection. A
+separate linear decay correction was applied to the set of reflections 
+collected within each two hour time period.
+
+ Data were corrected for absorption as described
+above.
+
+
+.ne 2
+.ti +5
+A preliminary report of the structure of II has been presented elsewhere~6`.
+However, both the crystal and the data set used in the present study were
+of higher quality than those used previously.  
+
+
+.ne 2
+.ti +5
+(c) 2-alpha-D-ribofuranosylthiazole-4-carboxamide (III)
+
+
+.ne 2
+.ti +5
+Colorless rod-shaped crystals were grown by vapor diffusion from  a 
+20 ul drop of 10 mM aqueous solution of III in a 20% ethanol reservoir.
+Preliminary photographic and counter data indicated a monoclinic system with
+systematic absences 0k0 for k=2n+1, uniquely defining the space group
+as P2`1~.  Cell dimensions and intensity data were obtained  from a crystal
+of approximate dimensions 0.05 x 0.05 x 0.30 mm mounted parallel to 
+the b axis.Lattice constants were obtained as described
+for I and are listed in Table I. Data were collected on the CAD-4
+diffractometer using CuK\1a\0l radiation employing the methods described
+for I with the exceptions that   
+ the scan speed varied between l.0 and 2.0\1~"`\0/min.  Data were
+collected from one unique quadrant (-h,-k,\1>\01), yielding 1142  unique
+reflections, of which 25 had values of |F\1`"~\0|\1~2`\0<0.2\1a\0(F\1`"~~2`\0).
+These were reset to 0.2\1a\0(F\1`"~~2`\0), but all data were used in the
+subsequent  refinements. Three standard reflections measured
+every two hours no decline in intensity. 
+Lorentz and polarization factors were applied but in this case
+no correction for absorption was made.
+
+
+
+
+
+.ne 2
+.ti +5
+Structure Solutions and Refinements
+
+
+.ne 2
+.ti +5
+All structures were solved by the application of standard Fourier
+techniques. In each case the sulfur position was determined from the
+Patterson map and the positions of the remaining nonhydrogen atoms
+obtained from subsequent least-squares refinements and Fourier maps.
+The positions of all hydrogen atoms were then obtained from successive 
+difference Fourier maps, employing only low angle data (sin \1R\0/\1g\0<0.4).
+
+
+.ne 2
+.ti +5
+All structures were refined using full-matrix least-squares techniques.
+The function minimized was \1@\0w(\1W\0F)\1~2`\0  where \1W\0F = |F\1`0~\0| - 
+|F\1`"~\0| with weights  w = \11-s~2`\0.  In the early refinements,
+values of \1s\0  were calculated according to \1s\0 = \1s \0(F\1`"~~2`\0)/2|F
+\1`"~\0|, where \1s\0F\1`"~~2`\0)  is defined as above.
+ In the later refinements, weights w = \11-s~2`\0new  were used where
+ \1s~2`\0new 
+= [\1s~2`\0 + 0.5A|F\1`0~\0|\1~2\0 + 0.5B(sin\1R\0/\1g\0)\1~2`\0]\1~1-2`.
+Values of A and B 
+  were obtained by a least-squares minimization of the function     
+|\1W\0F|\1~2`\0 - \1s~2`\0new for twenty separate segments in |F\1`0~\0| and
+sin\1R\0/\1g\0, for each data set.
+ Nonhydrogen
+atoms were refined anisotropically, the y coordinates of the sulfur
+atoms in the two monoclinic structures remaining fixed. Positional
+parameters of all hydrogen atoms were refined with isotropic 
+temperature factors. The later refinements of each structure included
+a Type I isotropic extinction correction and utilized all data. Final
+refinements converged to the values of R= \1@\0|\1W\0F|/\1g\0F\1`0~\0|
+and Rw = [\1g\0w(\1W\0F)\1~2`\0/\1g\0w|F\1`0~\0|\1~2`\0]\1~1-2`\0 
+ listed in Table I. Also listed
+for each structure is the discrepancy factor S = [\1g\0w(\1WF)\1~2`\0/(m-n]
+\1~1-2`\0.
+     The largest final parameter shift observed in all three
+structures was 0.18 sigma  ; most were less than 0.10 sigma .
+The final difference Fourier maps were featureless.  Atomic
+scattering factors for the nonydrogen atoms and anomalous dispersion
+corrections for the sulfur atoms were from reference ~7`.
+Scattering factors for the hydrogen atoms were those of Stewart, et al ~8`.
+
+
+
+
+
+.ne 2
+.ti +5
+Absolute Configuration Determinations
+
+
+.ne 2
+.ti +5
+The enantomorphs of structures I, II, and III were also refined, using
+the same techniques described above. The values of R`w~  thus obtained
+are listed in Table I. Application of Hamilton's significance test ~9` 
+to each of the three weighted R factor ratios confirmed the original
+absolute configuration assignments at the 99.5% significance level.
+
+
+
+
+
+.ne 2
+.ti +5
+RESULTS
+
+
+.ne 2
+.ti +5
+The conformations of the three structures are illustrated in Figure 1.
+Atomic coordinates  for I, II,
+and III are listed in Table II. Bond lengths involving non-hydrogen atoms
+are listed in Table III. Selected bond and torsion angles are given in Tables
+IV and V respectively.
+
+
+
+
+
+.ne 2
+.ti +5
+Thiazole Rings
+
+
+.ne 2
+.ti +5
+Bond lengths and angles in the three thiazole rings are similar, most
+agreeing within 3-4 sigma. Somewhat larger differences in the C2-N3
+and S-C2 bonds suggest contributions from slightly different resonance
+forms for each  ring. However, in each case the S-C2 and S-C5 bond lengths
+are significanntly shorter than the single S-C(sp~2`)  bond length
+ (1.78\1/\0) 
+~14` as well as unconjugated S-C(sp~2`)  bond lengths observed in several
+thiazolidines and thiazolidinones (cf 1.771, 1.776, 1.777 and 1.782\1/\0)
+~10-13`. Similarly,
+all N3-C4 bond lengths are shorter than the C(sp~2`)-N(sp~2`)
+ single bond
+length (1.47\1/\0).  Thus, the thiazole rings display significant conjugation.
+This is similar to results observed in other thiazole structures, although
+comparison is complicated by the wide variations seen in ring dimensions
+upon changes in substituents. Nevertheless, bond lengths and angles
+observed here are within a standard deviation of the mean values obtained
+from twelve well-refined thiazole structures (R<.10) without protonated
+or substituted heterocyclic nitrogens (i.e. C2-N3:1.30(1)\1/\0;  N3-C4:
+1.38(1)\1/\0;  C4-C5:1.35(2)\1/\0;  C5-S:1.72(2)\1/\0;  S-C2:1.73(2)\1/\0;
+  C2-S-C5:89(1)\1"\0;
+ S-C5-C4:110(1)\1~"`\0;  C5-C4-N3:116(1)\1~"`\0;  C4-N3-C2:110(1)\1~"`\0;
+ N3-C2-S:115(1)\1~"`\0) ~14-18`.
+
+
+.ne 2
+.ti +5
+Deviations from the least-squares planes of the thiazole rings are
+listed in Table VI. In general, these are quite small. The thiazole
+ring in III is planar within experimental error. Deviations from the
+least squares plane in II suggest a very slight envelope type pucker
+which may be significant.  This is consistent with the .16\1/\0 deviation of
+C1' above the ring plane observed in this structure. The thiazole
+ring in I shows a small but significant pucker  similar to
+ that suggested in II. In this structure the C2 atom lies slightly
+above the least-squares plane with flanking S and N3 atoms lying below
+the plane. This is also consistent with the bending of the C2-C1' bond
+above the ring plane (evidenced by the deviation in C1') and probably
+contributes to the differences seen in bond angles about C2.
+
+
+
+
+
+.ne 2
+.ti +5
+Carboxamide Groups
+
+
+.ne 2
+.ti +5
+The lengths of the C-O and C-N bonds in the carboxamide groups of I and
+III are similar. The Beta-deoxy structure shows a significantly shorter
+C-O bond and longer C-N bond , suggesting a greater contribution from the
+H`2~N-C=0  resonance form and a smaller contribution from the alternative 
+H`2~N~+`=C-0~-`  form. This is consistent with the relatively small number
+of hydrogen bonds formed by this group in II (see below). The C(4)-C bond
+lengths are similar in all three structures. These are close to the
+values observed for extracyclic C(sp~2`) -  C(sp~2`) bonds in other thiazoles which
+show relatively little conjugation with the heterocyclic ring (e.g.
+1.48,1.482,1.49 and 1.49\1/\0) ~16-19`.  The plane of
+the carboxamide group in each structure is rotated relative to the
+thiazole ring plane. The O-C-C4-C5 torsion angle in the alpha structure
+(III) shows the smallest value (-3.8\1~"`\0).  However, the carboxamide carbon in this 
+structure shows the largest displacement from the ring plane (0.143(7)\1/\0),
+indicating significant bending of the C4-C bond. This is seen to a lesser
+extent in the other two structures. The large (33\1~"`\0) rotation of the
+carboxamide group in tiazofurin (I) is probably the result of packing
+forces. The carboxamide group in this structure participates in a larger
+number of hydrogen bonds than in either II or III (see below).
+
+
+.ne 2
+.ti +5
+ Despite the
+variation in carboxamide group rotation seen among I, II, and III, in each
+structure the carboxamide amino group remains trans to the thiazole ring
+C5 and cis to the ring nitrogen N3 (Figure 1).  Rotation of this group cis to C5 would
+produce unfavorable steric interactions between the amino hydrogen
+HN1 and the ring hydrogen HC5. The geometry observed here avoids these as 
+well as optimizing any electrostatic interactions between the amide HN1 
+and the lone pair electrons of N3, and between the carbonyl oxygen and 
+ring HC5. A similar effect is observed in the structures of several
+thiazole- containing antibiotics, all of which possess at least one
+free N-substituted carboxamide group on the 4 position of a 2-4 substituted 
+ thiazole ring ~20-22`. In each case, the carbox amide nitrogen is
+found cis to the ring nitrogen and the carbox amide oxygen
+cis to the HC5. The largest carbox amide rotation observed among those 
+structures for which coordinates are available is about l5\1~"`\0.
+
+
+
+
+
+.ne 2
+.ti +5
+Sugar Moieties
+
+
+.ne 2
+.ti +5
+Bond lengths in the three ribose moieties are similar. Several
+differences in bond lengths greater than 3-sigma probably reflect
+either the absence of the 2'hydroxyl group (C2'-C3' in II) or
+differences in sugar pucker~23`.  Differences in bond lengths
+between I and III are similar to those seen between other nucleoside
+anomeric pairs. All bond lengths are  within the range of those seen in
+other beta-ribo ~24`, beta-deoxyribo~25-27` and alpha-ribonucleosides
+~28-30` with similar ribose puckering. 
+
+
+.ne 2
+.ti +5
+The amplitude T and phase angle P of pseudorotation~31` for
+each structure is given in Table V  . Conformations of the three ribose
+rings were standard. The Tiazofurin structure (I) adopts a C2'endo
+pucker (~2`E)  seen in a number of ribose structures~24`.
+The Beta-2'-deoxy analogue (II) shows a similar C3'exo-C2'endo
+pucker (#T), falling within the range of conformations most 
+commonly seen for deoxyribonucleosides~32`.  The alpha
+anomer (III)adopts a pure C3'endo-C2'exo (#T) pucker, essentially
+enantiomeric to that seen in the beta structures I and II. This is not
+always the case among pairs of anomeric nucleosides~30,33,34`,
+although this particular conformation is seen in other alpha 
+nucleosides~28-30`.
+
+
+.ne 2
+.ti +5
+Conformations about the C4'-C5' bond, defined by the torsion angle
+\1d\0(O5'-C5'-C4'-C3') are shown in Table V. These fall within the
+three commonly observed ranges, being gauche-trans (t), 
+trans-gauche (g-), and gauche-gauche (g+) for I, II, and III
+respectively. These conformations are generally associated with the observed
+ribofuranosyl puckering~32`.
+
+
+.ne 2
+.ti +5
+The C-glycosyl Bonds:  Conformational Stabalization
+
+
+.ne 2
+.ti +5
+The lengths of the C-glycosyl bonds C1'-C2 are similar to the
+mean values seen for other C-glycosyl nucleosides (1.50(1)\1/\0)~35-37`
+as well as values for thiazole and thiazolium derivatives with an sp~3`
+ hybridized
+carbon on the C2 position (1.50(3)\1/\0)~38-41`.  The conformations about
+this bond are defined by the torsion angles \1x\0(O1'-C1'-C2-S), listed
+in Table V. A comparison of the conformations of the thiazole
+rings relative to the furanose moieties reveals several interesting
+features common to all three structures. The magnitudes of \1x\0 lie
+within the  range |\1x\0|=30 \1>\011\1~"`\0.  In each case the
+thiazole sulfur is cis to the furanose oxygen O1' (Figure 2). Further, the
+distance between the two atoms in each case is less than the sum of
+their Van der Waals radii (3.30\1/\0).  S\1^^^\001' distances are 2.859,
+3.023 and 2.826 \1//0 for structures I, II, and III respectively. Very
+similar short intramolecular S\1^^^\00  contacts (2.749-2.901\1/\0) have
+been observed in four thiamin analogues conaining substituents
+of the form -CH2OR on C2 of the thiazolium ring~39-41`.  Analogous
+contacts (2.92-3.08\1/\0) have been observed in several thiazole
+derivatives as well~21,41,43`.  Results from a number
+of molecular orbital calculations suggest that the thiazole
+sulfur has a net positive charge~44,45`.  Thus, the S\1^^^\00 contacts observed
+in each structure likely represent an electrostatic
+interaction between the heterocyclic sulfur and the lone pair
+electrons on the furanose oxygen. Similar, albeit marginally short contacts are also observed
+between the thiazole nitrogens N3 and the furanose hydrogens HC1'
+(N3...HC1' distances are 2.68, 2.55, and 2.64\1/\0  respectively for
+structures I, II, and III.).  Although these contacts are less certain, due to
+the lower accuracy of the hydrogen positions, they suggest an 
+additional intramolecular electrostatic interaction. These interactions
+probably stabilize the conformation of each structure about the
+C-glycosyl bond. Further, rotation of the thiazole ring about this bond
+may be hindered by steric effects. In structures I and II, rotation
+of the ring to more positive values of \1x\0 (counterclockwise in Figure
+ 2.) would produce  short
+contacts between the sulfur atom and the furanose hydrogen HC2' . 
+In structure
+III, rotation of the ring to more negative values of \1x\0 (clockwise in
+Figure 2) would bring the
+thiazole sulfur into very short contact  with
+the hydroxyl oxygen O2' (2.521 \1/\0 at \1x\0 = -100\1~"`\0). 
+Rotation of the rings in all three structures toward \1x\0 = 0\1~^`\0 would 
+maximize the steric component of the S\1~^^^`\0O1' interaction described
+above. Some relief from these
+close contacts could be expected from simultaneous changes in ring
+pucker. However, it is possible that the available conformations about
+the C-glycosyl bond are restricted to those in which the thiazole
+sulfur is generally cis to the furanose O1'.
+
+
+
+
+
+.ne 2
+.ti +5
+Molecular Packing and Hydrogen Bonding
+
+
+.ne 2
+.ti +5
+Crystal packing and intermolecular hydrogen bonding for I, II, and
+III are illustrated in Figures 3,4, and 5. Hydrogen bond
+distances and angles are tabulated in Table VII. In general, the crystal
+structures are characterized by a rich network of primarily linear hydrogen
+bonds linking thiazole ring to thiazole ring, furanose ring to furanose
+ring, and thiazole ring to furanose ring. There are no indication for any
+thiazole ring stacking interactions. All hydroxyl oxygens act as hydrogen
+bond donors. In addition, all exocyclic O5' oxygens act as hydrogen acceptors.
+One furanose hydroxyl oxygen in each structure also acts as an acceptor. The
+carboxamide group is a highly versatile hydrogen bond forming substituent.
+It acts as both donor and acceptor, the number of bonds formed varying with
+each structure.
+
+
+.ne 2
+.ti +5
+In III, the heterocyclic nitrogen N3 acts as an acceptor in an 
+O2'-HO2'\1~^^^`\0N3 bond. This is the only structure in which this nitrogen clearly
+participates in any hydrogen bonding. The carboxamide hydrogens HN1 and
+HN2 both act as hydrogen donors, while the carboxamide oxygen O acts as an
+acceptor in two hydrogen bonds. The fewest number of intermolecular hydrogen
+bonds
+are found in the beta-deoxy structure, II. In this case, only one carboxamide
+hydrogen serves as a donor while the carboxamide oxygen accepts only one
+hydrogen in a complementary N-HN1\1~^^^`\0O bond. In contrast, both carboxamide
+hydrogens in I participate in H-bond formation. Further, the carboxamide
+oxygen in this structure acts as an acceptor in three bonds, the donor
+atoms being situated in a distorted tetrahedral arrangement around the
+acceptor oxygen.
+
+
+
+
+
+.ne 2
+.ti +5
+Discussion
+
+
+.ne 2
+.ti +5
+Work by several groups suggests that the oncolytic activity of tiazofurin
+(I) is related to its ability to create a state of cellular guanine
+nucleotide depression with a subsequent interruption of the cell cycle
+in S phase. This is a result of a decline in the guanosine precurser
+xanthosine monophosphate due to the inhibition of inosine monophosphate
+dehydrogenase (IMPd) (4,46). It has been convincingly 
+demonstrated, both in vitro and in vivo, that the major IMPd inhibitor
+is an anabolite of I. The tiazofurin molecule is incorporated into
+an analogue of the cofactor nicotimamide adenine dinucleotide (NAD)
+in which the nicotinamide ring is replaced by the thiazole-4-carboxamide
+group (Figure 6)~46,47`.  This NAD analogue (TAD) is a more potent IMPd inhibitor
+(K`i~ \1f\0 0.5 \1)\0M) than either tiazofurin 5'monophosphate
+ (K`i~ \1f\0 0.4mM) or
+tiazofurin itself (K`i~ \1f\0 8.2 nM)~4,47`. 
+
+
+.ne 2
+.ti +5
+A comparison of both the steric and hydrogen bonding properties of the
+thiazole-4-carboxamide ring with those of the nicotinamide ring suggests
+a mechanism for the observed IMPd inhibition. The TAD molecule would bind 
+at the NAD cofactor binding site, the thiazole-4-carboxamide group
+occupying the pocket normally filled by the nicotinamide ring. Although
+the structure of IMPd is unknown, single crystal structures of five
+other dehydrogenase-cofactor complexes have shown a conservation of
+carboxamide-enzyme hydrogen bonding at the nicotinamide end of the cofactor
+binding site~48`.  Similarly, enzyme binding studies using NAD
+analogues have emphasized the necessity of maintaining both the 
+hydrogen bonding abilities of the carboxamide group as well as the
+general steric characteristics of the nicotinamide ring in forming binary
+or tertiary complexes in several dehydrogenase systems~49`.  The
+similar size of the thiazole ring and location of its carboxamide group 
+suggest that it could successfully mimic the nicotinamide moiety
+in the binding of TAD to IMPd (Figure 7).  However, once bound,
+ the thiazole ring
+would be unable to accept a hydride ion from the enzyme
+substrate, as the uncharged ring is highly resistant to reduction~45,51`.
+This mechanism is consistent with the finding that the carboxamide group in
+the thiazole-4-position is a requirement for cytotoxicity in the P388
+system~4`.
+
+
+.ne 2
+.ti +5
+It has been suggested above that the conformations about the C-glycosyl bond
+may be limited to those in which the thiazole sulfur is generally cis to the
+ribose oxygen 01'.  In this case the location of the thiazole carboxamide group
+ would
+also be restricted to generally trans conformations relative to
+01' (Figure 2).  If binding of TAD to IMPd were analogous to that of
+NAD, then the carboxamide moiety in NAD might be expected to occupy a
+similar location, relative to the nicotinamide ribose, implying some
+restrictions on the sterochemistry of cofactor binding in IMPd.
+
+
+.ne 2
+.ti +5
+The inactivity of both the alpha-anomer (III) and the beta-deoxy 
+derivative (II) suggest that these species are either not converted to the
+corresponding NAD analogues, or, if converted, the analogues do not
+effectively bind IMPd. The proposed mechanism for the metabolic synthesis of
+TAD involves the formation of tiazofurin-5' monophosphate from I via a kinase
+followed by reaction with ATP via NAD pyrophosphorylase~52`.  It is possible
+that either of these enzymes is unable to utilize the tiazofurin
+analogues as substrates. As seen above, the solid state conformation of the
+alpha-anomer ribose is different from that of tiazofurin. If some population
+of the alpha-anomer in solution could adopt the same ribose conformation,
+the sterochemical relationship of the heterocycle to the sugar would still
+remain distinct from that in tiazofurin. Although the beta-deoxy analogue
+adopts a similar conformation to that seen in I, it lacks the hydrogen
+bonding capability of the 2'-hydroxyl group demonstrated in I and III.
+
+
+.ne 2
+.ti +5
+The possibility does exist that either III or II is converted to alpha-TAD
+or beta-2'-deoxy TAD analogues respectively. However, the same structural
+differences discussed above could adversely influence IMPd binding as
+well. This is suggested by the behaviors of similar NAD analogues. Alpha-NADH
+does exist in mammalian and microbial systems, although it probably results
+from a nonenzymatic anomerization of beta-NADH~50,53`.  The alpha
+coenzyme is oxidized by several dehydrogenases, but at rates 3 to 4 orders
+or magnitude slower than beta-NADH~53`.  Alpha-NAD is enzymatically inactive
+~54`.  Similarly, an NAD analogue containing a beta-2'-3'-dideoxy
+nicotinamide ribose is reduced more slowly than NAD by both alcohol and
+lactute dehydrogenase~55`. 
+ The importance of the nicotinamide ribose 2'-hydroxyl
+group is also suggested by the conservation of an enzyme\1~^^^`\002' hydrogen
+bond in a number of dehydrogenase-coenzyme crystal structures (48). Thus,
+if binding of TAD to IMPd were analogous to that of NAD, an alpha-TAD
+or beta-2'-deoxy-TAD might well be inefficient enzyme inhibitors.
+
+
+.ne 2
+.ti +5
+Finally, It is worth adding that the thiazole-4-carboxamide group is also
+stereochemically similar to the base in inosine suggesting that tiazofurin 5'
+-monophosphate(TMP) might be capable of acting as an analogue of the IMPd
+substrate inosine 5'-monophosphate 5'.  In this case the mechanism for
+enzyme inhibition would be similar to that proposed for the antiviral agent
+virazole~57,58`.  Although TMP is not as potent an inhibitor as TAD, the
+possible dual role of both a coenzyme and a substrate analogue in IMPd
+inhibition has not been ruled out.

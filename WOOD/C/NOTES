@@ -1,0 +1,23 @@
+move zero to memory.cmn?
+check get and put have &nc, &ier
+modify scr coords to be 0-based, not 1-based
+put dcl's zilch.log in zilch startup dir? maybe not - no access on network
+change ifdefs to ifs etc.
+change all chars to ints?
+go over all .cmn, replace chars with ints where really logicals
+many st_allocates can be replaced by automatic declarations.
+bug in mappings - * should be comment in col 2 only for C mappings?
+&tx_text needs a macro.
+is long int or textind appropriate?
+check uses of textind should be textp?
+ms_ funcs always need strings; others?
+static chars!
+do i=1,n -> for
+repeat-until
+check for switch statements - need break
+check for ' should be " and v-v
+check for array indexes converted properly from 1 to 0-based
+remember the || &&
+remember to check for pass-by-value VS pass-by-reference
+	st_buffer esp.
+	tx_text

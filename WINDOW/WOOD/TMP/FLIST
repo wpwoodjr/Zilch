@@ -1,9 +1,0 @@
- ## flist common block
- #  Put on a file called 'flist'
- # Used by the tools:  sort, roff, lpr (VMS version), ls (VMS version)
- 
- #flist - common block
- 
-  common /flist/  flevel, ffiles(FILENAMESIZE, FLMAX)
-  integer flevel
-  character ffiles

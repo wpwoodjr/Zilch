@@ -1,0 +1,231 @@
+  # Zilch Screen Editor
+  #   Copyright (c) 1982,1983,1984,1986,1987 William P. Wood, Jr.
+  # Prompt bindings and function definitions for standard Zilch
+  # This file is %included by ZBIND.BND
+
+%mode					prompt
+  define(header,implicit integer (a-p,r-z); implicit logical (q)
+    include "memory.cmn")
+
+  define(unbound_key_sequence,
+	q_status = false)
+  define(qio_error,	# not really for QIO error;
+			# had to do here since cannot bind to NULL
+	if (pusize == -1) {			# read from user, not pushback
+	  pusize = bu_size(pu_buffer)
+	  bu_size(pu_buffer) = 0
+	  })
+  define(qio_error_in_insert_mode,		# can't happen here
+	continue)
+  define(control_y_interrupt,
+	continue)				# rebound below
+  define(end_function_definition,
+	next)
+
+  function q_pr_read_prompt(pr, st, len)
+  header
+  include "session.cmn"
+  include "pushb.cmn"
+  include "screen.cmn"
+  include "prompt.cmn"
+  byte pr(ARB)
+  byte c, get_tty_character
+  logical q_status
+
+  q_pr_read_prompt = true
+  se_in_prompt = true
+  sc_cursor_y = sc_size
+  mode = bi_use_keymap(PROMPT_MODE)
+  len = 0
+  dot = 1
+  st_buffer(st) = EOS
+  q_status = true
+  pusize = -1
+  recall_current = mod(recall_last, MAX_RECALL) + 1
+  recall_len(recall_current) = 0
+  recall(1, recall_current) = EOS
+  for (call ms_message(pr) ; ; call ms_message3(pr,st,len,dot)) {
+	if (! q_status) {
+	  call ms_error(EOS)
+	  q_status = true
+	  }
+	cmd = bi_get_command()
+
+pr_self_insert				\1-\177
+	q_status = q_pr_self_insert(st_buffer(st),len,dot,pu_last_key_struck)
+exit_prompt_mode			^M
+	if (pusize == -1)		# not reading partial prompt from user?
+	  break
+	bu_size(pu_buffer) = pusize	# return to push-back buffer
+	pusize = -1
+pr_kill_to_beginning_of_line		^U
+	call pr_kill_to_beginning_of_line(st_buffer(st),len,dot)
+pr_delete_previous_character		\177
+	call pr_delete_previous_character(st_buffer(st),len,dot)
+pr_previous_line			^B
+	recall_current = recall_current - 1
+	if (recall_current == 0)
+	  recall_current = MAX_RECALL
+	if (recall_len(recall_current) == -1)
+	  recall_current = mod(recall_last, MAX_RECALL) + 1
+	len = recall_len(recall_current)
+	dot = len+1
+	call movc(recall(1, recall_current), st_buffer(st), len+1)
+pr_next_line						# not bound
+	repeat
+	  recall_current = mod(recall_current, MAX_RECALL) + 1
+	  until (recall_len(recall_current) != -1)
+	len = recall_len(recall_current)
+	dot = len+1
+	call movc(recall(1, recall_current), st_buffer(st), len+1)
+pr_previous_character			^D
+	dot = max(1, dot-1)
+pr_next_character			^F
+	dot = min(len+1, dot+1)
+pr_end_of_line				^E
+	dot = len+1
+pr_beginning_of_line			^H
+	dot = 1
+pr_add_text_before_cursor		^A
+	q_status = q_pr_add_text_before_cursor(st,len,dot)
+pr_abort				^G
+	call ms_error("Aborted.")
+	q_pr_read_prompt = false
+	break
+pr_special_character			\\
+	call ms_message3(pr,st,len,dot)
+	c = get_tty_character()
+	if (c == '@')
+	  c = 0
+	else if (c == 8%31)
+	  call redraw
+	else if (c >= '0' & c <= '9') {		# get octal value
+	  n = 0
+	  repeat {
+	    c = n*8 + (c - '0')
+	    n = c
+	    q_status = q_pr_self_insert(st_buffer(st),len,dot,c)
+	    call ms_message3(pr,st,len,dot)
+	    if (q_status)
+	      call pr_delete_previous_character(st_buffer(st),len,dot)
+	    else
+	      call ms_error(EOS)
+	    c = get_tty_character()
+	    } until (c < '0' | c > '9')
+	  call pu_push_back_character(c)
+	  c = n
+	  }
+	if (q_status)
+	  q_status = q_pr_self_insert(st_buffer(st),len,dot,c)
+	else
+	  q_status = true
+pr_control_y				^Y
+	call redraw
+	q_status = q_pr_self_insert(st_buffer(st),len,dot,pu_last_key_struck)
+	end_function_definition	#MAKEBIND isn't smart enough to put this at end
+	}
+
+  if (pusize != -1)
+    bu_size(pu_buffer) = pusize
+  mode = bi_use_keymap(mode)
+  se_in_prompt = false
+  if (q_pr_read_prompt & len > 0)	# add new entry to recall buffer...
+    if (! q_cmpc(recall(1, recall_last), recall_len(recall_last),
+      						st_buffer(st), len, neq)) {
+      recall_last = mod(recall_last, MAX_RECALL) + 1
+      recall_len(recall_last) = len
+      call movc(st_buffer(st), recall(1, recall_last), len+1)
+      }
+  return
+  end
+
+  subroutine pr_add_to_recall(recall_st)
+  header
+  include "prompt.cmn"
+  byte recall_st(ARB)
+
+  len = ho_length(recall_st)
+  len = min(MAX_PROMPT - 1, len + 1 + recall_len(recall_last)) -
+  							recall_len(recall_last)
+  if (len > 1) {
+    if (recall_len(recall_last) >= 0)			# starts out as -1
+      recall(recall_len(recall_last) + 1, recall_last) = ' '
+    call movc(recall_st,recall(recall_len(recall_last) + 2,recall_last),len-1)
+    recall_len(recall_last) = recall_len(recall_last) + len
+    recall(recall_len(recall_last) + 1, recall_last) = EOS
+    }
+  return
+  end
+
+  function q_pr_self_insert(buf,len,dot,char)
+  header
+  byte buf(ARB), char
+
+  if (len+1 < MAX_PROMPT) {
+    len = len+1
+    call movc(buf(dot), buf(dot+1), len-dot)
+    buf(len+1) = EOS
+    buf(dot) = char
+    dot = dot+1
+    }
+  else
+    return(false)
+  return(true)
+  end
+
+  function q_pr_add_text_before_cursor(st,len,dot)
+  header
+
+  bu = bu_find_by_name("Save")
+  if (bu != null)
+    if (len+bu_size(bu) < MAX_PROMPT) {
+      n = bu_size(bu)
+      call movc(st_buffer(st+dot-1), st_buffer(st+dot+n-1), len+1-dot)
+      len = len + n
+      st_buffer(st+len) = EOS
+      call tx_copy_text_to_string(bu,1,n,st+dot-1)
+      dot = dot + n
+      }
+    else
+      return(false)
+  return(true)
+  end
+
+  subroutine pr_delete_previous_character(buf,len,dot)
+  header
+  byte buf(ARB)
+
+  if (dot > 1) {
+    dot = dot - 1
+    call movc(buf(dot+1), buf(dot), len-dot)
+    buf(len) = EOS
+    len = len - 1
+    }
+  return
+  end
+
+  subroutine pr_kill_to_beginning_of_line(buf,len,dot)
+  header
+  byte buf(ARB)
+
+  if (dot > 1) {
+    len = len + 1 - dot
+    call movc(buf(dot), buf(1), len)
+    buf(len+1) = EOS
+    dot = 1
+    }
+  return
+  end
+
+  function q_pr_ask(q,defans,aborted)
+  header
+  byte q(ARB),ho_clower
+  logical defans,aborted
+
+  st = st_allocate(MAX_PROMPT)
+  aborted = ! q_pr_read_prompt(q,st,len)
+  q_pr_ask = (! aborted) & (ho_clower(st_buffer(st)) == 'y' |
+				(defans & ho_clower(st_buffer(st)) != 'n'))
+  call st_deallocate(st)
+  return
+  end

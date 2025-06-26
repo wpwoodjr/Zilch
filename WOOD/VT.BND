@@ -1,0 +1,115 @@
+  # Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986 William P. Wood, Jr.
+  # Extra keyboard bindings for VT100/VT200/VTxxx Zilch
+
+%keypad					application
+%alternate_escape			^C
+
+%mode					insert
+exit_insert_mode_without_popping_mappings	^S^[
+exit_insert_mode			`
+exit_insert_mode			^C[23~		# F11 (ESC)
+macro_x					^C[2~		# Insert Here
+	^[~						# switch to overstrike
+in_next_character			^C[\C
+in_previous_character			^C[\D
+in_previous_character			^C[24~		# F12 (BS)
+in_next_line				^C[\B
+in_next_line				^C[25~		# F13 (LF)
+in_previous_line			^C[\A
+macro_0					^C\O\P		# PF1
+	^S^[\\^M					# find previous
+macro_1					^C\O\Q		# PF2
+	^S^[/^M						# find next
+macro_2					^C\O\R		# PF3
+	^S^[>o<^D^Sm^M^[				# delete previous word
+macro_3					^C\O\S		# PF4
+	^S^[<p>^D^Sm^M^[				# delete next word
+macro_4					^C[5~		# PREV_SCREEN
+	^S^[wty
+macro_5					^C[6~		# NEXT_SCREEN
+	^S^[wtn
+macro_6					^C\O\m		# (keypad) -
+	^S^[^Sd^[					# delete to end of line
+macro_7					^C\O\l		# (keypad) ,
+	^S^[^S\177^[					# delete next character
+macro_7					^C[3~		# REMOVE
+macro_10						# unbound
+	^S^[/<%^Mhh</%>^M>^E^[				# insert into template
+
+%mode					control
+exit_insert_mode_without_popping_mappings	^S^[
+message					^Sm
+delete_next_character			^S\177
+kill_to_end_of_line			^Sd
+enter_insert_mode			`
+enter_insert_mode			^C[23~		# F11 (ESC)
+enter_insert_mode			^C[2~		# Insert Here
+next_character				^C[\C
+previous_character			^C[\D
+previous_character			^C[24~		# F12 (BS)
+next_line				^C[\B
+scroll_one_line_up			^C[25~		# F13 (LF)
+previous_line				^C[\A
+help					^C[28~		# Help
+macro_0					^C\O\P		# PF1
+macro_1					^C\O\Q		# PF2
+macro_2					^C\O\R		# PF3
+macro_3					^C\O\S		# PF4
+macro_4					^C[5~		# PREV_SCREEN
+macro_5					^C[6~		# NEXT_SCREEN
+macro_6					^C\O\m		# (keypad) -
+macro_7					^C\O\l		# (keypad) ,
+macro_7					^C[3~		# REMOVE
+udk_0					^C\O\p		# (keypad) 0
+udk_replace_0				^C\O\n^C\O\p	# (keypad) . (keypad) 0
+udk_1					^C\O\q		# (keypad) 1
+udk_replace_1				^C\O\n^C\O\q	# (keypad) . (keypad) 1
+udk_2					^C\O\r		# (keypad) 2
+udk_replace_2				^C\O\n^C\O\r	# (keypad) . (keypad) 2
+udk_3					^C\O\s		# (keypad) 3
+udk_replace_3				^C\O\n^C\O\s	# (keypad) . (keypad) 3
+udk_4					^C\O\t		# (keypad) 4
+udk_replace_4				^C\O\n^C\O\t	# (keypad) . (keypad) 4
+udk_5					^C\O\u		# (keypad) 5
+udk_replace_5				^C\O\n^C\O\u	# (keypad) . (keypad) 5
+udk_6					^C\O\v		# (keypad) 6
+udk_replace_6				^C\O\n^C\O\v	# (keypad) . (keypad) 6
+udk_7					^C\O\w		# (keypad) 7
+udk_replace_7				^C\O\n^C\O\w	# (keypad) . (keypad) 7
+udk_8					^C\O\x		# (keypad) 8
+udk_replace_8				^C\O\n^C\O\x	# (keypad) . (keypad) 8
+udk_9					^C\O\y		# (keypad) 9
+udk_replace_9				^C\O\n^C\O\y	# (keypad) . (keypad) 9
+
+%mode					overstrike
+exit_overstrike_mode			^S^[
+exit_overstrike_mode			`
+exit_overstrike_mode			^C[23~		# F11 (ESC)
+macro_x					^C[2~		# Insert Here
+	^[^[						# switch to insert
+next_character				^C[\C
+previous_character			^C[\D
+previous_character			^C[24~		# F12 (BS)
+next_line_and_hug_column		^C[\B
+next_line_and_hug_column		^C[25~		# F13 (LF)
+previous_line_and_hug_column		^C[\A
+macro_0					^C\O\P		# PF1
+macro_1					^C\O\Q		# PF2
+macro_x					^C\O\R		# PF3
+	^[>o<^D^Sm^M~					# delete previous word
+macro_x					^C\O\S		# PF4
+	^[<p>^D^Sm^M~					# delete next word
+macro_4					^C[5~		# PREV_SCREEN
+macro_5					^C[6~		# NEXT_SCREEN
+kill_to_end_of_line			^C\O\m		# Keypad -
+delete_next_character			^C\O\l		# Keypad ,
+delete_next_character			^C[3~		# REMOVE
+
+%mode					prompt
+pr_previous_line			^C[\A		# Up-Arrow
+pr_next_line				^C[\B		# Down-Arrow
+pr_previous_character			^C[\D		# Left-Arrow
+pr_next_character			^C[\C		# Right-Arrow
+pr_beginning_of_line			^C[24~		# F12
+
+%mode					control

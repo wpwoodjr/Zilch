@@ -1,0 +1,470 @@
+# Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986,1987 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "session.cmn"
+  include "memory.cmn")
+
+  function q_fi_read_named_file(bu,dot)
+  header
+
+  st = st_allocate(MAX_PROMPT)
+  if (dot == 0)
+    q_fi_read_named_file = q_pr_read_prompt("Read from file: ",st,len)
+  else
+    q_fi_read_named_file = q_pr_read_prompt("Insert file: ",st,len)
+  if (q_fi_read_named_file) {
+    if (len == 0) {
+      call ms_error("Aborted.")
+      q_fi_read_named_file = false
+      }
+    else if (! q_mp_read_file(bu,st_buffer(st),dot,false)) {
+      call ms_message2("Can't read ",st)
+      call ms_error(EOS)
+      q_fi_read_named_file = false
+      }
+    else
+      bu_modified(bu) = 1
+    }
+  call st_deallocate(st)
+  return
+  end
+
+  function q_fi_read_file(bu,name,dot,setpro)
+  header
+  byte name(ARB)
+  logical setpro
+
+  if (! q_fi_open_read(READ_UNIT,name,ebk,pro))
+    return(false)
+  if (setpro)
+    bu_protection(bu) = pro
+  if (q_fi_add_newline(READ_UNIT,rsize))
+    leave = 1
+  else
+    leave = 0
+  if (rsize == 0)
+    i = ebk					# eof block set by gpopen
+  else
+    i = ebk*2
+  tdot = max(1, min(dot, bu_size(bu)+1))
+  if (dot == 0)
+    call bu_clear_text(bu)
+  else
+    call tx_set_gap(bu, tdot)
+  call tx_more_memory_please(bu, i*512)
+  bsize = bu_size(bu)
+
+  while (bu_gap_size(bu) > leave) {
+    err = get(READ_UNIT, tx_text(bu_gap(bu)),
+    			min(32767,bu_gap_size(bu) - leave), nc)
+    if (nc < 0)
+      break
+    bu_gap(bu) = bu_gap(bu) + nc + leave
+    bu_gap_size(bu) = bu_gap_size(bu) - (nc+leave)
+    bu_size(bu) = bu_size(bu) + nc + leave
+    if (leave == 1)
+      tx_text(bu_gap(bu) - 1) = NEWLINE
+    }
+  if (bu_gap_size(bu) <= leave | nc == RECORDTOOLONG)
+    call ms_error( _
+"Text buffer overflow! Whole file not read. What kind of file is this anyway!?")
+  else if (nc != EOF) {
+    call ms_message("Error reading file ")
+    call ms_add_to_message(name)
+    call ms_error(EOS)
+    }
+
+  len = bu_size(bu) - bsize
+  bu_map_windows(bu,wi)
+    if (dot > 0) {
+      if (wi_dot(wi) > tdot)		# ok
+	wi_dot(wi) = wi_dot(wi) + len
+      if (wi_bow(wi) > tdot)		# ok
+	wi_bow(wi) = wi_bow(wi) + len
+      else
+	wi_modified(wi) = 1
+      }
+    else
+      wi_modified(wi) = 1
+  if (dot > 0) {
+    mk_map(bu_markers(bu),mk)
+      if (mk_mark(mk) > tdot)
+	mk_mark(mk) = mk_mark(mk) + len
+# mark inserted buffer for easy deletion if wrong file or whatever...
+    call mk_set_mark(bu_mark1_ptr(bu), tdot, bu)
+    call mk_set_mark(bu_mark2_ptr(bu), tdot + len, bu)
+    }
+
+  close(unit = READ_UNIT, err=10)
+  return(true)
+10
+  call ms_message("Error closing file ")
+  call ms_add_to_message(name)
+  call ms_error(EOS)
+  return(true)
+  end
+
+  function q_fi_write_buffer(bu)
+  header
+
+  if (bu_file_name(bu) == null)
+    q_fi_write_buffer = q_fi_write_named_file(bu)
+  else if (q_mp_write_file(bu,st_buffer(bu_file_name(bu)),'N',stat))
+    q_fi_write_buffer = true
+  else if (stat == FI_OPEN_ERROR)
+    q_fi_write_buffer = q_fi_write_named_file(bu)
+  else
+    q_fi_write_buffer = false
+  return
+  end
+
+  function q_fi_write_named_file(bu)
+  header
+
+  q_fi_write_named_file = false
+  fi = st_allocate(max(FILENAMESIZE,MAX_PROMPT))
+  st = st_allocate(MAX_PROMPT)
+  if (q_pr_read_prompt("Write to file: ",st,len)) {
+    n = 0
+    if (len == 0)
+      call ms_error("Aborted.")
+    else if (! q_fi_find_file(FIND_UNIT,st_buffer(st),st_buffer(fi),n,false,
+      				true)) {
+      call ms_message2("Can't write ",st)
+      call ms_error(EOS)
+      }
+    else if (q_mp_write_file(bu,st_buffer(fi),'N',stat)) {
+      call bu_new_names(bu,EOS,st_buffer(fi))
+      q_fi_write_named_file = true
+      }
+    else if (stat == FI_OPEN_ERROR) {
+      call ms_message2("Can't write ",fi)
+      call ms_error(EOS)
+      }
+    else
+      call bu_new_names(bu,EOS,st_buffer(fi))
+    }
+  call st_deallocate(fi)
+  call st_deallocate(st)
+  return
+  end
+
+  function q_fi_write_modif_file_buffers
+  header
+
+  n = 0
+  errn = 0
+  bu_map(se_buffers,bu)
+    if (bu_file_name(bu) != null & mod(bu_modified(bu),2) == 1)
+      if (q_mp_write_file(bu,st_buffer(bu_file_name(bu)),'N',stat))
+	n = n+1
+      else
+	errn = errn+1
+  if (errn > 0) {
+    call ms_report_number2(EOS,errn," file could not be written!",
+    				    " files could not be written!")
+    call ms_error(EOS)
+    q_fi_write_modif_file_buffers = false
+    }
+  else {
+    call ms_report_number2("Wrote ",n," file."," files.")
+    q_fi_write_modif_file_buffers = true
+    }
+  return
+  end
+
+  function q_fi_write_region(bu,name,m1,m2,type,stat)
+  header
+  byte name(ARB),type
+
+  stat = FI_OK
+  q_fi_write_region = true
+  if (name(1) != EOS)
+    if (! q_fi_open_write(WRITE_UNIT,name,type,bu_protection(bu))) {
+      stat = FI_OPEN_ERROR
+      return(false)
+      }
+  call tx_set_gap(bu,m1)
+  tx = tx_address(bu,m1)
+  last = tx_address(bu,m2)
+  for ( ; tx <= last & ! se_error_occurred; tx = i+1) {	# possible ^C interrupt
+    for (i = tx; i <= last; i = i+1)
+      if (tx_text(i) == NEWLINE)
+	break
+    if (! put(WRITE_UNIT,tx_text(tx),i-tx,ier)) {
+      call ms_message("Error writing file ")
+      call ms_add_to_message(name)
+      call ms_error(EOS)
+      q_fi_write_region = false
+      stat = FI_IO_ERROR
+      break
+      }
+    }
+  if (se_error_occurred) {
+    q_fi_write_region = false
+    stat = FI_IO_ERROR
+    }
+  if (name(1) != EOS)
+    close(unit = WRITE_UNIT,err=10)
+  return
+10
+  call ms_message("Error closing file ")
+  call ms_add_to_message(name)
+  call ms_error(EOS)
+  stat = FI_IO_ERROR
+  return(false)
+  end
+
+  function q_fi_open_read(lun,file,filebk,filpro)
+  header
+  byte file(ARB)
+  include "finfo.cmn"
+  character*_arith(FILENAMESIZE,-,1) cfile
+_ifdef(VAX)
+  external gpopen
+_enddef
+
+# use character var for filename, not byte array because of bug when byte
+# array is more than 100 chars long
+  cfile = ' '
+  call movc(file, %ref(cfile), ho_length(file))
+  open(unit = lun, name = cfile, type = 'old',
+_ifdef(VAX)
+	useropen = gpopen, defaultfile = ' ',
+_enddef
+    	shared, readonly, err = 10)
+  filebk = ebk
+  filpro = pro
+  return(true)
+
+10
+  return(false)
+  end
+
+  function q_fi_open_write(lun,file,stat,filpro)
+  header
+  byte file(ARB),stat
+  include "finfo.cmn"
+  character*_arith(FILENAMESIZE,-,1) cfile
+_ifdef(VAX)
+  external gpcre8
+_enddef
+
+# use character var for filename, not byte array because of bug when byte
+# array is more than 100 chars long
+  cfile = ' '
+  call movc(file, %ref(cfile), ho_length(file))
+  pro = filpro
+  if (stat == 'N' & fi_find_version(file) == 0)
+    open(unit = lun, name = cfile, type = 'new', carriagecontrol = 'list',
+_ifdef(VAX)
+	  useropen = gpcre8, defaultfile = ' ',
+_enddef
+	  err = 10)
+  else
+    open(unit = lun, name = cfile, type = 'unknown', carriagecontrol = 'list',
+_ifdef(VAX)
+	  useropen = gpcre8, defaultfile = ' ',
+_enddef
+	  err = 10)
+  return(true)
+
+10
+  return(false)
+  end
+
+  function q_fi_delete(lun,file)
+  header
+  byte file(ARB)
+  character*_arith(FILENAMESIZE,-,1) cfile
+
+# use character var for filename, not byte array because of bug when byte
+# array is more than 100 chars long
+  cfile = ' '
+  call movc(file, %ref(cfile), ho_length(file))
+  open(unit = lun, name = cfile, type = 'old',
+_ifdef(VAX)
+	  defaultfile = ' ',
+_enddef
+	  err = 10)
+  close(unit = lun, dispose = 'delete', err = 5)
+  return(true)
+
+5
+  close(unit = lun, err = 10)
+
+10
+  return(false)
+  end
+
+_ifdef(VAX)
+
+# q_fi_find_file - return matching file names one-by-one
+  function q_fi_find_file(dummy, file, outfil, n, wild, clear_context)
+  header
+  byte file(FILENAMESIZE), outfil(FILENAMESIZE), ho_clower
+  logical wild, clear_context, insert_space, inquo
+  character*_arith(FILENAMESIZE,-,1) file_spec, result_spec
+  integer context, user_flags, status
+  save insert_space, file_spec, context, user_flags
+  data insert_space /false/, context /0/
+ 
+  if (n == 0) {
+    if (clear_context)
+      call lib$find_file_end(context)	# Clear file name defaults
+    if (wild)
+      user_flags = 2		# Multiple, allow wild
+    else
+      user_flags = 3		# Multiple, nowild
+    file_spec = ' '
+    for (i = 1; file(i) != EOS; i = i+1)
+      file_spec(i:i) = char(file(i))
+# the following code works around a bug in lib$find_file - it does not
+# work properly when the same wild file spec is given to it twice in a row
+# and user_flags is set for multiple; the work-around is to alternately
+# insert or not insert a space in front of file_spec
+    if (insert_space) {
+      file_spec(2:) = file_spec(1:)
+      file_spec(1:1) = ' '
+      }
+    insert_space = ! insert_space
+    }
+  nn = n
+  status = lib$find_file(file_spec, result_spec, context, , , , user_flags)
+  if ((status & 1) == 1)
+    n = n + 1
+  else
+    n = 0
+  if (n > 0 | nn == 0) {
+    rlen = len_trim(result_spec)
+    for ([inquo = false; i = 1]; i <= rlen; i = i+1) {
+      if (result_spec(i:i) == '"')
+	inquo = .not. inquo
+      if (inquo)
+	outfil(i) = ichar(result_spec(i:i))
+      else if (result_spec(i:i) == '>')
+	outfil(i) = ']'
+      else if (result_spec(i:i) == '<')
+	outfil(i) = '['
+      else
+	outfil(i) = ho_clower(ichar(result_spec(i:i)))
+      }
+    outfil(i) = EOS
+    vers = fi_find_version(outfil)
+    if (vers != 0)
+      if (fi_find_version(file) == 0)
+	outfil(vers) = EOS
+      else
+	outfil(vers) = ';'
+    status = status & 7			# isolate error severity bits
+    if (status == 0 | status == 2)	# Warning or Error severity
+      if (! q_fi_wild(outfil))
+	n = 1				# file is legal, but non-readable
+    }
+  return(n > 0)
+  end
+ 
+_elsedef
+
+# q_fi_find_file - return matching file names one-by-one
+  function q_fi_find_file(lun, file, outfil, n)
+  header
+  byte file(FILENAMESIZE), outfil(FILENAMESIZE)
+  integer lun, n,
+    saven, ierr
+  include "qiofn.cmn"
+
+  saven = n
+  if (saven == 0)
+    call qiofn(TT$OUT, IODET, 0, 0, ierr)
+  call fndfil(lun, file, outfil, n)
+  if (saven == 0)
+    call qiofn(TT$OUT, IOATT, 0, 0, ierr)
+  return(n > 0)
+  end
+
+_enddef
+
+# q_fi_wild - return true if file name contains wild card chars or switches
+  function q_fi_wild(file)
+  header
+  byte file(ARB)
+ 
+_ifdef(VAX)
+  if (file(ho_bkscnq(file, '/*%', 1)) != EOS)
+    return(true)
+  else {			# look for ...
+    ndots = 0
+    for (i = 1; file(i) != EOS  &  ndots < 3; i = i+1)
+      if (file(i) == '.')
+        ndots = ndots+1
+      else
+        ndots = 0
+    if (ndots == 3)
+      return(true)
+    }
+_elsedef
+  if (file(ho_bkscnq(file, '/*?', 1)) != EOS)
+    return(true)
+_enddef
+  return(false)
+  end
+
+  function fi_find_version(file)
+  header
+  byte file(ARB)
+
+  for ([ndots = 0; i = ho_length(file)]; i > 0; i = i - 1)
+    switch (file(i)) {
+      case '"', ':', '>', ']':
+        return(0)
+      case '.':
+	ndots = ndots+1
+	if (ndots == 1)
+	  fi_find_version = i
+	else
+	  return
+      case ';':
+	return(i)
+      }
+  return(0)
+  end
+
+  function q_fi_add_newline(f,rsize)
+  header
+
+_ifdef(VAX)
+
+  _undef(character)
+  integer f, rsize
+  character*20 rtype, crc, org
+ 
+  inquire(unit=f, recordtype=rtype, carriagecontrol=crc, organization=org,
+  		recl = rsize)
+  if (rtype == 'VARIABLE')
+    rsize = 0
+  if (crc == 'LIST'  |  crc == 'UNKNOWN'  |  rtype == 'FIXED' |
+      org != 'SEQUENTIAL')
+    return(true)
+  else if (crc == 'FORTRAN')
+    return(true)
+  else
+    return(false)
+
+_elsedef
+
+  integer f, cc, rtype, efbk, ffby, ier
+ 
+  call getcha(f, rtype, rsize, cc, efbk, ffby, ier)
+  if (rtype != 1)
+    rsize = 0
+  if ((cc  &  2) != 0 | rtype == 1)  # treat fixed length records as LIST
+    return(true)
+  else if ((cc  &  1) != 0)		# fortran cc
+    return(true)
+  else
+    return(false)
+
+_enddef
+
+  end

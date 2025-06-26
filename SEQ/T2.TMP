@@ -1,0 +1,40 @@
+$ sr bu_clear_text
+
+******************************
+COM$8:[WOOD.WINDOW]BUFFER.RAT;205
+
+  subroutine bu_clear_text(bu)
+  call bu_clear_text(se_current_buffer)
+
+******************************
+COM$8:[WOOD.WINDOW]FILEIO.RAT;173
+
+    call bu_clear_text(bu)
+
+******************************
+COM$8:[WOOD.WINDOW]REGION.RAT;49
+
+    call bu_clear_text(bu)
+
+******************************
+COM$8:[WOOD.WINDOW]TTY.RAT;64
+
+    call bu_clear_text(pu_buffer)		# purge push-back-buffer
+
+******************************
+COM$8:[WOOD.WINDOW.SEQ]BUFFER.RAT;206
+
+  subroutine bu_clear_text(bu)
+  call bu_clear_text(se_current_buffer)
+
+******************************
+COM$8:[WOOD.WINDOW.SEQ]MAPSEQ.RAT;2
+
+  call bu_clear_text(bu)
+
+******************************
+COM$8:[WOOD.WINDOW.WOOD]INTERFACE.RAT;19
+
+    call bu_clear_text(bu_out)
+	call bu_clear_text(bu_out)
+      call bu_clear_text(bu_in)

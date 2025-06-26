@@ -1,6 +1,0 @@
-declare int
-	pu_buffer;
-
-declare char
-	pu_tty_c,
-	pu_last_key_struck;

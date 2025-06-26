@@ -1,0 +1,122 @@
+#define ADM3A 1
+#define VT100 2
+#define ADM5 3
+#define VT52 4
+
+declare int
+	te_pos_x,
+	te_pos_y,
+	te_size_x,
+	te_size_y,
+	te_type;
+
+declare char
+	te_rv,			/* terminal has reverse video */
+	te_in,			/* terminal has insert line */
+	te_application_keypad;	/* set keypad to application mode */
+
+
+#if VMS
+#define BUFFER_SIZE 512
+
+declare int
+	ti_channel,
+	ti_count,
+	ti_ctrl_mask,
+	ti_lffill,
+	ti_width,
+	ti_length,
+	ti_flush_iofc,
+	ti_in_type_ahead_iofc,
+	ti_in_character_iofc,
+	ti_fast;
+
+declare char
+	ti_buffer[BUFFER_SIZE],
+	ti_character;
+
+
+#define MBX_SIZE 256
+
+declare struct {
+	int channel;
+	struct {
+		short int status;
+		short int byte_count;
+		variant_union {
+			long int sender_pid;
+			long int receiver_pid;
+			long int protection_mask;
+			} iosb_variant;
+		} iosb;
+	variant_union {
+		char buffer[MBX_SIZE];
+		struct {
+			short int type;
+			short int unit;
+			unsigned char controller_name_length;
+			char controller_name[15];
+			short int size;
+			char msg[MBX_SIZE - 22];
+			} bdcst;
+		} message_variant;
+	char name[11];
+	} mbx;
+
+
+#define TI_IN_EFN 1
+#define MBX_IN_EFN 2
+
+declare int
+	ef_in_mask;
+
+
+declare char
+	characteristics[12]
+
+declare struct {
+	short int status;
+	variant_union {
+		unsigned char ttspeed;
+		short int trm_offset;
+		} iosb_variant;
+	char filler_1;
+	unsigned char lffill;
+	short int trm_size;
+	} iosb;
+
+declare struct {
+	char class;
+	char type;
+	short int width;
+	variant_union {
+		long int characteristics;
+		variant_struct {
+			char filler_1[3];
+			unsigned char length;
+			} ttchar_variant_1;
+		} ttchar_variant_2;
+	long int extended_characteristics;
+	} ttchar;
+
+declare char
+	ttclass,
+	tttype,
+	ttlength,
+	ttspeed,
+	lffill
+
+  integer*2 iosb_status,ttwidth,trm_offset,trm_size
+  integer*4 ttchar,ttxchar
+  equivalence (characteristics(1), ttclass),
+	      (characteristics(2), tttype),
+	      (characteristics(3), ttwidth),
+	      (characteristics(5), ttchar),
+	      (characteristics(8), ttlength),
+	      (characteristics(9), ttxchar)
+  equivalence (iosb(1), iosb_status),
+	      (iosb(3), ttspeed),
+	      (iosb(3), trm_offset),
+	      (iosb(7), trm_size),
+	      (iosb(6), lffill)
+#endif

@@ -1,0 +1,40 @@
+_repdef(tx_map,for ($2 = $1; $2 != null; $2 = tx_next($2)))
+
+_repdef(bu_map_text,
+  for ($2 = bu_text($1); $2 != null;
+			  [$2 = tx_next($2); call tx_swap(bu_text($1), $2)]))
+bu_map_text(bu, tx)
+  type *,bu_base(bu)
+
+# Swap the contents of the head of a text buffer list with another text buffer
+#	down the list, maintaining the same pointers,
+#	unless tx is null, then move tx_next(head) to head, and head to
+#	the end of the list (circular left (counter-clockwise) shift).
+# This routine is used by the bu_map_text macro to make each text buffer
+#	the current buffer in turn, then end with the original ordered
+#	list of buffers.  Other uses may be found for this routine as well.
+  subroutine tx_swap(head, tx)
+  header
+  integer head_save(tx_sizeof)
+
+  tx1 = tx
+  if (tx1 == null)
+    tx1 = tx_next(head)
+  if (tx1 != null) {
+    call movc(me_mem(head), head_save, tx_sizeof*CHARS_PER_INT)
+    head_next_save = tx_next(head)
+    call movc(me_mem(tx1), me_mem(head), tx_sizeof*CHARS_PER_INT)
+    call movc(head_save, me_mem(tx1), tx_sizeof*CHARS_PER_INT)
+    if (tx == null) {		# put tx1 back at list end
+      tx_next(tx1) = null
+      tx_map(head, tx2)
+	last = tx2
+      tx_next(last) = tx1
+      }
+    else {
+      tx_next(tx1) = tx_next(head)
+      tx_next(head) = head_next_save
+      }
+    }
+  return
+  end

@@ -1,0 +1,68 @@
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "map.cmn"
+include "level.cmn")
+
+define(ELEMENT,integer*2)
+define(ELEMENT_SIZEOF,2)
+ 
+  subroutine levinit(xo, yo, zo, xs, ys, zs)
+  header
+
+  if (ys * xs > LEVELBUFSIZE)
+    return(FALSE)
+  le_page0 = -1
+  le_page1 = -1
+  le_xo = xo + ma_xoff
+  le_yo = yo + ma_yoff
+  le_zo = zo + ma_zoff
+  le_xs = xs
+  le_ys = ys
+  le_zs = zs
+  return(YES)
+  end
+ 
+ELEMENT *zget(z)		/* $page $title Get density plane at z */
+int z
+{
+  loop {
+    if (z == le_page0)
+      return(le_pb0)
+    else if (z == le_page1)
+      return(le_pb1)
+    else if (z >= le_zs)
+      return(NULL)
+    else if (le_page0 <= le_page1) {
+      plane_read(le_pb0, z)
+      le_page0 = z
+      }
+    else {
+      plane_read(le_pb1, z)
+      le_page1 = z
+      }
+    }
+}
+
+  subroutine plane_read(buf, z)
+  header
+  ELEMENT buf(0:0)
+  integer z
+  integer y, x
+
+  write(SYSOUT, ("Reading plane",i4)) z + le_zo
+  for ([y = 0; x = 0]; y < le_ys; [y = y + 1; x = x + le_xs])
+    call row_read(buf(x), z, y)
+  return
+  end
+ 
+  subroutine row_read(buf, z, y)
+  header
+  ELEMENT buf(0:0)
+  integer y, z
+  integer*4 rec_num
+ 
+  rec_num = z + le_zo
+  rec_num = rec_num*ma_ny + y + le_yo
+  byte_num = le_xo*ELEMENT_SIZEOF
+  call read_map(rec_num, byte_num, buf, le_xs*ELEMENT_SIZEOF)
+  return
+  end

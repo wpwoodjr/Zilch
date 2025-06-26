@@ -1,0 +1,102 @@
+
+TEST                                                             9-JAN-1989 12:24:26    VAX C      V2.3-024                 Page 1
+V1.0                                                             9-JAN-1989 12:24:23    COM$8:[WOOD.WINDOW.WOOD.C]TEST.C;12 (1)
+
+
+
+    1        	#include "symbols.h"
+  546        	#include "tables.cmn"
+  606        	
+  607        	test()
+  608        	{
+                                          0000	test:
+                                    007C  0000		.entry	test,^m<r2,r3,r4,r5,r6>
+                              5E 04 C2    0002		subl2	#4,sp
+                     56 00000000 EF 9E    0005		movab	TA_CLOW,r6
+
+  609    1   		register char *tp = ta_clow + 128;
+                              54 66 DE    000C		moval	(r6),r4
+                     54 00000080 8F C0    000F		addl2	#128,r4
+
+  610    1   		char cl, c = y(1);
+                                 01 DD    0016		pushl	#1
+                    00000000* EF 01 FB    0018		calls	#1,Y
+                              55 50 F6    001F		cvtlb	r0,r5
+
+  611    1   	
+  612    1   		cl = ta_clow[128 + c];
+                              52 55 98    0022		cvtbl	r5,r2
+                  5C 52 00000080 8F C1    0025		addl3	#128,r2,ap
+
+  613    1   		x(cl);
+                            7E 664C 98    002D		cvtbl	(r6)[ap],-(sp)
+                    53 00000000* EF 9E    0031		movab	X,r3
+                              63 01 FB    0038		calls	#1,(r3)
+
+  614    1   		cl = *(ta_clow + 128 + c);
+                              5C 66 DE    003B		moval	(r6),ap
+                     5C 00000080 8F C0    003E		addl2	#128,ap
+                              5C 52 C0    0045		addl2	r2,ap
+
+  615    1   		x(cl);
+                              7E 6C 98    0048		cvtbl	(ap),-(sp)
+                              63 01 FB    004B		calls	#1,(r3)
+
+  616    1   		cl = tp[c];
+  617    1   		x(cl);
+                            7E 6442 98    004E		cvtbl	(r4)[r2],-(sp)
+                              63 01 FB    0052		calls	#1,(r3)
+
+  618    1   		cl = *(tp + c);
+                              54 52 C0    0055		addl2	r2,r4
+
+  619    1   		x(cl);
+                              7E 64 98    0058		cvtbl	(r4),-(sp)
+                              63 01 FB    005B		calls	#1,(r3)
+
+  620    1   		cl = ta_clow[(unsigned char) c];
+                              5C 55 9A    005E		movzbl	r5,ap
+
+  621    1   		x(cl);
+                            7E 664C 98    0061		cvtbl	(r6)[ap],-(sp)
+
+TEST                                                             9-JAN-1989 12:24:26    VAX C      V2.3-024                 Page 2
+V1.0                                                             9-JAN-1989 12:24:23    COM$8:[WOOD.WINDOW.WOOD.C]TEST.C;12 (1)
+
+                              63 01 FB    0065		calls	#1,(r3)
+
+  622    1   	}
+                                    04    0068		ret	
+
+  623        	y(int x)
+  624        	{
+                                          0069	y:
+                                    0000  0069		.entry	y,^m<>
+                              5E 04 C2    006B		subl2	#4,sp
+
+  625    1   		return -1;
+                              50 01 CE    006E		mnegl	#1,r0
+                                    04    0071		ret	
+
+  626    1   	}
+  627        	x(int c)
+  628        	{
+                                          0072	x:
+                                    0000  0072		.entry	x,^m<>
+                              5E 04 C2    0074		subl2	#4,sp
+
+  629    1   		printf("%d",c);
+                              04 AC DD    0077		pushl	4(ap)
+                        00000000 EF DF    007A		pushal	$CHAR_STRING_CONSTANTS
+                    00000000* EF 02 FB    0080		calls	#2,PRINTF
+
+  630    1   	}
+                                    04    0087		ret	
+
+ 
+ 
+Command Line
+------------
+ 
+CC/LIS/NOOBJ/MACH TEST.C
+

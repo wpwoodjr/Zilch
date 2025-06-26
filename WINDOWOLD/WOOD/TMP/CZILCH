@@ -1,4 +1,0 @@
-  common /czilch/ bu_in, bu_out, bu_in_dot, bu_out_marker, bu_in_marker,
-      tx_in_pointer
-    integer bu_in, bu_out, bu_in_dot, bu_out_marker, bu_in_marker,
-      tx_in_pointer

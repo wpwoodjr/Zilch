@@ -1,0 +1,184 @@
+;	Zilch Screen Editor, Copyright (c) 1982,1983,1984 William P. Wood, Jr.
+;
+	.title	icr_gp_open_create
+;
+; Function to do a Fortran useropen for "old" files for get and put.
+;
+;	status = icr_gp_open(fab, rab, unit)
+;
+; inputs:
+;	fab is the fab
+;	rab is the rab
+;	unit is the unit number
+;
+; outputs:
+;	status - standard VAX/VMS status code
+;	ebk (in finfo common) - end of file block or, occasionally,
+;				when ebk information is unavailable,
+;				number of blocks allocated to file
+;	pro (in finfo common) - file protection of opened file
+;
+	$xabfhcdef
+	$xabprodef
+	.psect	gp	pic,usr,ovr,rel,gbl,shr,noexe,rd,wrt,novec,long
+nunits=100
+rabs:	.blkl	nunits			; array maps units to rab addresses
+;
+	.psect	finfo	pic,usr,ovr,rel,gbl,shr,noexe,rd,wrt,novec,long
+ebk:
+	.long	0			; end-of-file block
+pro:
+	.word	0			; file protection
+	.align	long
+proxab:
+	$xabpro				; xab to get/set protection information
+	.align	long
+fhcxab:
+	$xabfhc				; file header characteristics xab
+;
+	.psect	icr_code,pic,usr,con,rel,lcl,shr,exe,rd,nowrt,novec,long
+fab=4					; offset for fab address
+rab=8					; offset for rab address
+unit=12					; offset from ap for unit address
+;
+icr_gp_open::
+gpopen::
+	.word	^m<r2,r3>
+	movl	fab(ap),r3		; fab address
+	bbs	#fab$v_put,fab$b_fac(r3),10$	; see if user set read-only
+	bicb2	#fab$m_shrput!fab$m_shrdel!fab$m_shrupd,-
+		fab$b_shr(r3)		; clear out record-locking operations
+					; if readonly was set
+10$:
+	moval	proxab,r2
+	bsbw	link_xab		; link in proxab
+	moval	fhcxab,r2
+	bsbw	link_xab		; link in fhcxab
+	$open	fab=r3			; open the file
+	blbc	r0,error		; low bit clear => error
+connect:
+	movb	#xab$c_fhc,r2
+	bsbw	find_xab		; get fhcxab address
+	beql	5$			; use alq if fhcxab absent
+	movl	xab$l_ebk(r0),ebk	; get eof-block #
+	bneq	10$			; use it if not 0
+5$:
+	movl	fab$l_alq(r3),ebk	; else use alq (cause of decnet files)
+10$:
+	movb	#xab$c_pro,r2
+	bsbw	find_xab		; get proxab address
+	movw	xab$w_pro(r0),pro	; get file protection
+	$connect rab=@rab(ap)		; connect the rab
+	blbc	r0,error		; low bit clear => error
+	movl	@unit(ap),r2		; get unit
+	movl	rab(ap),rabs[r2]	; set rab address for this unit
+error:
+	moval	fhcxab,r2
+	bsbb	unlink_xab		; unlink fhcxab
+	moval	proxab,r2
+	bsbb	unlink_xab		; unlink proxab
+	ret
+
+;
+; Function to do a Fortran useropen for "new", "unknown", or
+;	"scratch" files for get and put.
+;
+;	status = icr_gp_create(fab, rab, unit)
+;
+; inputs:
+;	fab is the fab
+;	rab is the rab
+;	unit is the unit number
+;	pro (in finfo common) is the desired file protection
+;
+; outputs:
+;	status - standard VAX/VMS status code
+;	pro (in finfo common) - file protection of opened file
+;
+fab=4					; offset for fab address
+rab=8					; offset for rab address
+unit=12					; offset from ap for unit address
+;
+icr_gp_create::
+gpcre8::
+	.word	^m<r2,r3>
+	movl	fab(ap),r3		; fab address
+	bbs	#fab$v_put,fab$b_fac(r3),10$	; see if user set read-only
+	bicb2	#fab$m_shrput!fab$m_shrdel!fab$m_shrupd,-
+		fab$b_shr(r3)		; clear out record-locking operations
+					; if readonly was set
+10$:
+	moval	proxab,r2
+	bsbb	link_xab		; link in proxab
+	movw	pro,xab$w_pro(r0)	; set file protection
+	movl	#0,xab$l_uic(r0)	; default to process UIC
+	$create	fab=r3			; open the file
+	blbc	r0,error		; low bit clear => error
+  	brw	connect			; go connect the rab
+
+;
+;  Subroutine to link a xab into the xab list of a fab if a
+;  xab of same type is not already present in the xab list.
+;
+;  Inputs:
+;	r2 - address of xab
+;	r3 - address of fab
+;
+;  Ouputs:
+;	r0 - address of linked or found xab
+;	r1 - junked
+;	r2 - junked
+;
+link_xab:
+	movl	r2,r1
+	movb	xab$b_cod(r1),r2	; get type of this xab
+	bsbb	find_xab		; see if similar xab already present
+	bneq	10$			; found one, return it's address
+	movl	fab$l_xab(r3),xab$l_nxt(r1) ; link in the xab
+	movl	r1,fab$l_xab(r3)
+	movl	r1,r0			; return address of linked xab in r0
+10$:
+	rsb
+
+;
+;  Subroutine to unlink a xab from the front of a fab's xab list
+;  if the xab is there
+;
+;  Inputs:
+;	r2 - address of xab
+;	r3 - address of fab
+;
+;  Ouputs:
+;	none
+;
+unlink_xab:
+	cmpl	r2,fab$l_xab(r3)	; xab at front of list?
+	bneq	10$			; no, return
+	movl	xab$l_nxt(r2),fab$l_xab(r3) ; unlink the xab
+10$:
+	rsb
+
+;
+;  Subroutine to find a particular type of xab in the xab list of a fab
+;
+;  Inputs:
+;	r2 - type of xab
+;	r3 - address of fab
+;
+;  Ouputs:
+;	r0 - address of found xab, zero if not found
+;	condition codes - set by TESTL R0 to detect if r0 is zero or
+;				contains an address
+;
+find_xab:
+	movl	fab$l_xab(r3),r0	; get first xab
+	beql	20$			; didn't find xab - return
+10$:
+	cmpb	r2,xab$b_cod(r0)	; is desired xab type?
+	beql	20$			; yes
+	movl	xab$l_nxt(r0),r0	; get next xab
+	bneq	10$			; branch to check next xab
+20$:
+	tstl	r0			; set condition codes
+	rsb
+	.end

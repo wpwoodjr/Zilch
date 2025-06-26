@@ -1,2 +1,0 @@
-WOOD
-STODOLA

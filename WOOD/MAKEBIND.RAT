@@ -1,0 +1,505 @@
+# Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  common /err/ error
+    logical error
+  include "bind.cmn")
+
+define(BI_MEM_SIZE,20000)
+
+_undef(true)
+_undef(false)
+define(trim,$1(1:len_trim($1)))
+
+  header
+  logical parse, code, restart
+  character*129 cline, file, fncfile, dat, dat2
+  character*80 funcs(500), curfunc
+  integer funcn(500)
+
+  code = .false.
+  error = .false.
+  call lib$get_foreign(cline)
+  if (! parse(cline, file))
+    call exit(16%10000002)
+  if (file == '/CODE') {
+    code = .true.
+    if (! parse(cline, file))
+      call exit(16%10000002)
+    open(unit=4, name=file//'.rat', type='new', carriagecontrol='list')
+    open(unit=7, type='scratch', carriagecontrol='list')
+    }
+  inlun = 11
+  open(unit=inlun, name=file//'.bnd', type='old', readonly, err=10)
+  if (code)
+    open(unit=3, name=file//'.fnc', type='new', carriagecontrol='list')
+  else {
+    if (! parse(cline, fncfile))
+      call exit(16%10000002)
+    open(unit=3, name=fncfile, type='old', carriagecontrol='list', readonly)
+    }
+  do i = 0, NUM_MODES-1
+    bi_modes(i) = null
+  do i = 0, NUM_MACROS-1
+    bi_macros(i) = null
+  bi_free = 1
+  bi_max = BI_MEM_SIZE
+  bi_modes(CONTROL_MODE) = bi_allocate(128)
+  bi_mem(bi_modes(CONTROL_MODE)) = - 1		# function for QIO error
+  bi_mem(bi_modes(CONTROL_MODE) + 8%31) = -3	# function for ^Y interrupt
+  call bi_use_keymap(CONTROL_MODE)
+  bi_keypad = KEYPAD_NUMERIC
+  do i = 0, 127
+    bi_alternate_escape_followers(i) = .false.
+  bi_alternate_escape = EOS
+  lastfunc = 0
+  repeat {
+  restart = .false.
+  funcnum = 0
+  funcoffset = lastfunc
+  macro = -1					# not defining a macro
+  codelun = 4
+  if (code) {
+    rewind 7
+    write(7, ('       ), cmd'))
+    write(7, ('      unbound_key_sequence'))
+    write(7, ('      end_function_definition'))
+    write(7, ('2001  qio_error'))
+    write(7, ('      end_function_definition'))
+    write(7, ('2002  qio_error_in_insert_mode'))
+    write(7, ('      end_function_definition'))
+    write(7, ('2003  control_y_interrupt'))
+    }
+  repeat {
+    read(inlun,(q,a),end=1) nch,dat2
+    if (.false.) {
+1     close(unit=inlun)
+      inlun = inlun - 1
+      if (inlun == 10)
+	goto 5
+      next
+      }
+    if (nch == 0)
+      ;
+    else if (dat2(1:1) == ' ' | dat2(1:1) == char(8%11)) {
+      if (code & funcnum > 0) {
+	write(7, ('      end_function_definition'))
+	write(7, (i4,t51,'# ',a)) funcnum + 1000,
+				  trim(curfunc)
+	write(7, (a)) dat2(1:nch)
+	funcnum = 0
+	}
+      else if (macro >= 0) {			# defining a macro
+	if (bi_macros(macro) == null) {
+	  bi_macros(macro) = bi_free
+	  mlen = 0
+	  }
+	else
+	  mlen = bi_mem(bi_macros(macro))
+	call esc(dat2(1:nch), dat, ilen, funcend, low, high, .false., .false.)
+	bi_free = bi_macros(macro) + 1 + (mlen + ilen + 1)/2
+	if (bi_free > bi_max + 1)
+	  stop "Macro overflow!"
+	call copy(%ref(dat), ilen, bi_mem(bi_macros(macro) + 1), mlen)
+	bi_mem(bi_macros(macro)) = mlen
+	}
+      else if (code)
+	write(codelun, (a)) dat2(1:nch)
+      }
+    else {
+      call esc(dat2(1:nch), dat, ilen, funcend, low, high, .true., .true.)
+      if (funcend == 0)
+	next
+      funcnum = 0
+      macro = -1				# not defining a macro
+      if (dat(1:5) == 'MODE_' & funcend > 5) {
+	decode(funcend - 5, (i<funcend - 5>), dat(6:funcend), err=6) mode
+	if (mode < 0 | mode >= NUM_MODES) {
+6	  write(6,(' Illegal keypad mode: ',a)) dat(1:funcend)
+	  error = .true.
+	  }
+	else
+	  funcnum = mode + 4000
+	}
+      else if (dat(1:12) == 'UDK_REPLACE_' & funcend > 12) {
+	decode(funcend - 12, (i<funcend - 12>), dat(13:funcend), err=601) unum
+	if (unum < 0 | unum >= MAX_MACROS) {
+601	  write(6,(' Illegal macro number: ',a)) dat(1:funcend)
+	  error = .true.
+	  }
+	else
+	  funcnum = 3000 + unum
+	}
+      else if (dat(1:4) == 'UDK_' & funcend > 4) {
+	decode(funcend - 4, (i<funcend - 4>), dat(5:funcend), err=603) unum
+	if (unum < 0 | unum >= MAX_MACROS) {
+603	  write(6,(' Illegal macro number: ',a)) dat(1:funcend)
+	  error = .true.
+	  }
+	else
+	  funcnum = 2000 + unum
+	}
+      else if (dat(1:6) == 'MACRO_' & funcend > 6) {
+	if (dat(1:funcend) == 'MACRO_X') {
+	  macro = -1
+	  do i = NUM_MACROS - 1, 0, - 1
+	    if (bi_macros(i) == NULL) {
+	      macro = i
+	      break
+	      }
+	  if (macro == -1) {
+	    write(6,(' Too many macros!'))
+	    error = .true.
+	    }
+	  }
+	else
+	  decode(funcend - 6, (i<funcend - 6>), dat(7:funcend), err=7) macro
+	if (macro < 0 | macro >= NUM_MACROS) {
+7	  write(6,(' Illegal macro: ',a)) dat(1:funcend)
+	  error = .true.
+	  }
+	else {
+	  funcnum = macro + 1000
+	  if (bi_macros(macro) != null)		# already defined?
+	    macro = -1				# not defining a macro
+	  }
+	}
+      else if (code & dat(1:1) != '%') {
+	for (funcnum = 1; funcnum <= lastfunc; funcnum = funcnum + 1)
+	  if (funcs(funcnum) == dat(1:funcend))
+	    break
+	if (funcnum > lastfunc) {
+	  lastfunc = funcnum
+	  if (lastfunc > 500)
+	    stop "too many functions"
+	  funcs(lastfunc) = dat(1:funcend)
+	  funcn(lastfunc) = lastfunc - funcoffset
+	  write(3,(a)) dat(1:funcend)
+	  if (codelun == 4) {
+# 2001 is for a QIO error while not in INSERT mode
+# 2002 is for a QIO error while in INSERT mode
+# 2003 is for a CONTROL-Y interrupt
+	    write(4, ('      goto (2001, 2002, 2003 _'))
+	    codelun = 7
+	    }
+	  write(4, ('       ,', i5, ' _')) funcn(lastfunc) + 1000
+	  }
+	curfunc = funcs(funcnum)
+	funcnum = funcn(funcnum)
+	}
+      dat(ilen+1:ilen+1) = char(0)
+      if (funcend == ilen & dat(1:1) != '%')	# function is not bound
+	;
+      else if (high != 0) {			# bind a range of characters
+	while (ichar(dat(low:low)) <= ichar(dat(high:high))) {
+	  call bindit(dat(1:funcend), dat(funcend+1:low)// _
+		      dat(high+1:ilen+1), funcnum, inlun, restart)
+	  dat(low:low) = char(ichar(dat(low:low)) + 1)
+	  }
+	}
+      else
+	call bindit(dat(1:funcend), dat(funcend+1:ilen+1),
+				  funcnum, inlun, restart)
+      if (funcnum >= 1000)			# mode or macro function
+	funcnum = 0
+      }
+    } until (restart)
+5
+  if (code) {
+    rewind 7
+    repeat {
+      read(7, (q,a), end=8) nch, dat2
+      write(4, (a)) dat2(1:nch)
+      }
+8     continue
+    }
+  if (restart & code)
+    write(3,(a)) ' '
+  } until (! restart)
+  if (error)
+    call exit(16%10000002)
+  bl = index(file,']')
+  dl = index(file(bl+1:), '.')
+  if (dl != 0)
+    file(bl + dl:) = ' '
+  open(unit=2, name=file//'.bor', type='new', carriagecontrol='list')
+  inquire(unit=2,name=file)
+  call write_block_data
+  call exit(1)
+10
+  write(6,(' Can''t open ',a)) trim(file)
+  call exit(16%10000002)
+  end
+
+  subroutine esc(dat, outdat, ilen, funcend, low, high, dorange, upcase)
+  implicit integer (a - z)
+  character*(*) dat, outdat
+  logical dorange, upcase
+  character*1 c
+
+  nch = len(dat)
+  ilen = 0
+  funcend = 0
+  low = 0
+  high = 0
+  for (i1 = 1; i1 <= nch; i1 = i1 + 1) {
+    switch (ichar(dat(i1:i1))) {
+      case '-':
+	if (dorange) {
+	  low = ilen
+	  high = ilen + 2
+	  ilen = ilen+1
+	  outdat(ilen:ilen) = char(0)
+	  }
+	else {
+	  ilen = ilen+1
+	  outdat(ilen:ilen) = dat(i1:i1)
+	  if (upcase)
+	    call str$upcase(outdat(ilen:ilen), outdat(ilen:ilen))
+	  }
+      case ' ','@t':
+	if (funcend == 0)
+	  funcend = ilen
+      case '#':
+	break
+      case '^':
+	i1 = i1 + 1
+	ilen = ilen + 1
+	c = dat(i1:i1)
+	call str$upcase(c, c)
+	outdat(ilen:ilen) = char(ichar(c) - 8%100)
+      case '\':
+	i1 = i1 + 1
+	switch (ichar(dat(i1:i1))) {
+	  case '0'-'9':
+	    n = 0
+	    repeat {
+	      n = n*8 + (index('0123456789',dat(i1:i1)) - 1)
+	      i1 = i1 + 1
+	      } until (index('0123456789', dat(i1:i1)) == 0 | i1 > nch)
+	    i1 = i1 - 1
+	    ilen = ilen+1
+	    outdat(ilen:ilen) = char(n)
+	  default:
+	    ilen = ilen+1
+	    outdat(ilen:ilen) = dat(i1:i1)
+	  }
+	c = outdat(ilen:ilen)
+	if ((c >= 'A' & c <= 'Z') | (c >= 'a' & c <= 'z'))
+	  outdat(ilen:ilen) = char(- ichar(c))
+      default:
+	ilen = ilen+1
+	outdat(ilen:ilen) = dat(i1:i1)
+	if (upcase)
+	  call str$upcase(outdat(ilen:ilen), outdat(ilen:ilen))
+      }
+    }
+  if (funcend == 0)
+    funcend = ilen
+  return
+  end
+
+  subroutine bindit(func, keystrokes, funcnum, inlun, restart)
+  header
+  character*(*) func, keystrokes
+  character*80 funcs(500)
+  integer funcn(500)
+  byte c
+  logical first, restart
+  data first /.true./
+
+  if (func == '%MODE') {
+    if (trim(keystrokes) == 'CONTROL')
+      mode = CONTROL_MODE
+    else if (trim(keystrokes) == 'INSERT')
+      mode = INSERT_MODE
+    else if (trim(keystrokes) == 'OVERSTRIKE')
+      mode = OVERSTRIKE_MODE
+    else if (trim(keystrokes) == 'PROMPT')
+      mode = PROMPT_MODE
+    else if (trim(keystrokes) == 'CHANGE')
+      mode = CHANGE_MODE
+    else if (trim(keystrokes) == 'SEQ')
+      mode = SEQ_MODE
+    else if (trim(keystrokes) == 'CALC')
+      mode = CALC_MODE
+    else {
+      lk = len(keystrokes) - 1
+      decode(lk, (i<lk>), keystrokes(1:kl), err=5) mode
+      if (mode < 0 | mode >= NUM_MODES) {
+5	write(6, (' Illegal mode: ',a)) trim(keystrokes)
+	error = .true.
+	mode = -1
+	}
+      }
+    if (mode != -1) {
+      if (bi_modes(mode) == null) {
+	bi_modes(mode) = bi_allocate(128)
+	if (mode == INSERT_MODE)
+	  bi_mem(bi_modes(mode)) = - 2		# QIO error while in INSERTMODE
+	else
+	  bi_mem(bi_modes(mode)) = - 1		# QIO error while in other mode
+	bi_mem(bi_modes(mode) + 8%31) = - 3	# function for ^Y interrupt
+	}
+      call bi_use_keymap(mode)
+      }
+    }
+  else if (func == '%KEYPAD') {
+    if (trim(keystrokes) == 'NUMERIC')
+      bi_keypad = KEYPAD_NUMERIC
+    else if (trim(keystrokes) == 'APPLICATION')
+      bi_keypad = KEYPAD_APPLICATION
+    else {
+      write(6, (' Illegal keypad mode: ',a)) trim(keystrokes)
+      error = .true.
+      }
+    }
+  else if (func == '%INCLUDE') {
+    inlun = inlun + 1
+    open(unit=inlun, name=trim(keystrokes), defaultfile='.bnd',
+		      type='old', readonly, err=99)
+    }
+  else if (func == '%RESTART') {
+    restart = .true.
+    }
+  else if (func == '%ALTERNATE_ESCAPE') {
+    c = ichar(keystrokes(1:1))
+    if (c <= 0 | len(keystrokes) != 2) {
+      write(6, (' Illegal alternate escape character: ',a)) trim(keystrokes)
+      error = .true.
+      }
+    else
+      bi_alternate_escape = c
+    }
+  else if (funcnum != 0) {
+    if (funcnum >= 1000)			# mode or macro function
+      call bi_bind_to_key(funcnum, %ref(keystrokes))
+    else
+      call bi_bind_to_key(funcnum + 3, %ref(keystrokes))
+    }
+  else {
+    if (first) {
+      first = .false.
+      i = 1
+      for (nfunc = 0; ; ) {
+	if (nfunc >= 500)
+	  stop "too many functions"
+	read(3,(a),end=8) funcs(nfunc+1)
+	funcn(nfunc+1) = i + 3
+	i = i + 1
+	if (funcs(nfunc+1) == ' ')			# restart?
+	  i = 1
+	else
+	  nfunc = nfunc + 1
+	}
+8     continue
+      }
+    for (i = 1; i <= nfunc; i = i + 1)
+      if (funcs(i) == func)
+	break
+    if (i > nfunc) {
+      write(6,(' Unrecognized function: ',a)) func
+      error = .true.
+      }
+    else
+      call bi_bind_to_key(funcn(i), %ref(keystrokes))
+    }
+  return
+99
+  write(6,(' Can''t open ',a)) trim(keystrokes)
+  call exit(16%10000002)
+  end
+
+  subroutine write_block_data
+  header
+  integer*2 bi_stuff(1),bi_mem_extend(BI_MEM_SIZE)
+  equivalence (bi_stuff,bi_mode),
+	      (bi_mem_extend, bi_mem)
+
+  bi_max = bi_free - 1
+  common_size = (%loc(bi_mem(bi_free)) - %loc(bi_stuff))/2
+  if (bi_free == 1) {
+    common_size = common_size + 1		# For null binding files
+    bi_mem(1) = 0
+    }
+  write(2, ('      block data bi_data'))
+  write(2, ('      common /bind/ bi_stuff(',i10,')')) common_size
+  write(2, ('      integer*2 bi_stuff'))
+  do i = 1, common_size
+    write(2, ('      data bi_stuff(',i10,') /',i10,'/')) i, bi_stuff(i)
+  write(2, ('      end'))
+  close(unit=2)
+  return
+  end
+
+  byte function get_tty_character
+
+  stop 'Huh?'
+  end
+
+  subroutine ms_report_number(s1, n, s2)
+  implicit integer (a - z)
+  byte s1(1), s2(1), buf(132)
+
+  call ho_scopy(s1, 1, buf, 1)
+  lb = ho_length(buf)
+  lb = lb + ho_itoc(n, buf(lb+1), 132-lb)
+  call ho_scopy(s2, 1, buf, lb+1)
+  lb = ho_length(buf)
+  write(6,(' ',<lb>a1)) (buf(i),i=1,lb)
+  return
+  end
+
+  subroutine ms_error(s1)
+  header
+  byte s1(1)
+
+  error = .true.
+  lb = ho_length(s1)
+  if (lb > 0)
+    write(6,(' ',<lb>a1)) (s1(i),i=1,lb)
+  return
+  end
+
+  subroutine copy(s1, s1len, s2, s2len)
+  integer s1len, s2len
+  byte s1(1), s2(1)
+
+  do i = 1, s1len {
+    s2len = s2len + 1
+    s2(s2len) = s1(i)
+    }
+  return
+  end
+
+define(dellb,{ if ($1 != ' ') while ($1(1:1) == ' ') $1 = $1(2:) })
+  logical function parse(line, out)
+  implicit integer (a-z)
+  character*(*) line, out
+
+  dellb(line)
+  if (line == ' ')
+    return(.false.)
+  if (line(1:1) == '/') {
+    idxsl = index(line(2:), '/')
+    if (idxsl > 0)
+      idxsl = idxsl + 1
+    idxs = index(line, ' ')
+    if ((idxs > idxsl | idxs == 0) & idxsl != 0)
+      idxs = idxsl
+    }
+  else {
+    idxc = index(line, ',')
+    if (idxc != 0)
+      line(idxc:idxc) = ' '
+    idxs = index(line, ' ')
+    }
+  if (idxs == 0)
+    idxs = len(line) + 1
+  out = line(1:idxs-1)
+  if (idxs > len(line))
+    line = ' '
+  else
+    line = line(idxs:)
+  return(.true.)
+  end

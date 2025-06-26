@@ -1,0 +1,8 @@
+declare int
+	ma_next,
+	ma_len[MAX_MACROS],
+	ma_start[MAX_MACROS];
+
+declare char
+	ma_defining_macro,
+	ma_text[MACRO_SIZE];

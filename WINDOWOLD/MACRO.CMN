@@ -1,9 +1,0 @@
-common /macro/ ma_next, ma_len(MAX_MACROS), ma_start(MAX_MACROS),
-	       ma_defining_macro, ma_text(MACRO_SIZE)
-
-  integer ma_next, ma_len, ma_start
-  logical*1 ma_defining_macro
-  byte ma_text
-
-  data ma_next /1/, ma_len /MAX_MACROS*0/,
-	ma_defining_macro /false/, ma_start /MAX_MACROS*1/

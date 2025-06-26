@@ -1,0 +1,18 @@
+  # Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986,1987 William P. Wood, Jr.
+  # Keyboard bindings and function definitions for Sequence Editor Zilch
+
+%keypad					application	# {numeric,application}
+%include				seq.bnd		# sequence bindings
+
+%restart						# prompt subroutines
+%include				[\-]prompt.bnd
+
+%restart						# change subroutines
+%include				[\-]change.bnd
+
+%restart						# calc subroutines
+%include				[\-]calc.bnd
+
+%include				[\-.wood]vt.bnd	# VTxxx bindings
+
+%mode					control

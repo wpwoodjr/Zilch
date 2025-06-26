@@ -1,6 +1,0 @@
-%	include '($ssdef)'
-%	include '($iodef)'
-%	include '($ttdef)'
-%	include '($tt2def)'
-%	include '($dcdef)'
-%	include '($dvidef)'

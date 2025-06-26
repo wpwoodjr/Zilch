@@ -1,3 +1,0 @@
-_repdef(SEQ,5)
-_repdef(bu_seq,bu_sub_buffers(bu_parent($1)))
-_repdef(wi_seq,wi_sub_windows(wi_parent($1)))

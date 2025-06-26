@@ -1,8 +1,0 @@
-common /bind/ bi_mode, bi_modes(0:NUM_MODES-1), bi_keypad,
-	      bi_macros(0:NUM_MACROS-1),
-	      bi_free, bi_max, bi_alternate_escape, bi_filler,
-	      bi_alternate_escape_followers(0:127), bi_mem(1)
-
-  integer*2 bi_mode, bi_modes, bi_keypad, bi_macros, bi_free, bi_max, bi_mem
-  byte bi_alternate_escape, bi_filler
-  logical*1 bi_alternate_escape_followers

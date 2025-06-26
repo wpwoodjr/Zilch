@@ -1,0 +1,13 @@
+declare int
+	pa_highest_n
+#ifdef initialize
+			= 0
+#endif
+	;
+
+declare pagep
+	pa_last_page
+#ifdef initialize
+			= null
+#endif
+	;

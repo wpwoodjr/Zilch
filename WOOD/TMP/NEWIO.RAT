@@ -1,0 +1,87 @@
+define(header,implicit integer (a - z)
+  include "[--]memory.cmn"
+  include "[--]session.cmn"
+  include "czilch")
+
+include "[--]buffer.sym"
+
+  function getlin(buf)
+  header
+  byte buf(MAXLINE),c
+
+  if (se_error_occurred) {
+    bu_out_marker = bu_size(bu_out) + 1
+    buf(1) = EOF
+    buf(2) = EOS
+    return(EOF)
+    }
+  if (bu_in_dot > bu_size(bu_in)) {
+    if (bu_in_dot == bu_in_marker)
+      bu_out_marker = bu_size(bu_out) + 1
+    buf(1) = EOF
+    buf(2) = EOS
+    return(EOF)
+    }
+  tx = bu_base(bu_in) + bu_in_dot
+  call tx_find_newline(tx,bu_gap(bu_in),bu_gap_size(bu_in),tx_text)
+  len = tx - bu_base(bu_in) - bu_in_dot
+  if (bu_in_dot <= bu_in_marker)
+    if (bu_in_dot + len > bu_in_marker)
+      bu_out_marker = bu_size(bu_out) + 1
+  if (len < MAXLINE)
+    call movc(tx_text(tx_address(bu_in, bu_in_dot)), buf, len)
+  else {
+    call ms_error("Input line too long!")
+    buf(1) = EOF
+    buf(2) = EOS
+    bu_out_marker = bu_size(bu_out) + 1
+    return(EOF)
+    }
+  bu_in_dot = bu_in_dot + len
+  buf(len + 1) = EOS
+  return(len)
+  end
+
+  logical function q_getch(c)
+  header
+  byte c
+
+  if (se_error_occurred) {
+    bu_out_marker = bu_size(bu_out) + 1
+    c = EOF
+    return(.false.)
+    }
+  if (bu_in_dot > bu_size(bu_in)) {
+    if (bu_in_dot == bu_in_marker)
+      bu_out_marker = bu_size(bu_out) + 1
+    c = EOF
+    return(.false.)
+    }
+  c = tx_text(tx_in_pointer + bu_in_dot)
+  if (bu_in_dot == bu_in_marker)
+    bu_out_marker = bu_size(bu_out) + 1
+  bu_in_dot = bu_in_dot + 1
+  return(.true.)
+  end
+
+  subroutine putch(c)
+  header
+  byte c
+
+  if (bu_gap_size(bu_out) <= 0)
+    call tx_more_memory_please(bu_out,4*512)
+  tx_text(bu_gap(bu_out)) = c
+  bu_gap(bu_out) = bu_gap(bu_out) + 1
+  bu_gap_size(bu_out) = bu_gap_size(bu_out) - 1
+  bu_size(bu_out) = bu_size(bu_out) + 1
+  return
+  end
+
+  subroutine putlin(buf)
+  header
+  byte buf(ARB)
+
+  for (i = 1; buf(i) != EOS; i = i + 1)
+    call tx_add_character(bu_out, buf(i))
+  return
+  end

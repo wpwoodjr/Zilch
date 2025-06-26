@@ -1,5 +1,0 @@
-  common /page/ pa_highest_n, pa_last_page
-
-    integer pa_highest_n, pa_last_page
-
-    data pa_highest_n /0/, pa_last_page /null/

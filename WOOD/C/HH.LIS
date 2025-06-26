@@ -1,0 +1,223 @@
+
+HH                                                              16-NOV-1987 12:01:20    VAX C      V2.3-024                 Page 1
+V1.0                                                            16-NOV-1987 12:00:31    COM$8:[WOOD.WINDOW.WOOD.C]HH.C;4 (1)
+
+
+
+    1        	#define _tolower(c)	((c) >= 'A' && (c) <= 'Z' ? (c) | 0x20:(c))
+    2        	#include <stdio.h>
+  143        	#include "symbols.h"
+  635        	#include "tables.cmn"
+  695        	
+  696        	main(int argc, const char *argv[])
+  697        	{
+                                          0000	main:
+                                    01FC  0000		.entry	main,^m<r2,r3,r4,r5,r6,r7,r8>
+                              5E 04 C2    0002		subl2	#4,sp
+                       00000000* EF 16    0005		jsb	C$MAIN_ARGS
+                     55 00000000 EF 9E    000B		movab	$CHAR_STRING_CONSTANTS,r5
+                     58 00000000 EF 9E    0012		movab	TA_LOW,r8
+                     57 00000000 EF 9E    0019		movab	TA_CLOW,r7
+
+  698    1   		int i;
+  699    1   	
+  700    1   	  for(i = -128; i < 128; i++)
+                         53 FF80 8F 32    0020		cvtwl	#-128,r3
+                    54 00000000* EF 9E    0025		movab	HO_CLOWER,r4
+                                          002C	sym.1:
+
+  701    1   		  if (ho_clower(i) != _tolower(i))
+                                 53 DD    002C		pushl	r3
+                              64 01 FB    002E		calls	#1,(r4)
+                              52 50 D0    0031		movl	r0,r2
+                     00000041 8F 53 D1    0034		cmpl	r3,#65
+                                 0F 19    003B		blss	sym.2
+                     0000005A 8F 53 D1    003D		cmpl	r3,#90
+                                 06 14    0044		bgtr	sym.2
+                           51 53 20 C9    0046		bisl3	#32,r3,r1
+                                 03 11    004A		brb	sym.3
+                                          004C	sym.2:
+                              51 53 D0    004C		movl	r3,r1
+                                          004F	sym.3:
+                              51 52 D1    004F		cmpl	r2,r1
+                                 2F 13    0052		beql	sym.6
+
+  702    1   			  printf("1: %d, %d, %d\n", i,  ho_clower(i), _tolower(i));
+                     00000041 8F 53 D1    0054		cmpl	r3,#65
+                                 0F 19    005B		blss	sym.4
+                     0000005A 8F 53 D1    005D		cmpl	r3,#90
+                                 06 14    0064		bgtr	sym.4
+                           52 53 20 C9    0066		bisl3	#32,r3,r2
+                                 03 11    006A		brb	sym.5
+                                          006C	sym.4:
+                              52 53 D0    006C		movl	r3,r2
+                                          006F	sym.5:
+                                 52 DD    006F		pushl	r2
+                                 53 DD    0071		pushl	r3
+                              64 01 FB    0073		calls	#1,(r4)
+                                 50 DD    0076		pushl	r0
+                                 53 DD    0078		pushl	r3
+                                 65 DF    007A		pushal	(r5)
+                    00000000* EF 04 FB    007C		calls	#4,PRINTF
+
+HH                                                              16-NOV-1987 12:01:20    VAX C      V2.3-024                 Page 2
+V1.0                                                            16-NOV-1987 12:00:31    COM$8:[WOOD.WINDOW.WOOD.C]HH.C;4 (1)
+
+  703    1   	  for(i = -128; i < 128; i++)
+                                          0083	sym.6:
+                  A1 53 0000007F 8F F3    0083		aobleq	#127,r3,sym.1
+                           52 80 8F 98    008B		cvtbl	#-128,r2
+                         54 0000 C7 9E    008F		movab	0(r7),r4
+                                          0094	sym.7:
+
+  704    1   		  if (ta_clower(i) != _tolower(i))
+                              53 84 98    0094		cvtbl	(r4)+,r3
+                     00000041 8F 52 D1    0097		cmpl	r2,#65
+                                 10 19    009E		blss	sym.8
+                     0000005A 8F 52 D1    00A0		cmpl	r2,#90
+                                 07 14    00A7		bgtr	sym.8
+                           51 52 20 C9    00A9		bisl3	#32,r2,r1
+                                 04 11    00AD		brb	sym.9
+                                    01    00AF		nop	
+                                          00B0	sym.8:
+                              51 52 D0    00B0		movl	r2,r1
+                                          00B3	sym.9:
+                              51 53 D1    00B3		cmpl	r3,r1
+                                 34 13    00B6		beql	sym.12
+
+  705    1   			  printf("2: %d, %d, %d\n", i,  ho_clower(i), _tolower(i));
+                     00000041 8F 52 D1    00B8		cmpl	r2,#65
+                                 0F 19    00BF		blss	sym.10
+                     0000005A 8F 52 D1    00C1		cmpl	r2,#90
+                                 06 14    00C8		bgtr	sym.10
+                           53 52 20 C9    00CA		bisl3	#32,r2,r3
+                                 03 11    00CE		brb	sym.11
+                                          00D0	sym.10:
+                              53 52 D0    00D0		movl	r2,r3
+                                          00D3	sym.11:
+                                 53 DD    00D3		pushl	r3
+                                 52 DD    00D5		pushl	r2
+                    00000000* EF 01 FB    00D7		calls	#1,HO_CLOWER
+                                 50 DD    00DE		pushl	r0
+                                 52 DD    00E0		pushl	r2
+                              0F A5 DF    00E2		pushal	15(r5)
+                    00000000* EF 04 FB    00E5		calls	#4,PRINTF
+
+  706    1   	  for(i = -128; i < 128; i++)
+                                          00EC	sym.12:
+                  A0 52 0000007F 8F F3    00EC		aobleq	#127,r2,sym.7
+                           53 80 8F 98    00F4		cvtbl	#-128,r3
+                           56 00 A8 9E    00F8		movab	0(r8),r6
+                                          00FC	sym.13:
+
+  707    1   		  if (ta_lower(i) != _tolower(max(0, i)))
+                              54 86 98    00FC		cvtbl	(r6)+,r4
+                                 53 D5    00FF		tstl	r3
+                                 05 18    0101		bgeq	sym.14
+                                 50 D4    0103		clrl	r0
+                                 04 11    0105		brb	sym.15
+                                    01    0107		nop	
+                                          0108	sym.14:
+                              50 53 D0    0108		movl	r3,r0
+                                          010B	sym.15:
+
+HH                                                              16-NOV-1987 12:01:20    VAX C      V2.3-024                 Page 3
+V1.0                                                            16-NOV-1987 12:00:31    COM$8:[WOOD.WINDOW.WOOD.C]HH.C;4 (1)
+
+                     00000041 8F 50 D1    010B		cmpl	r0,#65
+                                 28 19    0112		blss	sym.20
+                                 53 D5    0114		tstl	r3
+                                 04 18    0116		bgeq	sym.16
+                                 50 D4    0118		clrl	r0
+                                 03 11    011A		brb	sym.17
+                                          011C	sym.16:
+                              50 53 D0    011C		movl	r3,r0
+                                          011F	sym.17:
+                     0000005A 8F 50 D1    011F		cmpl	r0,#90
+                                 14 14    0126		bgtr	sym.20
+                                 53 D5    0128		tstl	r3
+                                 04 18    012A		bgeq	sym.18
+                                 51 D4    012C		clrl	r1
+                                 03 11    012E		brb	sym.19
+                                          0130	sym.18:
+                              51 53 D0    0130		movl	r3,r1
+                                          0133	sym.19:
+                           52 51 20 C9    0133		bisl3	#32,r1,r2
+                                 11 11    0137		brb	sym.23
+                                 50 D5    0139		tstl	r0
+                                    01    013B		nop	
+                                          013C	sym.20:
+                                 53 D5    013C		tstl	r3
+                                 04 18    013E		bgeq	sym.21
+                                 50 D4    0140		clrl	r0
+                                 03 11    0142		brb	sym.22
+                                          0144	sym.21:
+                              50 53 D0    0144		movl	r3,r0
+                                          0147	sym.22:
+                              52 50 D0    0147		movl	r0,r2
+                                          014A	sym.23:
+                              52 54 D1    014A		cmpl	r4,r2
+                                 35 13    014D		beql	sym.26
+
+  708    1   			  printf("3: %d, %d, %d\n", i,  ho_clower(i), _tolower(i));
+                     00000041 8F 53 D1    014F		cmpl	r3,#65
+                                 10 19    0156		blss	sym.24
+                     0000005A 8F 53 D1    0158		cmpl	r3,#90
+                                 07 14    015F		bgtr	sym.24
+                           52 53 20 C9    0161		bisl3	#32,r3,r2
+                                 04 11    0165		brb	sym.25
+                                    01    0167		nop	
+                                          0168	sym.24:
+                              52 53 D0    0168		movl	r3,r2
+                                          016B	sym.25:
+                                 52 DD    016B		pushl	r2
+                                 53 DD    016D		pushl	r3
+                    00000000* EF 01 FB    016F		calls	#1,HO_CLOWER
+                                 50 DD    0176		pushl	r0
+                                 53 DD    0178		pushl	r3
+                              1E A5 DF    017A		pushal	30(r5)
+                    00000000* EF 04 FB    017D		calls	#4,PRINTF
+
+  709    1   	}
+                                          0184	sym.26:
+             FF6E 53 01 0000007F 8F F1    0184		acbl	#127,#1,r3,sym.13
+
+HH                                                              16-NOV-1987 12:01:20    VAX C      V2.3-024                 Page 4
+V1.0                                                            16-NOV-1987 12:00:31    COM$8:[WOOD.WINDOW.WOOD.C]HH.C;4 (1)
+
+                              50 01 D0    018E		movl	#1,r0
+                                    04    0191		ret	
+
+  710        	
+  711        	int tclower(int c)
+  712        	{
+                                          0192	tclower:
+                                    0000  0192		.entry	tclower,^m<>
+                              5E 04 C2    0194		subl2	#4,sp
+
+  713    1   	return ta_clower(c);
+               50 04 AC 00000080 8F C1    0197		addl3	#128,4(ap),r0
+                   50 00000000 EF40 98    01A0		cvtbl	TA_CLOW[r0],r0
+                                    04    01A8		ret	
+
+  714    1   	}
+  715        	int tlower(int c)
+  716        	{
+                                          01A9	tlower:
+                                    0000  01A9		.entry	tlower,^m<>
+                              5E 04 C2    01AB		subl2	#4,sp
+
+  717    1   	return ta_lower(c);
+               50 04 AC 00000080 8F C1    01AE		addl3	#128,4(ap),r0
+                   50 00000000 EF40 98    01B7		cvtbl	TA_LOW[r0],r0
+                                    04    01BF		ret	
+
+  718    1   	}
+
+ 
+ 
+Command Line
+------------
+ 
+CC/MACH/LIS HH
+

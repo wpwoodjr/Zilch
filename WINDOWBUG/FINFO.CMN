@@ -1,4 +1,0 @@
-common /finfo/ ebk, pro
-
-  integer ebk
-  integer*2 pro

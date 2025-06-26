@@ -1,0 +1,110 @@
+  # Zilch Screen Editor, Copyright (c) 1988 William P. Wood, Jr.
+  # Keyboard bindings and macros for ONLINE hypertext system
+
+%include				zbind
+
+mode_9					^S@
+macro_x					@		# switch to Online mode
+	^S@!
+macro_x					^S!		# Zilch mode message
+	^SmZilch\ mode.\ \ Use\ @\ to\ return\ to\ Online.^M
+
+%mode					9
+  # following two lines must be first after switch to %mode 9!
+macro_x					\1-\177		# Help line with error
+	^Sm!H\ Help\ \ V\ next\ link/scrn\ \ \^\ prev\ link/scrn\ \ ->\ follow\ link\ \ <-\ exit\ link\  %^M
+
+message					^Sm
+macro_x					!		# Help line no error
+	^SmH\ Help\ \ V\ next\ link/scrn\ \ \^\ prev\ link/scrn\ \ ->\ follow\ link\ \ <-\ exit\ link\  %^M
+
+mode_0					^S@
+macro_x					@		# Switch to Zilch mode
+	^S@^S!
+
+exit					^Z
+exit					x
+exit					q
+
+hyp_prev_page				^Spp
+macro_20				^C[5~		# prev page
+	^SppBeginning\ of\ text.^M!
+macro_20				p
+
+hyp_next_page				^Snp
+macro_21				^C[6~		# next page
+	^SnpEnd\ of\ text.^M!
+macro_21				n
+
+macro_x					t		# top of file
+	@t@!
+
+macro_x					e		# end of file
+	@e@!
+
+macro_22				+		# next line
+	@^J@!
+macro_22				\40		# space = next line
+
+macro_x					\-		# previous line
+	@^K@!
+
+hyp_search_forward			^S/
+macro_x					/
+	^S/^@^M!
+
+hyp_search_reverse			^S\\
+macro_x					\\
+	^S\\^@^M!
+
+hyp_follow_link				^Sfl
+macro_23					^C[\C		# link to file
+	^SflNo\ more\ links!^M!
+macro_23				>
+
+hyp_exit_link				^Sel
+macro_24					^C[\D		# link back
+	^SelThis\ is\ the\ first\ page!^M!
+macro_24				<
+
+hyp_next_link_or_page			^Snl
+macro_25				^C[\B		# goto next link
+	^SnlEnd\ of\ text.^M!
+macro_25				v		# help line shows v
+
+hyp_prev_link_or_page			^Spl
+macro_26				^C[\A		# goto previous link
+	^SplBeginning\ of\ text.^M!
+macro_26				\^		# help line shows ^
+
+increment_page				^S+
+next_window				^Swn
+delete_other_windows			^Swo
+change_file				^Swc
+macro_27				^C[28~		# Help
+	^S+^Swn^Swo^Swconline_help:[online_help]online_help.^M!
+macro_27				h
+
+hyp_link_to_default_file		^Sld
+macro_x					i		# Index
+	^Sldindex.^M!
+
+macro_x					g		# goto topic
+	^Sld^@^M!
+
+write_text				^S^P
+macro_x					^P		# print
+	@=t,ebb.\^@^S^P^@^M!
+
+hyp_first_link				^S1
+macro_x					f		# return to first page
+	^S1^Swot^C[B!
+
+macro_x					^W		# redraw display
+	@r@!
+
+delete_next_window			^S\177
+macro_x					\177		# delete next window
+	^S\177!
+
+repeat_count				0-9		# repeat a command

@@ -1,4 +1,0 @@
-  common /tty/ last_key_struck
-    byte last_key_struck
-
-    data last_key_struck /8%32/

@@ -1,4 +1,0 @@
-cd \zilch
-for v1 in *.h g $$1
-for v1 in *.cmn g $$1
-;for v1 in *.c g $$1
