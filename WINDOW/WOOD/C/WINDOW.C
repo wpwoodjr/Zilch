@@ -1,0 +1,369 @@
+/*	Zilch Screen Editor,
+ *	Copyright (c) 1982,1986,1987 William P. Wood, Jr. */
+
+#include "symbols.h"
+#include "screen.cmn"
+#include "memory.cmn"
+#include "session.cmn"
+
+int q_split_current_window(void)
+{
+  register windowp wi;
+
+  if (se_current_window == null) {
+    se_current_window = wi_new(sc_size - 2);
+    se_windows = se_current_window;
+    }
+  else if (wi_size(se_current_window) < 3)
+    return false;
+  else {
+    wi_modified(se_current_window) = 1;
+    wi = wi_copy(se_current_window);
+    wi_size(wi) = (wi_size(se_current_window)-1)/2;
+    wi_size(se_current_window) = wi_size(se_current_window)/2;
+    wi_min_size(wi) = 1;
+    wi_next(wi) = wi_next(se_current_window);
+    wi_next(se_current_window) = wi;
+    wi_prev(wi) = se_current_window;
+    if (wi_next(wi) != null)
+      wi_prev(wi_next(wi)) = wi;
+    se_current_window = wi;
+    }
+  return true;
+}
+
+/* make wi a window on bu, and remove wi as a window on wi_buffer(wi) */
+void wi_switch_to_buffer(windowp wi, bufferp bu)
+{
+  register windowp wi2, wi3, prev;
+  windowp witmp, wiparent, wilast;
+  bufferp bu2;
+
+  for (wi2 = wi_parent(wi); wi2 != null; ) {
+    if (wi_buffer(wi2) != null) {
+      bu_dot(wi_buffer(wi2)) = wi_dot(wi2);/* save latest position in buffer */
+      bu_bow(wi_buffer(wi2)) = wi_bow(wi2);
+      if (wi2 == wi)
+	bu_current(wi_buffer(wi2)) = 1;
+      else
+	bu_current(wi_buffer(wi2)) = 0;
+      prev = null;			 /* remove window from buffer's list */
+      bu_map_windows(wi_buffer(wi2), wi3)
+	if (wi3 == wi2) {
+	  if (prev == null)
+	    bu_windows(wi_buffer(wi2)) = wi_next_bu_window(wi2);
+	  else
+	    wi_next_bu_window(prev) = wi_next_bu_window(wi2);
+	  break;
+	  }
+	else
+	  prev = wi3;
+      }
+    witmp = wi_sub_windows(wi2);
+    if (wi2 != wi || bu == null)		/* deallocate extra windows */
+      me_deallocate(wi2);
+    wi2 = witmp;
+    }
+  if (bu != null) {
+    wilast = wiparent = null;
+    bu_map_sub_buffers(bu, bu2) {
+      if (bu_current(bu2) == 1)
+	wi2 = wi;
+      else
+	wi2 = wi_new(wi_size(wi));
+      if (wiparent == null)
+	wiparent = wi2;
+      else
+	wi_sub_windows(wilast) = wi2;
+      wilast = wi2;
+      wi_parent(wi2) = wiparent;
+      wi_buffer(wi2) = bu2;
+      wi_dot(wi2) = bu_dot(bu2);
+      wi_set_bow(wi2, bu_bow(bu2));
+      wi_modified(wi2) = 1;
+      wi_mode_line(wi2) = bu_name(bu2);
+      wi_next_bu_window(wi2) = bu_windows(bu2);
+      bu_windows(bu2) = wi2;
+      }
+    }
+}
+
+int q_pop_up_window(void)
+{
+  while (! q_split_current_window())
+    if (! q_enlarge_window())
+      return false;
+  return true;
+}
+
+windowp wi_new(int size)
+{
+  register windowp wi;
+
+  wi = me_allocate(wi_sizeof);
+  wi_parent(wi) = wi;
+  wi_buffer(wi) = null;
+  wi_dot(wi) = 1;
+  wi_bow(wi) = 1;
+  wi_size(wi) = size;
+  wi_sub_size(wi) = size;
+  wi_min_size(wi) = 1;
+  wi_modified(wi) = 1;
+  wi_id(wi) = 0;
+  wi_mode_line(wi) = null;
+  wi_next(wi) = null;
+  wi_prev(wi) = null;
+  wi_sub_windows(wi) = null;
+  wi_next_bu_window(wi) = null;
+  return wi;
+}
+
+int q_enlarge_window(void)
+{
+  register windowp wi, wi2;
+# include "terminal.cmn"
+
+  wi_map(wi_next(se_current_window),wi)	/* look down for a window to shrink */
+    if (wi_size(wi) > wi_min_size(wi))	/* found one... */
+      wi_map(se_current_window,wi2) {	/* mark intervening windows as modified */
+	wi_modified(wi2) = 1;
+	if (wi2 == wi)
+	  goto L10;
+	}
+  wi_map_back(wi_prev(se_current_window),wi) /*look up for a window to shrink */
+    if (wi_size(wi) > wi_min_size(wi))	   /* found one... */
+      wi_map_back(se_current_window,wi2) { /* mark intervening windows modified */
+	wi_modified(wi2) = 1;
+	if (wi2 == wi)
+	  goto L10;
+	}
+/* if screen is not at full length, increase screen size by one...
+ *	(only if this is the only page present) */
+  if (sc_size < te_size_y && pa_next(se_pages) == null) {
+    sc_fill_line(sc_size+1,sc_buffer(1,sc_size,sc_new),
+    	sc_new_length(sc_size));
+    sc_reverse_video(sc_size+1,sc_new) = false;
+    sc_size = sc_size + 1;
+    wi_size(se_current_window) = wi_size(se_current_window) + 1;
+    wi_map(se_current_window,wi)     /* mark intervening windows as modified */
+      wi_modified(wi) = 1;
+    redraw();
+    return true;
+    }
+  return false;
+L10:
+  wi_size(se_current_window) = wi_size(se_current_window) + 1;
+  wi_size(wi) = wi_size(wi) - 1;
+  return true;
+}
+
+int q_shrink_window(void)
+{
+  register windowp wi;
+
+  wi = se_current_window;
+  if (wi_size(wi) <= 1)
+    return false;
+  else if (wi_next(wi) != null) {
+    wi_size(wi_next(wi)) = wi_size(wi_next(wi)) + 1;
+    wi_modified(wi_next(wi)) = 1;
+    }
+  else if (wi_prev(wi) != null) {
+    wi_size(wi_prev(wi)) = wi_size(wi_prev(wi)) + 1;
+    wi_modified(wi_prev(wi)) = 1;
+    }
+  else if (pa_next(se_pages) != null)
+    return false;
+  else {
+    sc_fill_line(sc_size-1,sc_buffer(1,sc_size,sc_new),
+    	sc_new_length(sc_size));
+    sc_reverse_video(sc_size-1,sc_new) = false;
+    sc_size = sc_size-1;
+    redraw();		/* don't want to leave junk on the screen */
+    }
+  wi_size(wi) = wi_size(wi) - 1;
+  wi_modified(wi) = 1;
+  return true;
+}
+
+void next_window(void)
+{
+  se_current_window = wi_next(se_current_window);
+  if (se_current_window == null)
+    se_current_window = se_windows;
+}
+
+void previous_window(void)
+{
+  register windowp wi;
+
+  se_current_window = wi_prev(se_current_window);
+  if (se_current_window == null)
+    wi_map(se_windows,wi)
+      if (wi_next(wi) == null)
+	se_current_window = wi;
+}
+
+int q_delete_window(void)
+{
+  register windowp wi;
+
+  wi = se_current_window;
+  if (wi_next(wi) == null && wi_prev(wi) == null)
+    return false;
+  if (wi_prev(wi) == null) {
+    se_current_window = wi_next(wi);
+    se_windows = wi_next(wi);
+    }
+  else if (wi_next(wi) == null)
+    se_current_window = wi_prev(wi);
+  else if (wi_parent_buffer(wi_prev(wi)) != wi_parent_buffer(wi) &&
+	    wi_parent_buffer(wi_next(wi)) == wi_parent_buffer(wi))
+    se_current_window = wi_next(wi);
+  else
+    se_current_window = wi_prev(wi);
+  if (wi_prev(wi) != null)
+    wi_next(wi_prev(wi)) = wi_next(wi);
+  if (wi_next(wi) != null)
+    wi_prev(wi_next(wi)) = wi_prev(wi);
+  wi_size(se_current_window) = wi_size(se_current_window) + wi_size(wi) + 1;
+  wi_modified(se_current_window) = 1;
+  wi_switch_to_buffer(wi, null);
+  return true;
+}
+
+void delete_other_windows(void)
+{
+  register windowp wi;
+
+  wi = se_current_window;
+  for (se_current_window = se_windows; se_current_window != null; )
+    if (se_current_window == wi)
+      se_current_window = wi_next(se_current_window);
+    else
+      q_delete_window();
+  se_current_window = wi;
+}
+
+void beginning_of_window(void)
+{
+  wi_dot(se_current_window) = wi_bow(se_current_window);
+}
+
+void wi_fill(void)
+{
+  textind t;
+
+  t = wi_dot(se_current_window);
+  wi_dot(se_current_window) = max(wi_dot(se_current_window),
+					bu_size(se_current_buffer));
+  while (q_dot_is_visible())
+    if (! q_shrink_window())
+      break;
+  while (! q_dot_is_visible())
+    if (! q_enlarge_window())
+      break;
+  wi_dot(se_current_window) = t;
+  if (! q_dot_is_visible())
+    q_enlarge_window();
+}
+
+void wi_display(register windowp w)
+{
+  register windowp wi, w2;
+
+  wi_map(w, w2)
+    wi_map_sub_windows(w2, wi)
+      printf(
+  " Window at: %d\n   size = %d\n   buffer = %d\n   dot = %d\n   bow = %d\n",
+	    wi,wi_size(wi),wi_buffer(wi),wi_dot(wi),wi_bow(wi));
+}
+
+void wi_equalize(void)
+{
+  register windowp wi;
+  int nw, ss;
+
+  nw = 0;
+  wi_map(se_windows,wi)
+    nw = nw+1;
+  ss = sc_size - 1;
+  wi_map (se_windows,wi) {
+    wi_size(wi) = ss/nw + min(1, mod(ss, nw)) - 1;
+    wi_modified(wi) = 1;
+    ss = ss - (wi_size(wi) + 1);
+    nw = nw-1;
+    }
+}
+
+windowp wi_copy(windowp wi)
+{
+  register windowp wi2, wic, wiparent;
+  windowp wilast, wicopied;
+
+  wilast = wiparent = null;
+  wi_map_sub_windows(wi, wi2) {
+    wic = wi_new(wi_size(wi2));
+    if (wi2 == wi)
+      wicopied = wic;
+    movc(&me_mem(wi2), &me_mem(wic), wi_sizeof*CHARS_PER_INT);
+    if (wiparent == null)
+      wiparent = wic;
+    else
+      wi_sub_windows(wilast) = wic;
+    wilast = wic;
+    wi_parent(wic) = wiparent;
+    wi_sub_windows(wic) = null;
+    wi_next_bu_window(wic) = bu_windows(wi_buffer(wic));
+    bu_windows(wi_buffer(wic)) = wic;
+    }
+  return wicopied;
+}
+
+void wi_status(register windowp wi)
+{
+  register bufferp bu;
+  char num[15];
+# include <time.h>
+  time_t bintim;
+  char date[26];
+
+  bu = wi_buffer(wi);
+  if (mod(bu_modified(bu), 2) != 1)
+    ms_message("Mod: N  Size: ");
+  else
+    ms_message("Mod: Y  Size: ");
+  ho_itoc(bu_size(bu), num, 15);
+  ms_add_to_message(num);
+  ms_add_to_message("  Pos: ");
+  ho_itoc(wi_dot(wi), num, 15);
+  ms_add_to_message(num);
+  ms_add_to_message(" (");
+  if (bu_size(bu) == 0)
+    ms_add_to_message("0");
+  else {
+    ho_itoc((100*(wi_dot(wi)-1))/bu_size(bu), num, 15);
+    ms_add_to_message(num);
+    }
+  ms_add_to_message("%)  Col: ");
+  ho_itoc(current_column(), num, 15);
+  ms_add_to_message(num);
+  ms_add_to_message("  Page: ");
+  ho_itoc(pa_number(se_current_page), num, 15);
+  ms_add_to_message(num);
+  ms_add_to_message("  ");
+  bintim = time(NULL);
+  ho_scopy(ctime(&bintim), 1, date, 1);
+  date[24] = EOS;
+  ms_add_to_message(date);
+}
+
+void wi_ready(windowp wi)
+{
+  register windowp wi2;
+
+  wi_map_sub_windows(wi, wi2) {
+    wi_dot(wi2) = min(wi_dot(wi2), bu_size(wi_buffer(wi2)) + 1);
+    wi_set_bow(wi2, find_bol(wi_buffer(wi2), wi_bow(wi2)));
+    }
+}

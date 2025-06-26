@@ -1,0 +1,126 @@
+# Zilch Screen Editor, Copyright (c) 1986,1987 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "session.cmn"
+  include "memory.cmn")
+
+  function q_fi_read_seq_file(buf,name,setpro,stat)
+  header
+  byte name(ARB)
+  logical setpro
+  logical loadseq			# UWGCG functions
+  character cbuf(512)
+  descriptor ch_descr
+	common /seq/ comtable, position
+	Character ComTable(128,1000)
+	Integer Position(1000)
+
+  bu = bu_parent(buf)
+  do i = 1, 1000
+    position(i) = -1
+  if (! q_fi_open_read(READ_UNIT,name,ebk,pro)) {
+    stat = FI_OPEN_ERROR
+    return(false)
+    }
+  if (setpro)
+    bu_protection(bu) = pro
+  if (q_fi_add_newline(READ_UNIT,rsize))
+    leave = 1
+  else
+    leave = 0
+  if (rsize == 0)
+    i = ebk					# eof block set by gpopen
+  else
+    i = ebk*2
+  call bu_clear_text(bu)
+
+  buseq = bu_seq(bu)
+  call tx_more_memory_please(buseq, i*512)
+  if (loadseq(READ_UNIT, ch_descr(tx_text(bu_gap(buseq)), 1), nc, check,
+		comtable, position)) {
+    bu_gap(buseq) = bu_gap(buseq) + nc
+    bu_gap_size(buseq) = bu_gap_size(buseq) - nc
+    if (bu_gap_size(buseq) < 0) {
+      call checkpoint_modified_files
+      stop "Text buffer overflow! What kind of file is this anyway!?"
+      }
+    bu_size(buseq) = nc
+    call ms_report_number2(EOS, nc, " base read from ", " bases read from ")
+    call ms_add_to_message(name)
+    q_fi_read_seq_file = true
+    stat = FI_OK
+    }
+  else {
+    call ms_message("File is not in UWGCG format: ")
+    call ms_add_to_message(name)
+    call ms_error(EOS)
+    q_fi_read_seq_file = false
+    stat = FI_IO_ERROR
+    }
+
+  if (q_fi_read_seq_file) {
+    call tx_more_memory_please(bu, 1)
+    call rewindf(READ_UNIT)
+    call readstring(READ_UNIT, cbuf, nc)
+    for (i = 1; nc >= 0 & strfind('..', cbuf) == 0; ) {
+      call tx_insert_buffer(bu, i, %ref(cbuf), nc)
+      call tx_insert_character(bu, NEWLINE, i + nc)
+      i = i + nc + 1
+      call readstring(READ_UNIT, cbuf, nc)
+      }
+    }
+
+  bu_modified(bu) = 0
+  bu_map_windows(bu,wi)
+    wi_modified(wi) = 1
+  close(unit = READ_UNIT, err=10)
+  return
+10
+  call ms_message("Error closing file ")
+  call ms_add_to_message(name)
+  call ms_error(EOS)
+  return
+  end
+
+  function q_fi_write_seq_file(buf,name,type,stat)
+  header
+  byte name(ARB),type,c
+  integer checkseq				# UWGCG functions
+  descriptor ch_descr
+	common /seq/ comtable, position
+	Character ComTable(128,1000)
+	Integer Position(1000)
+
+  bu = bu_parent(buf)
+  stat = FI_OK
+  q_fi_write_seq_file = true
+
+  if (! q_fi_open_write(WRITE_UNIT,name,type,bu_protection(bu))) {
+    stat = FI_OPEN_ERROR
+    return(false)
+    }
+
+  if (! q_fi_write_region(bu,EOS,1,bu_size(bu),type,stat))
+    q_fi_write_seq_file = false
+  else {
+    buseq = bu_seq(bu)
+    call tx_set_gap(buseq,1)
+    c = tx_text(tx_address(buseq, bu_size(buseq)+1))
+    tx_text(tx_address(buseq, bu_size(buseq)+1)) = EOS # null terminate for UWGCG
+    call saveseq(WRITE_UNIT,
+		  ch_descr(tx_text(tx_address(buseq, 1)), 1),
+		  ch_descr(st_buffer(bu_name(buseq)), 1),
+		  bu_size(buseq),
+		  checkseq(ch_descr(tx_text(tx_address(buseq, 1)), 1)),
+		  50, 10, 1, true, comtable, position)
+    tx_text(tx_address(buseq, bu_size(buseq)+1)) = c   # restore
+    }
+  close(unit = WRITE_UNIT,err=10)
+  return
+10
+  call ms_message("Error closing file ")
+  call ms_add_to_message(name)
+  call ms_error(EOS)
+  stat = FI_IO_ERROR
+  return(false)
+  end

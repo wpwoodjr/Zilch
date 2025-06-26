@@ -1,0 +1,39 @@
+  # Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986,1987 William P. Wood, Jr.
+  # Keyboard bindings and function definitions for Sequence Editor Zilch
+  # This file is %included by ZBIND.BND
+
+%include				[\-]key1.bnd
+
+%keypad					application
+%alternate_escape			^C
+
+%mode					control
+enter_seq_mode				^C\O\M		# ENTER
+	if (bu_type(se_current_buffer) != SEQ)
+	  call ms_error('Mapping type of this buffer is not SEQ!')
+	else {
+	  call wi_switch_to_sub_window(se_current_window,
+		  wi_sub_windows(se_current_window))
+	  call bi_use_keymap(SEQ_MODE)
+	  }
+
+%mode					seq
+exit_seq_mode				^C\O\M		# ENTER
+	call wi_switch_to_sub_window(se_current_window,
+		wi_parent(se_current_window))
+	call bi_use_keymap(CONTROL_MODE)
+next_character				^C[\C
+previous_character			^C[\D
+self_insert				a-z
+seq_delete_previous_character		\177
+	call delete_previous_character
+write_text				^P
+save_text				s
+extract_text				^E
+delete_text				^D
+add_text_after_cursor			^A
+repeat_count				0-9
+
+%mode					control
+
+%include				[\-]key2.bnd

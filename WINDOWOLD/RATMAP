@@ -1,0 +1,37 @@
+
+a	accept 
+b	byte 
+c	continue
+d	do 0+
+e	else0+
+f	for (0+
+g	goto 
+h	common /
+i	if (0+
+1	character*
+2	integer*2 
+4	integer*4 
+8	real*8 
+6	real*16 
+j	dimension 
+k	call 
+l	logical
+m	end
+n	function 00	return00	end
+o	read (
+p	parameter 
+q	switch (0+	{00	}0-
+r	return
+s	subroutine 00	return00	end
+t	type 
+u	real 
+w	write (
+x	while (0+
+z	else if (0+
+=	equivalence (
+-	implicit integer*4 (a - z)
+(	open (unit = 
+)	close (unit = 
+@	include "
+{# 
+  = 

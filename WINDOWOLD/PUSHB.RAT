@@ -1,0 +1,70 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "pushb.cmn"
+include "memory.cmn")
+
+  subroutine pu_initialize
+  header
+
+  pu_buffer = bu_new("push-back",EOS)
+  return
+  end
+
+  subroutine pu_push_region(but,buf,p1,p2)
+  header
+
+  call tx_copy_text(buf,p1,but,1,p2-p1)
+  bu_modified(but) = 0
+  return
+  end
+
+  subroutine pu_push_string(bu,str)
+  header
+  byte str(ARB)
+
+  for (i = ho_length(str); i >= 1; i = i-1)
+    call tx_insert_character(bu,str(i),1)
+  bu_modified(bu) = 0
+  return
+  end
+
+  subroutine pu_push_character(bu,c)
+  header
+  byte c
+
+  call tx_insert_character(bu,c,1)
+  bu_modified(bu) = 0
+  return
+  end
+
+  subroutine pu_push_back_character(c)
+  header
+  byte c
+
+  call tx_insert_character(pu_buffer, - c, 1)
+  bu_modified(pu_buffer) = 0
+  return
+  end
+
+  subroutine pu_push_back_buf(buf,len)
+  header
+  byte buf(ARB)
+
+  for (i = len; i >= 1; i = i - 1)
+    call tx_insert_character(pu_buffer, - buf(i), 1)
+  bu_modified(pu_buffer) = 0
+  return
+  end
+
+  subroutine pu_nextc(bu,c)
+  header
+  byte c
+
+  if (bu_size(bu) > 0) {
+    c = tx_text(tx_address(bu,1))
+    call tx_delete(bu,1,1)
+    bu_modified(bu) = 0
+    }
+  return
+  end

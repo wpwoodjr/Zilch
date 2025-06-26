@@ -1,0 +1,16 @@
+;	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+	.title	fillc
+;
+;
+;	call fillc(out, len, c)
+;
+;
+out=4
+len=8
+c=12
+	.psect	icr_code,pic,usr,con,rel,lcl,shr,exe,rd,nowrt,novec,long
+fillc::	.word	^m<r2,r3,r4,r5>
+	movc5	#0,0,@c(ap),@len(ap),@out(ap)		; fill the destination
+	ret
+	.end

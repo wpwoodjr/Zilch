@@ -1,0 +1,35 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "memory.cmn")
+
+  function st_allocate(size)
+  header
+  return(CHARS_PER_INT*me_allocate((size - 1)/CHARS_PER_INT + 1))
+  end
+
+  subroutine st_deallocate(ptr)
+  header
+  call me_deallocate(ptr/CHARS_PER_INT)
+  return
+  end
+
+  subroutine st_display(st)
+  header
+
+  call send_message_to_terminal(st_buffer(st))
+  return
+  end
+
+  subroutine st_scopy(s1,s2)
+  header
+
+  call ho_scopy(st_buffer(s1), 1, st_buffer(s2), 1)
+  return
+  end
+
+  function st_length(st)
+  header
+
+  return(ho_length(st_buffer(st)))
+  end

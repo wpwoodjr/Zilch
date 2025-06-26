@@ -1,0 +1,37 @@
+#  common block /cpage/
+ # put on a file called 'cpage'
+ # used only by the text formatter
+ 
+ 
+ common /cpage/ curpag,newpag,lineno,plval,m1val,m2val,m3val,m4val,
+  bottom, ehlim(2), ohlim(2), eflim(2), oflim(2), stopx, putff,
+  frstpg, lstpag, print, infont, oufont, lasnew, offset, hlevs(MAXHEADERLEVEL),
+  ehead(MAXLINE), ohead(MAXLINE),
+  efoot(MAXLINE), ofoot(MAXLINE)
+   integer curpag   # current output page number; init = 0
+   integer newpag   # next output page number; init = 1
+   real lineno      # last line printed; init = 0
+   integer plval   # page length in lines; init = PAGELEN = 66
+   integer m1val   # margin before and including header
+   integer m2val   # margin after header
+   integer m3val   # margin after last text line
+   integer m4val   # bottom margin, including footer
+   integer bottom   # last live line on page, = plval-m3val-m4val
+   integer ehlim   # left,right margins for even header;init=inval,rmval
+  integer frstpg    #first page to begin printing with
+  integer lstpag    #last page to be printed
+  integer print     # flag to indicate whether page should be printed
+  integer infont    # current input font level
+  integer oufont    # current output font level
+  integer lasnew    # last number of half line feeds requested
+  integer offset      #number of blanks to offset page by; init = 0
+   integer ohlim   # left,right margins for odd  header;init=inval,rmval
+   integer eflim   # left,right margins for even footer;init=inval,rmval
+   integer oflim   # left,right margins for odd  footer;init=inval,rmval
+  integer stopx     #flag for pausing between pages
+  integer putff    # flag which tells phead to put a form feed
+  integer hlevs    # keeps track of header level numbering
+   character ehead   # top of page title for even pages;init=NEWLINE
+   character ohead   # top of page title for odd  pages;init=NEWLINE
+   character efoot   # bot of page title for even pages;init=NEWLINE
+   character ofoot   # bot of page title for odd  pages;init=NEWLINE

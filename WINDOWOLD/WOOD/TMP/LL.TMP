@@ -1,0 +1,20 @@
+.m1 0
+.m2 0
+.rm 30
+.he /hi there
+.fr -1
+x =  y hi \1there this is a \0 test of this program a b c d e f g h y r e w a
+.br
+x =  y      hi ~there this is a ` test of this program a b c d e f g h y r e w a
+..bs 1
+.br
+x =########hi there this is x _ test) of this program a b c d e f g h y r e w a
+.br
+again
+you
+.hl 1 hi
+.hl 1 there
+hi
+this    (<--- what about these spaces?) is unfilled text
+so there! this
+isn't!

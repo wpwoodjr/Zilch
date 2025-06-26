@@ -1,0 +1,3 @@
+common /insert/ in_cr, in_deol, in_nchars
+
+  logical*1 in_cr, in_deol

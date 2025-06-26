@@ -1,0 +1,154 @@
+#	Zilch Screen Editor, Copyright (c) 1982,1986 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "session.cmn")
+
+  subroutine se_initialize
+  header
+
+  se_pages = null
+  se_current_page = pa_new(0)
+  se_buffers = null
+  se_windows = null
+  se_current_window = null
+  se_save = null
+  se_restore = null
+  se_macros = null
+  se_command_count = 0
+  se_count = 0
+  se_search_string = st_allocate(MAX_PROMPT)
+  se_search_mask = st_allocate(MAX_PROMPT)
+  se_search_length = 0
+  se_error_occurred = false
+  se_in_prompt = false
+  se_cross_lines = false
+  se_default_case = 0				# lower/upper case
+  se_indent = 2
+
+# define default classes; also note that Q_MP_GET_FIRST_WORD uses class 1,
+# SO DON'T MESS WITH CLASS 1 (class 1 is "A-Za-z~0-9").
+
+  call q_se_define_word_class("A-Za-z~0-9,0-9~.A-Za-z,)", 1)
+
+# if you need to change the default class definitions, add a second call
+# which starts defining at class 2, for example:
+
+#	call q_se_define_word_class("A-Z,0-9", 2)
+
+# defines two classes, uppercase A through Z and 0-9.
+# This way Q_MP_GET_FIRST_WORD will still be able to use class 1, but classes 2
+# and above will be used for the user's word searches.
+
+  return
+  end
+
+# Q_SE_DEFINE_WORD_CLASS defines the meaning of a "word" for word movement
+# commands. There may be up to MAX_WORD_CLASS definitions of what a word means.
+# There are two routines that scan over words, called WO_SKIP_WORD and
+# WO_SKIP_NON_WORD.  They each take as an argument what word class to use.
+# These routines are both called by the user-level routines NEXT_WORD and
+# PREVIOUS_WORD.  They work by first scanning over characters that aren't
+# in any class, then determining a class to use based on the character
+# which stopped the scan, then scanning over characters in that class.
+# Class 0 is special.  It contains, for each character, the number of the
+# class that the character is in, and 0 if the character is not in a class.
+# In fact, a character may be in more than one class, but it's PRIMARY
+# class is the one indicated by Class 0;  when NEXT_WORD and PREVIOUS_WORD
+# check what class a character is in, they check Class 0.  If a character
+# is in a class that is not it's primary class, then it cannot be used
+# to start a scan in that class, but once a scan is started, it will be
+# scanned over.  It is possible for a character to have a secondary class
+# but not a primary class, in which case it can participate in scans but
+# never start one, since its primary class is class 0.
+# For example, the following class definitions scan over numbers and words:
+
+#	A-Za-z~0-9,0-9~.A-Za-z
+
+# The first class definition is "A-Za-z~0-9".  That means that A through Z and
+# little a through little z are primary class members, while 0-9 are secondary
+# class members. The ~ (tilde) separates the primary and secondary class
+# members.  This class scans over words beginning with A-Z or a-z until
+# encountering a character which is not A-Z, a-z, or 0-9.
+# The second class definition is "0-9~.A-Za-z".  It is separated from the
+# first class definition by a comma.  This class scans over numbers
+# beginning with 0-9 until encountering a character which is not a period,
+# A-Z, or a-z.  Note that period is not a primary member in either class,
+# but is a secondary member of the second class.  This means that it cannot
+# start a scan, but can be scanned over if the number starts with 0-9.
+
+  function q_se_define_word_class(list, start_class)
+  header
+  byte list(ARB), lastc, c, ho_cupper
+  logical secondary_class
+
+  do i = -128, 127				# initialize Class 0
+    se_word_definition(i, 0) = 0		# no primary class to start
+  i = 1
+  for (class = start_class; class <= MAX_WORD_CLASS; class = class+1) {
+    do j = -128, 127
+      se_word_definition(j, class) = 0		# no chars in this class yet
+    do_range = -1			# first time through - ignore leading "
+    secondary_class = false		# first define primary class members
+    for ( ; ; i = i+1) {
+      switch (list(i)) {
+	case EOS:				# done
+	  break 2
+	case ",":				# new class starting...
+	  i = i + 1
+	  break
+	case '"':
+	  if (list(i+1) == '"') {
+	    i = i + 1
+	    c = '"'
+	    }
+	  else
+	    next				# ignore isolated double quotes
+	case '-':				# range, eg. A-Z
+	  if (do_range != 0)
+	    c = list(i)
+	  else
+	    do_range = 1
+	case '~':				# Now define secondary chars
+	  secondary_class = true
+	case '^':				# control character
+	  i = i + 1
+	  c = ho_cupper(list(i)) - 8%100
+	case '\':				# literal or octal number
+	  i = i + 1
+	  if (list(i) >= '0' & list(i) <= '9') {
+	    c = 0
+	    repeat {
+	      c = c*8 + (c - '0')
+	      i = i + 1
+	      } until (list(i) < '0' | list(i) > '9')
+	    i = i - 1
+	    }
+	  else
+	    c = list(i)
+	default:				# add to class
+	  c = list(i)
+	}
+      switch (do_range) {
+	case -1,0:
+	  do_range = 0
+	  lastc = c
+	  se_word_definition(c, class) = class
+	  if (! secondary_class)
+	    se_word_definition(c, 0) = class
+	case 1:
+	  do_range = 2
+	case 2:
+	  do_range = 0
+	  do j = lastc, c {
+	    se_word_definition(j, class) = class
+	    if (! secondary_class)
+	      se_word_definition(j, 0) = class
+	    }
+	  lastc = c
+	}
+      }
+    }
+  if (class > MAX_WORD_CLASS)
+    return(false)
+  return(true)
+  end

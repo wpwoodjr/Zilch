@@ -1,0 +1,526 @@
+.rm 75
+.ls 2
+1.  MATCHED CASE-CONTROL AND SURVIVAL STUDIES
+.he ///Page #
+     
+     Let n be the number of cases in a matched case-control study.  For the
+i~th` case, there are m`i~ controls and these m`i~#+l#individuals together
+are known as the i~th` risk set.  In survival studies, we interpret n to
+be the number of failures and m`i~ to be the number of individuals whose
+survival times are known to exceed the i~th` failure time.  We will assume
+that risk sets of survival analysis are ordered so that i = 1 corresponds
+to the first failure and i = n corresponds to the last.  The risk sets of
+matched case-control studies are disjoint, while one individual often
+appears in more than one survival risk set.
+
+     Let z`ig~ be a d-vector of covariate values collected from individual g in
+risk set i, g#=#0,1,...,m`i~, with g#=#0 corresponding to the case on the
+individual who failed.  The purpose of the data collection is to test the
+null hypothesis that#\1b\0#=##\1b\0`0~ where#\1b\0#is a d-vector of parameters in the
+relative risk function#\1p\0(\1b\0,z).  For example, the usual logistic regression
+in matched case-control studies and the original proportional hazards
+model of Cox (l972) had#\1p\0(\1b\0,z)#=#exp(#\1b\0~t`z).  Our only interest will be
+in#\1b\0`0~ such that#\1p\0(\1b\0`0~,z`ig~)#=#\1p\0(\1b\0`0~,z`is~), 0#<_#g, s#<_#m`i~.
+When#\1p\0(\1b\0,z)#=#exp(\1b\0~t`z), the null hypothesis is#\1b\0#=#0.
+
+     The conditional likelihood of the logistic model for matched case-control
+studies is formally identical to the partial likelihood of the
+proportional hazards model of survival data.  In either case, the
+appropriate likelihood function (Thomas, 1981) is
+
+.ti 10
+L(\1b\0) =
+#\1!\0~~n````i=1~~~ ____________~~\1p\0(\1b\0,z`i0~)`````m`i`\1S\0``g=0~~#\1p\0(\1b\0,z`ig~)~~~~
+.rj
+(1.1)
+This expression suggests defining a probability of being a case or of
+failing for each member of risk set i as
+.ls 1
+
+.ti 19
+\1p\0(\1b\0,z`is~)
+.ti 10
+P`is~ = ------------##s#=#0,1,...,m`i~.
+.rj
+(1.2)
+.ti 17
+m`i`\1S\0``g=0~~#\1p\0(\1b\0,z`ig~)
+.br
+.ls 2
+The null hypothesis#\1b\0#=#\1b\0`0~ is then equivalent to the hypothesis
+               P`is~#=#(m`i~#+#1)~-1`##s#=#0,1,...,m`i~; i#=#1,...,n
+.rj
+(1.3)
+From (1.1) and (1.2) the log likelihood is
+               log L(\1b\0)#=##\1S\0~~n```i=1~#log#P`i0~
+.rj
+(1.4)
+Define the d-vector U and the (d x d) matrix V by
+                   U(\1b\0)#=##\1S\0~~n```i=1~~~#`u`i~(\1b\0)
+.rj
+(1.5)
+and                V(\1b\0)#=##\1S\0~~n```i=1~#v`i~(\1b\0)
+.rj
+(1.6)
+where          {u`i~(\1b\0)}~t`#=#\1M\0log#P`i0~/\1Mb\0
+.rj
+(1.7)
+and############v`i~(\1b\0)#=#-E{\1M\0~2`log#P`i0~/\1Mb\0~2`}
+.rj
+(1.8)
+Let#\1b\0~^`#be the value of#\1b\0#that maximizes (1.4).
+Under the null hypothesis
+(1.3), L(\1b\0`0~)#=#-E#log(m`i~#+1).  The generalized likelihood ratio
+statistic measures the difference
+in log likelihoods at#\1b\0~^`#and#\1b\0`0~
+and is defined by
+.ti 15
+\1g\0`GLR~#=#2[log#L(\1b\0~^`)#-#log#L(\1b\0`0~)]
+.ti 20
+=#2##\1S\0~~n````i=1~~#log{m`i~#+#1)P~^``i0~}
+.rj
+(1.9)
+where P~^``i0~ is calculated from (1.2) evaluated at#\1b\0~^`.  In case-control
+studies, m`i~ is often constant so that \1g\0`GLR~#is large wherever the
+probability of being a case is high for the individuals who were, in fact,
+the cases.  In survival studies, m`i~ is never constant, and the P~^``i0~
+of the earlier (hence, larger) risk sets have inherently more weight in
+the calculation of#\1g\0`GLR~#no matter what choice is made for the relative
+risk function.
+
+     The Wald statistic is a standardized measure of the difference between
+\1b\0~^`#and#\1b\0`0~.  Using (1.6), the statistic is
+     \1g\0`ML~#=#{\1b\0~^`#-#\1b\0`0~}~t`#{V(\1b\0~^`)}~-1`#{\1b\0~^`#-#\1b\0`0~}
+.rj
+(1.10)
+which is computationally much more difficult than (1.9) in case-control
+and survival studies.  However, V(\1b\0~^`) is asymptotically the
+covariance matrix of#\1b\0~^`, and the significance of individual
+elements of#\1b\0#can be approximated by
+.in +15
+########\1b\0~^``j~#-#\1b\0`0j~
+.br
+t`j~#=#----------##j=1,...,d
+.rj
+(1.11)
+#########(v~^``jj~)\11-2\0
+.in -15
+
+where#\1b\0~^``j~ and#\1b\0`0j~ are the j~th` elements of#\1b\0~^`#and#\1b\0`0~,
+respectively, and#v~^``jj~#is the j~th` diagonal element of V(\1b\0~^`).
+
+2.  A REPARAMETERIZATION
+
+     Both#\1g\0`GLR~ and#\1g\0`ML~ require#\1b\0~^`#for the test statistic which
+means that an iterative solution is necessary.  The derivatives of
+(1.2) can be inconvenient to program.  A reparameterization can
+simplify the computations and provide insight into the methodology.
+To that end, define the m`i~-vector#\1r\0`i~#=#(\1r\0`i1~,...,\1r\0`i~m`i~)~t`
+by
+     \1r\0`ik~#=#log(P`ik~/P`i0~)#####k#=#1,...,m`i~.
+.rj
+(2.1)
+From (1.2), we have
+     \1r\0`ik~#=#log{\1p\0(z`ik~,\1b\0)#/#\1p\0(z`i0~,\1b\0)}
+.rj
+(2.2)
+and, when#####\1p\0(\1b\0,z)#=#exp(\1b\0~t`z),
+     \1r\0`ik~#=#\1b\0~t`(z`ik~#-#z`i0~.
+.rj
+(2.3)
+From (2.2), exp(\1r\0`ik~) can always be interpreted as a risk ratio with
+exp(\1r\0`ik~) in (2.3) being a familiar expression of relative risk.
+
+     It is simple to manipulate (2.1) to reveal
+               P`i0~#=#1#/#{1#+#\1S\0#exp(\1r\0`ik~)}
+.rj
+(2.4)
+and############P`ik~#=#exp(\1r\0`ik~)#/#{1#+#\1S\0#exp(\1r\0`ik~)} .
+.br
+We can then use the chain rule, to re-write (1.7) as
+     u`i~(\1b\0)#=#G`i~(\1b\0)~t`#s`i~(\1b\0)
+.rj
+(2.5)
+where##########G`i~(\1b\0)#=#\1Mr\0`i~/\1Mb\0
+.rj
+(2.6)
+and
+.br
+s`i~(#\1b\0)~t`#=#\1M\0logP`i0~/\1Mr\0`i~#=#(-P`11~,...,-P`im`i~~).
+.rj
+(2.7)
+The (mixed) matrix G`i~(\1b\0) is computable directly from (2.2) and is
+not dependent on the likelihood (1.4).  Rather, G`i~(\1b\0) is a Jacobian
+relating#\1b\0#to#\1r\0`i~.  On the other hand, s`i~(\1b\0) represents the
+derivative of the likelihood of risk set i with respect
+to#the "new parameters"#\1r\0`i~.
+When \1p\0(\1b\0,z)#=#exp(\1b\0~t`z), the derivative of (2.3) shows that row k
+in G`i~(\1b\0) is
+     g`ik~#=#z`ik~~t`#-#z`i0~~t`####k#=#1,...,m`i~
+.rj
+(2.8)
+and does not depend on#\1b\0#.
+
+     By differentiating (2.5) and taking expectations, (1.8) can be
+re-written as
+     v`i~(\1b\0)#=#G`i~(\1b\0)~t`#w`i~(\1b\0)#G`i~(\1b\0)
+.rj
+(2.9)
+where
+     w`i~(\1b\0)#=#diag(P`ik~)#-#s`i~(\1b\0)#s`i~(\1b\0)~t`
+.rj
+(2.10)
+and diag(P`ik~) is an (m`i~#x#m`i~) diagonal matrix with elements
+P`ik~##(k#=#1,...,m`i~).
+
+     Let N#=#\1S\0#m`i~ and define the N-vector s(\1b\0) and the (N#x#d) matrix
+G(\1b\0) as
+     s(\1b\0)#=#{s`1~(\1b\0)~t`,...,s`n~(\1b\0)~t`}~t`
+.rj
+(2.11)
+and############G(\1b\0)#=#{G`1~(\1b\0)~t`,...,G`n~(\1b\0)~t`}~t`
+.rj
+(2.12)
+Similarly, define the (N#x#N) matrix W(\1b\0) to be block diagonal with
+the i~th` block being the (m`i~#x#m`i~) matrix w`i~(\1b\0).  Then, (1.5)
+and (1.6) can be re-written as
+     U#=#G~t`s
+.rj
+(2.13)
+and############V#=#G~t`WG
+.rj
+(2.14)
+where, for notational convenience, we have suppressed the dependence
+of all quantities on#\1b\0.  Finally, the iterative solution for#\1b\0~^`#
+can be found using the Newton-Raphson procedure
+.ti 15
+\1b\0~^`~j+1`#=#\1b\0~^`~j`#+#{V~^`~j`}~-1`#U~^`~j`
+.rj
+(2.15)
+where V~^` and U~^`~j` are (2.3) and (2.14) evaluated at \1b\0~^`~j`,
+the estimate of#\1b\0#at iteration j.  One can recognizethat (2.15)
+is equivalent to iterative least squares with an (N x d) "design matrix"
+X(\1b\0) and (N x L) "observation vector" Y(\1b\0) defined by
+     X(\1b\0)#=#{W(\1b\0}~1/2`#G(\1b\0)
+.rj
+(2.16)
+and############Y(\1b\0)#={W(\1b\0)}~-1/2`#s(\1b\0)
+.rj
+(2.17)
+Thus, an iterative least squares computer program can easily be adapted
+to provide maximum likelihood estimates of#\1b\0# for any#\1p\0(\1b\0,z).
+
+     As we have seen, when#\1p\0(\1b\0,z)#=#exp(\1b\0~t`z), the "design matrix"
+X depends on \1b\0 only through the "weight matrix" W.  The observation
+vector Y(\1b\0), however, always depends on \1b\0 through both W and s.
+In fact, an alternative characterization of maximum likelihood estimation
+for case-control and survival studies is that \1b\0~^` is the solution
+to X(\1b\0~^`)~t`#Y(\1b\0~^`)#=0.  This can be re-expressed by
+defining the regression sum of squares, RSS, as
+     RSS(\1b\0)#=#Y~t`X(X~t`X)~-1`X~t`Y
+.rj
+(2.18)
+where the dependence of Y and X on \1b\0 is suppressed.  Then,
+RSS(\1b\0~^`)#=0.  We will pursue this line of reasoning further after
+a numerical illustration.
+
+3.  LIKELIHOOD CONTOURS
+
+     Thomas (1980) advocated a mixture model for the relative function
+defined by
+     \1p\0(\1b\0,z)#=#{(1#+#\1b\0~t`z}~1-\1a\0`#{exp(\1b\0~t`z)}~1\a\0
+.rj
+(3.1)
+When \1a\0#=1; the model is the familiar one that we have used as an
+example a number of times thus far.  This model is also known as the
+multiplicative model and provides a contrast to the#\1a\0#=#0 model
+known as the additive model.
+
+     Breslow and Day (1980, Appendix III) have presented a matched
+case-control study of endometrial cancer in Los Angeles.  There are
+n#=#63 risk sets with m`i~#=#4 controls in each.  We have chosen the
+d#=#2 covariates history of gall bladder disease and length of estrogen
+use for analysis.  We will denote the log likelihood as
+log#L(\1a\0,\1b\0,\1b\0`1~,\1b\0`2~) in order to include the dependence
+of#\1p\0(\1b\0,z)#on \1a\0.
+
+     Maximizing over all three unknowns, we find
+log#L(\1a\0~^`,\1b\0~^``1~,\1b\0~^``2~)#=#-82.94.  If X is
+fixed and just \1b\0`1~ and \1b\0`2~ are allowed to vary, we find
+log#L(0,\1b\0~^``1~,\1b\0~^``2~)#=#-83.14.
+log#L(1,\1b\0~^``1~,\1b\0~^``2~)#=#-85.45.
+On this basis, the
+hypothesis#\1a\0#=#1 can be rejected at the .05 level using the
+generalized likelihood ratio test.  Thus, the additive model#\1a\0#>#0)
+seems to be more appropriate for the data.  In fact,#\1a\0~^`#=#-.04.
+
+     Under the null hypothesis#\1b\0#=#0, all P`is~#=#1/s in (1.3) so that
+log#L(\1a\0,0,0)#=#-63#log#5#=#-101.39.  Hence, \1g\0`GLR~#=#36.50 for
+the additive model and resounding rejects the null hypothesis.  Note
+that#\1g\0`GLR~#=#36.9 when \1a\0~^`#=#-1.04 and#\1g\0`GLR~#=#31.88
+when#\1a\0#=#1 so that#\1b\0#=#0 is consistently untenable.
+
+     On computing (1.10), we found that at#\1a\0#=#0, \1g\0`ML~#=#5.48, at
+\1a\0#=#-.04, \1g\0`ML~#=#2.76, and \1a\0#=#1, \1g\0`ML~#=#27.32.
+This means \1g\0`ML~ is not even significant at the .05 level for the
+additive model or with \1a\0 set to its maximum likelihood estimate.
+Similarly, the statistics (t`1~,t`2~) from (1.11) are (1.61, 2.16) at
+\1a\0#+#0, (1.19, 1.55) at#\1a\0#=#-.04, and (2.87, 4.36) at \1a\0#=#1.
+From these rather surprising results, we surmized that the asymptotic
+properties of \1b\0~^ upon which the significance of \1g\0ML and (t`1~,t`2~)
+is based probably do not hold for \1a\0#=#0 or \1a\0#=#.04.
+
+     To verify this assertion, we plotted the locus of points
+(\1b\0~^``1~,\1b\0~^``2~) such that
+2{log L(\1a\0,\1b\0~^``1~,\1b\0~^``2)#-#log#L(\1a\0,\1b\0~^``1~,\1b\0~^``2~)}#=#3.84.
+#Figure 1 displays this contour with \1a\0#=#0.  The "X" marks the coordinates
+of (\1b\0~^``1~,\1b\0~^``2~) and all points within the region
+constitute the 95% connfidence set for (\1b\0`1~,\1b\0`2~).  If the
+asymptotic properties of \1b\0~^` held for these data, this region
+would be elliptical.  It is clear than that there is a serious problem in
+applying the asymptotic theory here.
+
+     Figure 2 displays this score contour with X#=#-.04.  Setting \1a\0 to
+\1a\0~^` makes the confidence region have an absolutely dreadful shape.
+With \1a\0#=#1, things are much improved as can be seen in Figure 3.
+
+     Even though the likelihood at \1a\0#=#1 is significantly lower than
+at \1a\0#=#\1a\0~^`, tests of \1b\0#=#0 based on the asymptotic
+distribution theory of \1b\0~^` are viable at \1a\0#=#1 but not at
+\1a\0#=#\1a\0~^`.  One way to avoid this paradox is not use
+\1b\0~^` at all to test \1b\0#=#0.  We discuss this in the next
+section, but we re-emphasize here that many "stepwise" procedures to
+"covariate selection" depend upon various functions of the t-statistics
+in (1.11).  The validity of these procedures requires careful
+monitoring.
+
+4.  SCORE TEST
+
+     Rao (1973, p.  ) defines a third test statistic for \1b\0#=#\1b\0`0~
+that does not depend upon the calculations of \1b\0~^`.  This test
+is known as the score test and is given
+     \1g\0`S~#=#{U(\1b\0`0~)}~t`#{V(\1b\0`0~)}~-1`#U(\1b\0`0~).
+.rj
+(4.1)
+where U(\1b\0`0~) and V(\1b\0`0~) are (1.5) and (1.6) evaluated at
+\1b\0#=#\1b\0`0~.  From (2.13), (2.14), (2.15), and (2.16), it is
+clear that U(\1b\0`0~)#=#X(\1b\0`0~)~t`#Y(\1b\0`0~) and
+V(\1b\0`0~)#=#X(\1b\0`0~)~t`#X(\1b\0`0~).  Thus, from (2.18)
+\1g\0`S~#=#RSS(\1b\0`0~).  As discussed earlier, RSS(\1b\0~^`)#=#0
+and, therefore, \1g\0`S~ is another measure of deviation between
+\1b\0~^` and \1b\0`0~ in the same spirit as \1g\0`GLR~ and \1g\0`ML~.
+This provides the intuitive motivation for \1g\0`S~ in case-control
+and survival studies while the computational desirability is clear
+because \1b\0~^` is not needed.
+
+     Since (1.3) is equivalent to \1b\0#=#\1b\0`0~, (2.7) and (2.10)
+evaluated under the null hypothesis are
+     s`i~(\1b\0`0~)#=#-(m`i~#+#1)~-1`#l`i~
+.rj
+(4.2)
+and##w`i~(\1b\0`0~)#=#(m`i~#+#1)~-1`#I#-#(m`i~#+#1)~-2`#l`i~l`i~~t`
+.rj
+(4.3)
+where l`i~ is a vector of length m`i~ with every element equal to l and
+I is the identity matrix (of order m`i~).  It is then straightforward
+to verify that
+     {w`i~(\1b\0`0~)}~-\11-2\0`#=#a~-1``i~#I#+#(a`i~#+#1)~-1`#l`i~l`i~~t`
+.rj
+(4.4)
+where a`i~#=#(m`i~#+#1)~-\11-2\0`.  We can then define the m`i~ vector
+of y`i~ as
+     y`i~#=#{w`i~(\1b\0`0~}~-\11-2\0`#s`i~(\1b\0`0~)
+.rj
+(4.5)
+and find the surprising result that
+     y`i~#=#-l`i~
+.rj
+(4.6)
+From (2.17), it can be seen that the elements of y`i~ are the rows of
+Y(\1b\0`0~) that correspond to risk set i.  Thus, every element in the
+vector Y(\1b\0`0~) equals -1.  We then have
+.br
+PROPOSITION 1:  The score statistic \1g\0`S~ in (4.1) can be computed
+by summing all the elements in the (N#x#N) matrix
+H#=#X(X~t`X)~-1`#X~t` where X#=#X(\1b\0`0~) defined by (2.16) evaluated
+at \1b\0#=#\1b\0`0~.
+
+     Each row in H corresponds to one individual and thus the row sums of
+H provide a measure of the contribution of each individual to \1g\0`S~.
+The total of the row sums for all of the individuals in risk set i
+measures the contribution of the entire risk set to the score statistic.
+Since in survival analysis one person appears in many risk sets, it is
+possible to locatew the appropriate rows of H to measure the overall
+impact of that person.  Time dependent covariates present no difficulties
+in this formulation so that a great variety of interesting summary
+statistics are available.  These calculations are certain to be more
+insightful than simply presenting \1g\0`S~ alone.  We will have more to
+present about "designated statistics" in the next section.
+
+     Unfortunately, proposition 1 does not provide as efficient a method
+for calculating \1g\0`S~ since H is a large matrix.  The computation
+of \1g\0`S~ will be facilitated by noting that from (2.5) and (4.6)
+     u`i~(\1b\0`0~)#=#-(m`i~#+#1)~-1#G`i~(\1b\0`0~)~t`#l`i~.
+.rj
+(4.7)
+When \1p\0(\1b\0,z)#=#exp(\1b\0~t`z), G`i~(\1b\0) does not depend on
+\1b\0 and (2.8) can be used to show that
+.br
+u`i~(\1b\0`0~)#=#-#\1S\0##(z`ik~#-z`i0~)#/#(m`i~#+#1)
+.rj
+(4.8)
+This means that u`i~(\1b\0`0~) contains the "average" difference between
+the covariate values of the controls and the case.  As before in
+survival analysis, the case is the individual who failed and the
+controls are those who survived longer than the case.  Clearly, if
+u`i~(\1b\0`0~)#=#0, then risk set i has nothing to contribute to
+U(\1b\0`0~) and hence, to \1g\0`S~.  This is a generalization of a
+familiar result in matched pairs (m`i~#=#1) when only discordant
+pairs contribute useful data.  A systematic examination of
+u`i~(\1b\0`0~) will certainly provide additional interesting summary
+information in both case-control and survival analysis.
+
+     Returning to the mixture model (3.1), we have
+     \1M\0#log#\1p\0(\1b\0,z)#/#\1Mb\0#=#\1a\0z~t`#/#log(1#+#\1b\0~t`z)
++#(1#-#\1a\0)z~t`
+.rj
+(4.9)
+Evaluating at the null hypothesis \1b\0#=#0, we can see that (4.9)
+equals to z~t` for any \1a\0.  The rows of G`i~(\1b\0`0~) for the
+mixture model are always given by g`ik~ in (2.8).  Hence, the
+interpretation of u`i~(\1b\0`0~) given in (4.8) that seemingly depended
+upon \1p\0(\1b\0,z)#=#exp(\1b\0~t`z) is, in fact, very general for the
+mixture model.  We also have
+.br
+PROPOSITION 2:  The score test for the null hypothesis \1b\0#=#0 in
+the mixture model (3.1) does not depend on \1a\0.
+.br
+PROOF:  From (4.3), W(\1b\0`0~) does not depend on \1a\0 so that
+X(\1b\0`0~) does not depend on \1a\0.  The result follows from
+Proposition l.
+
+     Day and Byar (1978) have shown that the score test of\1b\0#=#0 for
+\1g\0(\1b\0,z)#=#exp(\1b\0~t`z) in the logistic model of case-control
+studies is equivalent to the Mantel-Haenszel test.  Proposition 2
+permits an extension of that equivalence to the mixture model.  For
+the endometrial cancer discussed previously, \1g\0`S~#=#34.62
+which agrees quite well with \1g\0`GLR~ and with\1g\0`ML~ with
+\1a\0#=#1.
+
+5.  DIAGNOSTIC STATISTICS
+
+     As discussed previously, examination of u`i~(\1b\0`0~) is likely to
+be very revealing in understanding how risk set i affects the
+conclusions.  If the number of covariates is large, it would be
+useful to have an expression which would measure the change in
+\1g\0`S~ upon deletion of a risk set.
+
+     Define C`ik~ as the sum of all the entries in the row of H (defined
+in Proposition 1) that corresponds to individual k in risk set i,
+k#=#1,...,m`i~ and i#=#1,...,n.  Recall that (2.8) gives the row of
+G`i~(\1b\0`0~) that corresponds to this person in the mixture model
+(3.1).  Expression (2.16) and (4.3) then define the appropriate row
+of X(\1b\0`0~) which, in turn, defines the row of H.  As before, we
+will interpret C`i~#=#\1S\0#C`ik~ as the contribution of risk set i
+to \1g\0`S~ because \1g\0`S~#=#\1S\0#C`i~ by Proposition 1.  From
+(1.5) and (4.1), we have
+     \1g\0`S~#=#\1S\0#U(\1b\0`0~)~t`#{V(\1b\0`0~)}~-1`#u`i~(\1b\0`0~)
+.br
+from which it follows that
+     C`i~#=#K~t`#u`i~(\1b\0`0~)
+.rj
+(5.1)
+where the d-vector K#=#{V(\1b\0`0~)}~t`#U(\1b\0`0~)~-1`.  Thus, C`i~
+is simply a weighted sum of the elements of u`i~(\1b\0`0~), and H is
+not needed for the calculations.
+
+     Define \1g\0`S~(-i) as the actual value of (4.1) upon deletion of risk
+set (i) and let
+     \1W\0`i~#=#\1g\0`S~#-#\1g\0`S~#(-i)
+.rj
+(5.2)
+We have
+.br
+APPROXIMATION 1:  An approximation to \1W\0`i~ in (5.2) is given by
+A`ii~#=#C`i~ in (5.1).
+
+     As discussed earlier, \1g\0`S~#=#RSS(\1b\0`0~).  This permits an exact
+expression to be given for \1W\0`i~.  Let x`i~ be an (m`i~#x#d) matrix
+whose rows are the rows of X(\1b\0`0~) corresponding to risk set i
+and define
+     H`i~#=#x`i~{V(\1b\0`0~)}~-1`#x`i~~t`.
+.br
+Recall that y`i~ in (4.5) is the vector of elements of Y(\1b\0`0~)
+corresponding to risk set i and define e`i~ to be a vector of length
+m`i~ whose elements correspond to risk set i in the vector
+e#=#Y(\1b\0`0~)#-#H#Y(\1b\0`0~), where, as before,
+H#=#X(\1b\0`0~)#{V(\1b\0`0~)}~-1`#{X(\1b\0`0~)}~t`.  Then, by a
+standard result (Cook and Weisberg, 1982, p.l36)
+     \1W\0`i~#=#y`i~~t`#y`i~#-#e`i~~t`#(I#-#H`i~)~-1`#e`i~.
+.rj
+(5.3)
+From (4.6), y`i~#=#-l`i~ so that y`i~~t`#y`i~#=#m`i~ and element
+k of e`i~ is e`ik~#=#-1#+#C`ik~.  These simplifications are useful,
+but, the inverse of (I#-#H`i~) is a serious computational problem.
+Hence, H is an (N#x##) projection matrix of rank d which is usually
+substantially less than N.  The submatrix H`i~ is, therefore, likely
+to be small and H`i~~2` is nearly zero.  This suggests that
+I#+#H`i~ is a suitable approximation to (I#-#H`i~)~-1`.  We now have
+.br
+APPROXIMATION 2:  An approximation to \1W\0`i~ in (5.3) is given by
+A`i2~#=#m`i~#-#e`i~~t`#(I#+H`i~)#e`i~.
+
+     In survival analysis, even H is likely to be a fairly large matrix
+for the earlier risk sets, and one can consider using I rather than
+(I#+#H`i~) as the approximate inverse of (I#-#H`i~).  Then,
+.br
+APPROXIMATION 3:  An approximation to \1W\0`i~ is given by
+.br
+A`i3~#=#m`i~#-#e`i~~t`#e`i~#=#2C`i~#-#\1S\0#R`ik~~2.
+
+     One is tempted to dismiss A`i3~ as being overly economical in terms of
+computation.  However, A`i3~ has a surprising relationship with \1g\0`S~.
+.br
+PROPOSITION 3:#####\1g\0`S~#=#\1S\0#A`i3~
+.br
+PROOF:  Let C be an N-vector whose elements are the C`ik~###k, i.  By
+definition, C#=#HL where L is an N-vector with every element equal
+to l.  Then,
+.br
+C~t`C#=#L~t`H~t`HL#=#L~t`HL#=#\1g\0`S~ by proposition 1.  Hence,
+.br
+\lS#A`i3~#=#2#\1S\0#C`i~#-#\1S\0#\1S\0#C`ik~~2`#=#2\1g\0`S~#-#\1g\0`S~
+=#\1g\0`S~.
+
+     We used a subset of the heart transplant data (Crowley and Hu, 1977)
+to evaluate these approximations.  Only the 65 individuals who actually
+received a transplant were considered.  Of these, n#=#29 died because of
+graft rejection and we chose d#=#3 covariates - age at transplant (z`4~
+in Crowley and Hu), mismatch score (z`9~)
+and HLA-A2 antigen indicator (z`8~) for analysis.  The hypothesis
+\1b\0#=#0 in (3.1) is rejected because \1g\0`S~#=#19.92.
+
+     The approximation A`i2~ was nearly identical to \1W\0`i~ for all the
+risk sets.  This was not too surprising since H is a 996#x#996 matrix
+of rank 3.  Figure 4 shows that A`i3~ is much better than A`i1~.
+
+     Risk sets 1 and 13 make a large contribution to \1g\0`S~.  On the
+other hand, the deletion of either risk set 5 or 22 will increase
+\1g\0`S~ substantially.  The reason for these changes can be understood
+by letting the elements of u`i~(\1b\0`0~) be given by u`ii~, u`i2~
+and u`i3~.  From (4.8), we can interpret u`ii~ as the average
+difference in age between the individual who died and those who
+survived longer.  Similarly, u`i2~ is the average difference in
+mismatch score.  Figure 5 displays u`ii~ and u`i2~ for each risk set.
+The preponderance of values in the first quadrant indicate that those
+who died tended to be older and have a higher mismatch score.  Note
+that risk sets 1 and 13 are the most extreme examples of this general
+pattern and, hence, their major contribution to \1g\0`S~ follows
+directly.  On the other hand, the individuals who died in risk sets 5
+and 22 tended to be younger and better matched than their "controls."
+Thus, the deletion of these risk sets increases \1g\0`S~.
+
+     Every risk set in which the individual who died had the HLA-A2
+indicator present, also had u`ii~ < 0 and u`i2~ < 0 (fig. 5).
+Therefore, this covariate interacts with the other two and is
+unlikely to be a significant predictor of survival.

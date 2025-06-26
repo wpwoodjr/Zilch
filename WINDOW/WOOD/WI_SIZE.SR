@@ -1,0 +1,20 @@
+$ list/noprompt/trim [-...]*.rat /wi_size* = /,$?x
+COM$8:[WOOD.WINDOW]BUFFER.RAT;200
+    142>  wi_size(wi) = max(1, size - 2)
+    143>  wi_size(se_current_window) = 1
+    175>    wi_size(wi) = max(1, wi_size(wi) - nlines + 1)
+    176>    wi_size(se_current_window) = wi_size(se_current_window) +
+COM$8:[WOOD.WINDOW]EDIT.RAT;214
+    264>	    wi_size(wi) = buf(RS_WI_SIZE) & 16%ffff
+    326>	  buf(RS_WI_SIZE) = wi_size(wi)
+COM$8:[WOOD.WINDOW]WINDOW.RAT;81
+     19>    wi_size(se_current_window) = wi_size(se_current_window)/2
+     80>  wi_size(wi_new) = size
+    112>    wi_size(se_current_window) = wi_size(se_current_window) + 1
+    120>  wi_size(se_current_window) = wi_size(se_current_window) + 1
+    121>  wi_size(wi) = wi_size(wi) - 1
+    132>    wi_size(wi_next(wi)) = wi_size(wi_next(wi)) + 1
+    136>    wi_size(wi_prev(wi)) = wi_size(wi_prev(wi)) + 1
+    148>  wi_size(wi) = wi_size(wi) - 1
+    197>  wi_size(se_current_window) = wi_size(se_current_window) + wi_size(wi) + 1
+    263>    wi_size(wi) = ss/nw + min(1,mod(ss,nw)) - 1

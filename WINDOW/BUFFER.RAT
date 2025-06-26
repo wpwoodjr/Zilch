@@ -1,0 +1,455 @@
+# Zilch Screen Editor, Copyright (c) 1982,1983,1984,1986,1987 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "memory.cmn"
+  include "session.cmn")
+
+  function q_switch_to_buffer(buf, na)
+  header
+  byte na(ARB)
+
+  q_switch_to_buffer = true
+  bu = buf
+  if (bu == null)
+    bu = bu_find_by_name(na)
+  if (bu == null)
+    bu = bu_new(na,EOS)
+  call wi_switch_to_buffer(se_current_window, bu)
+  wi_map(se_windows,wi)	   # try to find another window onto bu to set dot from
+    if (wi != se_current_window & wi_parent_buffer(wi) == bu_parent(bu)) {
+      wicur = wi_parent(se_current_window)
+      wi_map_sub_windows(wi, wi2) {
+	wi_dot(wicur) = wi_dot(wi2)
+	wi_set_bow(wicur,wi_bow(wi2))
+	if (wi2 == wi)
+	  se_current_window = wicur
+	wicur = wi_sub_windows(wicur)
+	}
+      break
+      }
+  return
+  end
+
+  function q_pop_to_buffer(bu, na)
+  header
+  byte na(ARB)
+
+  if (q_pop_up_window())
+    return(q_switch_to_buffer(bu, na))
+  call ms_error("Can't make a new window!")
+  return(false)
+  end
+
+  function q_visit_file(na,switch_buffer,nf)
+  header
+  byte na(ARB)
+  logical switch_buffer
+
+  bu = bu_find_by_file_name(na)
+  if (bu == null) {
+    bu = bu_new(EOS,na)
+    if (se_recover)
+      call q_ch_recover(bu)
+    }
+  if (switch_buffer)
+    return(q_switch_to_buffer(bu, st_buffer(bu_name(bu))))
+  else if (nf == 1)
+    if (q_pop_up_window())
+      return(q_switch_to_buffer(bu, st_buffer(bu_name(bu))))
+  call pa_generate(pa_number(se_current_page))
+  if (q_split_current_window())
+    return(q_switch_to_buffer(bu, st_buffer(bu_name(bu))))
+  return(false)
+  end
+
+  subroutine multi_visit_file(na,switch_buffer,clear_context)
+  header
+  byte na(ARB)
+  logical switch_buffer, clear_context
+
+  fi = st_allocate(FILENAMESIZE)
+  st = st_allocate(max(MAX_COMMAND,MAX_PROMPT))
+  st1 = st_allocate(max(MAX_COMMAND,MAX_PROMPT))
+  pa = se_current_page
+  totfiles = 0
+  while (q_co_parse(na, st_buffer(st1), false)) {
+    nfile = 0
+    while (q_co_parse(st_buffer(st1), st_buffer(st), true)) {
+      n = 0
+      if (q_fi_find_file(FIND_UNIT,st_buffer(st),st_buffer(fi),n,true,
+				totfiles == 0 & clear_context)) {
+	repeat {
+	  nfile = nfile + 1
+	  totfiles = totfiles + 1
+	  call q_visit_file(st_buffer(fi),switch_buffer & totfiles == 1,nfile)
+	  } until(! q_fi_find_file(FIND_UNIT,st_buffer(st),st_buffer(fi),n,
+					true,false))
+	}
+      else
+	call ms_error("Bad file name encountered!")
+      }
+    if (se_current_page != pa) {
+      call ms_message("Some files windowed on succeeding pages.")
+      call pa_switch(pa_number(pa))
+      }
+    }
+  call st_deallocate(fi)
+  call st_deallocate(st)
+  call st_deallocate(st1)
+  return
+  end
+
+  subroutine bu_ready(bu)
+  header
+
+  if (bu_modified(bu) == 2) {
+    if (! q_mp_read_file(bu,st_buffer(bu_file_name(bu)),0,true))
+      call ms_message2("New file: ",bu_file_name(bu))
+    bu_modified(bu) = 0
+    }
+  bu_map_sub_buffers(bu, bu2)
+    if (bu_gap(bu2) == null)
+      call tx_more_memory_please(bu2, 0)
+  return
+  end
+
+  function q_bu_find_window(na)
+  header
+  byte na(ARB)
+
+  bu = bu_find_by_name(na)
+  if (bu == null)
+    return(q_pop_to_buffer(null, na))
+  wi_map(se_windows, wi)
+    if (wi_buffer(wi) == bu) {
+      while (wi != se_current_window)
+	call next_window
+      return(true)
+      }
+  return(q_pop_to_buffer(bu, na))
+  end
+
+  function q_bu_pop_up_message(msg, mlen, na)
+  header
+  byte msg(ARB), na(ARB)
+  logical all_blank
+
+  q_bu_pop_up_message = false
+  wi = se_current_window
+  size = wi_size(wi)
+  if (! q_pop_up_window())
+    return
+  wi_size(wi) = max(1, size - 2)
+  wi_size(se_current_window) = 1
+  bu = bu_new(na, EOS)
+  if (q_switch_to_buffer(bu, st_buffer(bu_name(bu)))) {
+    q_bu_pop_up_message = true
+    all_blank = true
+    nlines = 1
+    for (i = 1; i <= mlen; i = i + 1) {
+      if (msg(i) == CR)
+	if (i < mlen) {
+	  if (msg(i+1) == LF)
+	    next
+	  }
+	else {
+	  call insert_character(NEWLINE)
+	  next
+	  }
+      if (msg(i) == LF) {
+	call insert_character(NEWLINE)
+	if (i < mlen & ! all_blank)
+	  nlines = nlines + 1
+	}
+      else {
+	if (all_blank) {
+	  call line_to_top_of_window
+	  all_blank = false
+	  }
+	call insert_character(msg(i))
+	}
+      }
+    wi_dot(se_current_window) = wi_bow(se_current_window)
+    bu_modified(se_current_buffer) = 0
+    size = wi_size(wi)
+    wi_size(wi) = max(1, wi_size(wi) - nlines + 1)
+    wi_size(se_current_window) = wi_size(se_current_window) +
+							size - wi_size(wi)
+    call wi_fill
+    while (wi != se_current_window)
+      call next_window
+    }
+  return
+  end
+
+  function bu_find_by_file_name(na)
+  header
+  byte na(ARB)
+
+  bu_map(se_buffers,bu)
+    if (bu_file_name(bu) != null)
+      if (q_ho_equal(st_buffer(bu_file_name(bu)), na))
+	return(bu)
+  return(null)
+  end
+
+  function bu_find_by_name(na)
+  header
+  byte na(ARB)
+
+  bu_map(se_buffers,bu)
+    if (bu_name(bu) != null)
+      if (q_ho_equal(st_buffer(bu_name(bu)), na))
+	return(bu)
+  return(null)
+  end
+
+  function bu_new(name, fname)
+  header
+  byte name(ARB), fname(ARB)
+  save bu_last_buffer
+  data bu_last_buffer /null/
+
+  bu_new = me_allocate(bu_sizeof)
+  bu_parent(bu_new) = bu_new
+  bu_next(bu_new) = null
+  bu_sub_buffers(bu_new) = null
+  bu_name(bu_new) = null
+  bu_file_name(bu_new) = null
+  if (fname(1) != EOS)
+    bu_modified(bu_new) = 2			# file, not read in yet
+  else
+    bu_modified(bu_new) = 0
+  bu_type(bu_new) = 0
+  bu_mappings(bu_new) = null
+  bu_protection(bu_new) = -1
+  bu_indent(bu_new) = 1
+  bu_case(bu_new) = se_default_case
+  bu_windows(bu_new) = null
+  bu_size(bu_new) = 0
+  bu_base(bu_new) = null - 1
+  bu_gap(bu_new) = null
+  bu_gap_size(bu_new) = 0
+  bu_dot(bu_new) = 1
+  bu_bow(bu_new) = 1
+  bu_save_dot_ptr(bu_new) = mk_new(1)
+  bu_save_bow_ptr(bu_new) = mk_new(1)
+  bu_mark1_ptr(bu_new) = mk_new(0)
+  bu_mark2_ptr(bu_new) = mk_new(0)
+  bu_markers(bu_new) = null
+  bu_id(bu_new) = 0
+  bu_current(bu_new) = 1
+  if (name(1) != EOS | fname(1) != EOS) {	# if not a sub-buffer...
+    if (bu_last_buffer == null)
+      se_buffers = bu_new
+    else
+      bu_next(bu_last_buffer) = bu_new
+    bu_last_buffer = bu_new
+    call bu_new_names(bu_new,name,fname)
+    }
+  return
+  end
+
+  function bu_new_sub_buffer(bu,id)
+  header
+
+  bu_new_sub_buffer = bu_new(EOS, EOS)
+  bu_parent(bu_new_sub_buffer) = bu
+  bu_id(bu_new_sub_buffer) = id
+  bu_current(bu_new_sub_buffer) = 0
+  return
+  end
+
+# Should deallocate unused space!
+  function bu_delete_sub_buffer(bu)
+  header
+
+  return(bu_sub_buffers(bu))
+  end
+
+  subroutine bu_new_names(bu,name,fname)
+  header
+  byte name(ARB), fname(ARB), num(14), ho_clower
+
+  old = bu_name(bu)
+  bu_name(bu) = null
+  call st_deallocate(bu_file_name(bu))
+  if (name(1) != EOS) {
+    st = st_allocate(ho_length(name)+1)
+    call ho_scopy(name, 1, st_buffer(st), 1)
+    for (i = st; st_buffer(i) != EOS; i = i+1)
+      st_buffer(i) = ho_clower(st_buffer(i))
+    }
+  else
+    st = bu_make_name(fname)
+  if (fname(1) != EOS) {
+    bu_file_name(bu) = st_allocate(ho_length(fname)+1)
+    call ho_scopy(fname, 1, st_buffer(bu_file_name(bu)), 1)
+    }
+  else
+    bu_file_name(bu) = null
+  sl = st_length(st)
+  for (n = 2; bu_find_by_name(st_buffer(st)) != null; n = n+1) {
+    nl = ho_itoc(n,num(2),12)
+    num(1) = '<'
+    num(2+nl) = '>'
+    num(3+nl) = EOS
+    st2 = st_allocate(3+nl+sl)
+    call st_scopy(st,st2)
+    call ho_scopy(num,1,st_buffer(st2+sl),1)
+    call st_deallocate(st)
+    st = st2
+    }
+  bu_name(bu) = st
+  if (old != null) {				# update old pointers
+    bu_map_windows(bu, wi)
+      if (wi_mode_line(wi) == old) {
+	wi_mode_line(wi) = bu_name(bu)
+	wi_modified(wi) = 1
+	}
+    call st_deallocate(old)
+    }
+  call mp_set_mappings(bu,0)
+  return
+  end
+
+  function bu_make_name(file)
+  header
+  byte file(ARB)
+
+  for ([i = 0; j = ho_nuqcp(file, 1)]; file(j) != EOS; j = ho_nuqcp(file, j+1))
+    if (file(j) == ']' | file(j) == '>' | file(j) == ':')
+      i = j
+  bu_make_name = st_allocate(j - i)
+  i = i + 1
+  for (k = i; k <= j; k = k+1)
+    st_buffer(bu_make_name + k - i) = file(k)
+  return
+  end
+
+  subroutine bu_clear_text(bu)
+  header
+
+  bu_map_sub_buffers(bu, sb) {
+    if (bu_modified(sb) != 2) {		# don't mess with "unread file" buffers
+      save_dot = bu_save_dot(sb)	# so that restores work properly
+      save_bow = bu_save_bow(sb)
+      call tx_delete(sb, 1, bu_size(sb))
+      call mk_set_mark(bu_mark1_ptr(sb), 0, sb)
+      call mk_set_mark(bu_mark2_ptr(sb), 0, sb)
+      call mk_set_mark(bu_save_dot_ptr(sb), save_dot, sb)
+      call mk_set_mark(bu_save_bow_ptr(sb), save_bow, sb)
+      bu_dot(sb) = 1
+      bu_bow(sb) = 1
+      if (sb == bu)
+	bu_current(sb) = 1
+      else
+	bu_current(sb) = 0
+      }
+    }
+  if (mod(bu_modified(bu), 2) == 1)
+    bu_modified(bu) = 0
+  return
+  end
+
+  function q_buffer_list
+  header
+  include "screen.cmn"
+  logical do_files
+  string head "  Name@t@t@tSize    Page    Filename@l@l", num(9) " "
+
+  q_buffer_list = true
+  pacurrent = se_current_page
+  call pa_switch(-1)
+  call q_switch_to_buffer(null, "Buffer list")
+  call delete_other_windows
+  pa_update
+  call bu_clear_text(se_current_buffer)
+  call mp_set_mappings(se_current_buffer, TEXT)
+  call insert_string(head)
+  do_files = true
+  repeat {
+    bu_map(se_buffers,bu) {
+      if (do_files .xor. (bu_file_name(bu) == null)) { # do files, then buffers
+	bu_map_sub_buffers(bu,bu2) {
+	  if (bu2 == bu_parent(bu)) {
+	    if (bu_parent(bu2) != bu_parent(se_current_buffer) &
+		  mod(bu_modified(bu2),2) == 1)
+	      call insert_string('M ')
+	    else
+	      call insert_string('  ')
+	    curcol = 3
+	    if (bu_name(bu2) != null) {
+	      call insert_string(st_buffer(bu_name(bu2)))
+	      curcol = curcol + ho_length(st_buffer(bu_name(bu2)))
+	      }
+	    }
+	  else
+	    curcol = 1
+	  if (bu2 == se_current_buffer | bu_modified(bu2) == 2) {
+	    nlen = 0
+	    num(1) = EOS
+	    }
+	  else
+	    nlen = ho_itoc(bu_size(bu2),num,9)
+	  if (curcol + 1 + nlen > 29)
+	    call insert_character(NEWLINE)
+	  call tab_to_column(29 - nlen)
+	  call insert_string(num)
+	  if (bu2 == bu_parent(bu)) {
+	    call bu_list_page(bu2,pacurrent)
+	    if (bu_file_name(bu2) != null) {
+	      flen = st_length(bu_file_name(bu2))
+	      if (41 + flen > sc_width) {
+		call insert_character(NEWLINE)
+		call tab_to_column(max(5, int((sc_width - flen - 1)/8)*8 + 1))
+		}
+	      else
+		call tab_to_column(41)
+	      call insert_string(st_buffer(bu_file_name(bu2)))
+	      }
+	    }
+	  call insert_character(NEWLINE)
+	  }
+	}
+      }
+    do_files = ! do_files
+    } until (do_files)				# do files, then buffers
+  wi_dot(se_current_window) = 1
+  bu_modified(se_current_buffer) = 0
+  call ms_message("Type carriage-return to exit Buffer list.")
+  return
+  end
+
+  subroutine bu_list_page(bu,pacurrent)
+  header
+  byte num(9)
+
+  pa = pacurrent
+  wi_map(pa_windows(pa),wi)
+    if (wi_parent_buffer(wi) == bu_parent(bu))
+      goto 10
+  pa_map(se_pages,pa)
+    if (pa != pacurrent)
+      wi_map(pa_windows(pa),wi)
+	if (wi_parent_buffer(wi) == bu_parent(bu))
+	  goto 10
+  return
+10
+  call ho_itocrj(pa_number(pa),num,9)
+  call insert_string(num)
+  if (wi == pa_current_window(pacurrent))
+    call insert_character('*')
+  return
+  end
+
+  subroutine bu_switch_case
+  header
+
+  bu_case(se_current_buffer) = 1 - bu_case(se_current_buffer)
+  if (bu_case(se_current_buffer) == 1)
+    call ms_message("Buffer is now in upper case mode.")
+  else
+    call ms_message("Buffer is now in lower/upper case mode.")
+  return
+  end

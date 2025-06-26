@@ -1,0 +1,4 @@
+_repdef(mk_next,me_mem($1))		# next marker in list
+_repdef(mk_mark,me_mem(1+$1))		# number of marked character in buffer
+_repdef(mk_sizeof,2)
+_repdef(mk_map,for ($2 = $1; $2 != null; $2 = mk_next($2)))

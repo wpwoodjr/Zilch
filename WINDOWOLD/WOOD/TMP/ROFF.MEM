@@ -1,0 +1,127 @@
+
+
+Roff                       May 21, 1983                       Roff
+
+
+
+Input consists of intermixed text lines, which contain information
+to  be  formatted,  and  request lines, which contain instructions
+about how to format the text lines.  Request lines  begin  with  a
+distinguishing  'control  character',  normally  a  period.  Lines
+having leading spaces are output without modification.  Strings of
+embedded spaces are retained so that the output line will  contain
+at least as many spaces between words as the input line.
+
+Output  lines  may be 'filled' without regard to the format of the
+input text lines.  Right justification  of  filled  lines  may  be
+turned  on  and off through the use of the '.ju' and '.nj' request
+lines.  Line 'breaks' may result from the use of  certain  request
+lines,  or  by  the  appearance of an empty input line or an input
+line beginning with a space.
+
+The capabilities of roff are specified below. Numerical values are
+denoted there by 'n', titles by 't', and single characters by 'c'.
+Numbers denoted 'n' may be signed +  or  -,  in  which  case  they
+signify  relative changes to a quantity; otherwise they signify an
+absolute setting.  Missing 'n' fields are ordinarily taken  to  be
+1,  missing 't' fields to be empty, and 'c' fields to shut off the
+appropriate special interpretation.
+
+Running titles may appear at the top and bottom of every page. The
+head and foot for this writeup was set by:
+
+     .he 'Roff'%'Roff'
+     .fo ''- # -
+
+A title line consists of a line with three  distinct  fields:  the
+first  is text to be placed flush with the left margin, the second
+centered, and the third flush with the right  margin.   The  first
+non-blank  character  in  the  title is used as the 'delimiter' to
+separate the three fields.  Any '#'  characters  in  a  title  are
+replaced  by  the  current  page  number.  Any  '%' characters are
+replaced by the current date.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              - 1 -                               
+
+
+Roff                       May 21, 1983                       Roff
+
+
+Commands:
+
+Request Initial Default Break Meaning~~
+_______ _______ _______ _____ _______
+
+.bd n           n=1     no    Boldface the next 'n' lines.
+.bp n     n=1   n=+1    yes   Begin new page and number it 'n'.
+.br                     yes   The filling of the current line is stopped.
+.cc c     c=.   c=.     no    Control character becomes 'c'.
+.ce n           n=1     yes   Center the next 'n' input lines without filling.
+.ef t     t=''  t=''    no    Foots on even pages are 't'.
+.eh t     t=''  t=''    no    Heads on even pages are 't'.
+.fi       yes           yes   Begin filling output lines.
+.fo t     t=''  t=''    no    All foot titles are 't'.
+.he t     t=''  t=''    no    All head titles are 't'.
+.in n     n=0   n=0     yes   Set left margin to column 'n+1'.
+.ju             yes     no    Right justify filled lines.
+.ls n     n=1   n=1     no    Line spacing set to 'n' lines per output line.
+.h1 n     n=3   n=1     no    Put 'n'-1 blank lines between top of page and head.
+.h2 n     n=2   n=1     no    Put 'n' blank lines between head and text.
+.f1 n     n=3   n=1     no    Put 'n'-1 blank lines between text and foot.
+.f2 n     n=3   n=1     no    Put 'n' blank lines between foot and bottom of page.
+.ne n           n=0     y/n   Begin new page if 'n' lines won't fit on output.
+                              Break if need to start new page; don't if not.
+.nf       no            yes   Stop filling output lines.
+.nj       no            no    Do not right justify filled lines.
+.of t     t=''  t=''    no    Foots on odd pages are 't'.
+.oh t     t=''  t=''    no    Heads on odd pages are 't'.
+.pl n     n=66  n=66    no    Total page length is 'n' lines.
+.po n     n=0   n=0     no    Page offset; precede all lines by 'n' spaces.
+.rj n     n=0   n=1     no    Right justify the next 'n' lines without fill.
+.rm n     n=66  n=66    no    Set right margin to column 'n'.
+.sp n           n=1     yes   Insert 'n' blank lines, except at top of page.
+.ti n           n=0     yes   Temporarily indent next output line 'n' spaces.
+.ul n           n=1     no    Underline the next 'n' lines.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              - 2 -                               

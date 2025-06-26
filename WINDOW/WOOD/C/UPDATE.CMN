@@ -1,0 +1,34 @@
+#define NUMBER_NODES (SCREEN_SIZE+1)*(SCREEN_SIZE+1)
+#define nodep short int
+
+static nodep
+	open, min_node,
+	up_father_a[NUMBER_NODES],
+	up_open_a[NUMBER_NODES],
+	up_prev_a[NUMBER_NODES];
+
+static short int
+	up_cost_a[NUMBER_NODES],
+	up_neq_a[NUMBER_NODES];
+
+static char
+	up_old_pos_a[NUMBER_NODES],
+	up_new_pos_a[NUMBER_NODES],
+	up_operation_a[NUMBER_NODES],
+	up_insert_delete_count_a[NUMBER_NODES],
+	up_stat_a[NUMBER_NODES];
+
+#define up_father(x) up_father_a[x]
+#define up_open(x) up_open_a[x]
+#define up_prev(x) up_prev_a[x]
+#define up_cost(x) up_cost_a[x]
+#define up_old_pos(x) up_old_pos_a[x]
+#define up_new_pos(x) up_new_pos_a[x]
+#define up_neq(x) up_neq_a[x]
+#define up_operation(x) up_operation_a[x]
+#define up_insert_delete_count(x) up_insert_delete_count_a[x]
+#define up_stat(x) up_stat_a[x]
+#define up_son(x) up_prev(x)
+
+static int
+	up_buffer_size = 30;	/* start with low buffer size threshold */

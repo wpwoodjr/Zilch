@@ -1,0 +1,4 @@
+common /pushb/ pu_buffer, pu_tty_c, pu_last_key_struck
+
+  integer pu_buffer
+  byte pu_tty_c, pu_last_key_struck

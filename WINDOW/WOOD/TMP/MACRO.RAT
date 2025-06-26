@@ -1,0 +1,124 @@
+# ARCHIVE INSTAL.RAT              30  30-NOV-81 14:32:12
+# instal - add name and definition to table
+   subroutine instal(name, defn, flag)
+   character defn(MAXDEF), name(MAXTOK), c
+   integer length
+   integer dlen, nlen, flag
+   include clook
+
+   if (name(1) != EOS) {
+     nlen = length(name) + 1
+     dlen = length(defn) + 1
+     if (dlen > MAXDEF) {
+	call errlin(name)
+	call synerr("definition too long.")
+        return
+	}
+     if (avail + nlen + dlen + 2*CHARSPERINT > MAXTBL+1) {
+	call errlin(name)
+	call fatal("too many definitions.")
+        return
+	}
+     call setint(table(avail+CHARSPERINT), flag)
+     call scopy (name, 1, table, avail+2*CHARSPERINT)
+     call scopy (defn, 1, table, avail+nlen+2*CHARSPERINT)
+     c = table(avail+2*CHARSPERINT)
+     call setint(table(avail), tabptr(c))
+     tabptr(c) = avail
+     avail = avail + nlen + dlen + 2*CHARSPERINT
+     }
+   return
+   end
+# ARCHIVE LOCDEF.RAT              23   3-FEB-82 23:24:23
+# locdef - locate name
+   integer function locdef(name, i, j, c)
+   character name(MAXTOK), c
+   integer i, j, k
+   integer getint
+   include clook
+
+   if (name(1) != EOS) {
+     c = name(1)
+     for (i = tabptr(c); i > 0; i = getint(table(i))) {
+	j = i + 2*CHARSPERINT
+	for (k = 1; name(k) == table(j) & name(k) != EOS; k = k + 1)
+	   j = j + 1
+	if (name(k) == table(j)) {      # got one
+	   j = j+1
+	   locdef = YES
+	   return
+	   }
+	}
+     }
+   locdef = NO
+   return
+   end
+# ARCHIVE LOOKUP.RAT              13  30-NOV-81 14:32:13
+# lookup - locate name, extract definition from table
+   integer function lookup(name, defn, flag)
+   character defn(MAXDEF), name(MAXTOK), c
+   integer flag, i, j, locdef, getint
+   include clook
+
+   lookup = locdef(name, i, j, c)
+   if (lookup == YES) {
+     call scopy(table, j, defn, 1)
+     flag = getint(table(i+CHARSPERINT))
+     }
+   return
+   end
+# ARCHIVE GETINT.RAT              11  30-NOV-81 14:32:12
+# getint - get an integer from table
+  integer function getint(table)
+  character table(CHARSPERINT), c(CHARSPERINT)
+  integer i, j
+  equivalence (i, c)
+
+  do j = 1, CHARSPERINT
+    c(j) = table(j)
+  getint = i
+  return
+  end
+# ARCHIVE SETINT.RAT               8  30-NOV-81 14:32:16
+# setint - put an integer into table
+  subroutine setint(table, val)
+  character table(CHARSPERINT), val(CHARSPERINT)
+
+  do i = 1, CHARSPERINT
+    table(i) = val(i)
+  return
+  end
+# ARCHIVE UNDEF.RAT               33  30-NOV-81 14:32:16
+# undef - undefine a macro and garbage collect
+  subroutine undef(name)
+  character name(MAXTOK), c
+  integer i, j, k, knext, l, deflen, locdef, length, getint
+  include clook
+
+  if (locdef(name, i, j, c) == YES) {
+    if (tabptr(c) == i)
+      tabptr(c) = getint(table(i))
+    else {
+      for (k = tabptr(c); getint(table(k)) != i; k = getint(table(k)))
+	;
+      call setint(table(k), getint(table(i)))
+      }
+    j = j + length(table(j)) + 1
+    deflen = j - i
+    do l = 1, 127
+      if (tabptr(l) > i) {
+	k = tabptr(l)
+	tabptr(l) = tabptr(l) - deflen
+	for ( ; getint(table(k)) > i; k = knext) {
+	  knext = getint(table(k))
+	  call setint(table(k), knext - deflen)
+	  }
+	}
+    for ( ; j < avail; j = j+1) {
+      table(i) = table(j)
+      i = i+1
+      }
+    avail = i
+    }
+  return
+  end

@@ -1,0 +1,404 @@
+                     Z i l c h
+                  Pocket Reference
+
+               C o n t r o l  M o d e
+
+   Functions to position the cursor:
+
+   H or Left Arrow
+       Go back one character.
+   L or Right Arrow
+       Go forward one character.
+   K or Up Arrow
+       Go up one line.
+   J or Down Arrow
+       Go down one line.
+   ^J  Scroll up one line.
+   ^K  Scroll down one line.
+   I   Go up one line but stay in same column.
+   U   Go down one line but stay in same column.
+   G   Go up half the window length.
+   B   Go down half the window length.
+   Y   Go up by the number of lines in the window
+       minus one.
+   N   If not in top line, bring current line  to
+       the  top  of the window.  If at top, bring
+       bottom line to the top of the window.
+   M   Go  to  beginning  of  line  if   not   at
+       beginning, else go to end of line.
+   O   Go back one word.
+   P   Go forward one word.
+   T   Go to top of file.                           
+   E   Go to last lines of file.
+   F   Go  back  to  last  subprogram.   Behavior
+       depends   on  language  as  determined  by
+       file's extension or the WM command.
+   V   Go forward to next  subprogram.   Behavior
+       depends   on  language  as  determined  by
+       file's extension or the WM command.
+   WT  Go to top of window.
+   /   Search forward.
+   \   Search backward.
+   =   Save current location.
+   ^   Go to saved location.
+   *   Go to  saved  location  and  save  current
+       location.
+
+
+   Functions to change mode:
+
+   DCL Allows  access  to  VMS  commands  without
+       leaving  the  editor.  Type "logo" to exit
+       DCL.
+   <ESC> or ` (Accent)
+       Changes mode from insert mode to control
+       mode and back again.
+   <CR> Exits editor, but asks  if  you  wish  to
+       save files.
+   ^Z  Saves all modified files and exits editor.
+
+
+   Editing functions:
+
+   C   Change one character string to another.
+   ^U  Delete from cursor to  beginning  of  next
+       line.
+   ^R  Restore text deleted by ^U.
+   <   Mark beginning of specified text.
+   >   Mark end of specified text.
+   S   Save specified text.
+   ^A  Add saved text at current location.
+   ^D  Delete specified text.
+   ^E  Extract (save then delete) specified text.
+   X^  Change the case of specified text  to  the
+       case of the current buffer.
+
+
+   Functions  affecting   files,   windows,   and
+   buffers:
+
+   WV  Create a new window for a file.
+   WC  Use current window to display another file
+       instead of the current file.
+   WB  Create a new window for a buffer.
+   WX  Use  current  window  to  display  another
+       buffer instead of the current buffer.
+   WH  Split the current window into two windows.
+   WD  Delete current window.
+   WO  Delete all other windows on the screen.      
+   WP  Move to previous window.
+   WN  Move to next window.
+   WE  Expand current window size by one line.
+   WS  Shrink current window size by one line.
+   WF  Expand current  window  size  as  much  as
+       possible.
+   WQ  Equalize size of all windows.
+   WR  Read  a  file  into  current  window  (and
+       replace data already there).
+   WA  Write back all modified files.
+   WW  Write text to a new file name.
+   ^T  Write the current file.
+   WL  List all buffers and files.
+   W^  Toggle the case of the current buffer.
+   WM  Change the mapping  type  of  the  current
+       buffer.
+
+
+   Functions affecting pages:
+
+   #   Switch to page.  If  the  page  has  never
+       been  used,  it  is  initialized  with the
+       windows of the current page.
+   -   Switch to previous page.
+   +   Advance to next page.
+
+
+   Miscellaneous functions:
+
+   R   Redraw screen.
+   [   Start "remembering" keystrokes.
+   ]   Stop "remembering" keystrokes.
+   XM  Execute "remembered" keystrokes.
+   ?   List help buffer.
+   ^V  Move line left by 2.
+   ^B  Move line right by two.
+   ^I  Set initial tab  stop  to  current  line's
+       first non-blank position.
+   XDCL Execute a VMS DCL command and display the
+       results in a window.
+   n   ("n" is a number.) Repeat next  command  n
+       times.
+   ^G  Abort command or prompt entry.
+   ^C  Abort XM command or repeating commands.
+
+
+                I n s e r t  M o d e
+
+   Functions to change mode:
+
+   <ESC> Changes mode from insert mode to control
+       mode and back again.
+   ^Z  Exits insert mode without popping  mapping
+       characters.
+                                                    
+
+   Miscellaneous functions:
+
+   <CR> End current line and start a new one.
+   <DEL> Delete previous character.
+   ^U  Delete through beginning of current line.
+   ^R  Restore text deleted by ^U.
+   ^A  Add saved text.
+   ^H  Go back one character.
+   ^L  Go forward one character.
+   ^K  Go up one line.
+   ^J  Go down one line.
+   ^P  Go forward one word.
+   ^I  Tab to initial tab stop if before it, else
+       tab to next eighth character position.
+   ^W  Move initial tab stop left by 2.
+   ^E  Move initial tab stop right by 2.
+   ^D  Set initial tab  stop  to  current  cursor
+       position.
+   \   Start mapping sequence.
+   \{  Insert  comment.   Behavior   depends   on
+       language as determined by file's extension
+       or the WM command.
+   \[  Make structured block.   Behavior  depends
+       on   language   as  determined  by  file's
+       extension or the WM command.
+   \<DEL> Delete the mapping  sequence  begun  by
+       the last \ command.
+
+
+               C o m m a n d  L i n e
+                  S w i t c h e s
+
+   /Restore=file-spec
+     Names a file from  which  Zilch  restores  a
+     previous  editing  session  if no files were
+     specified on the command line.
+
+   /Save=file-spec
+     Names  a  file  in  which  Zilch  saves  the
+     current editing session when it exits.
+
+   /Help=file-spec
+     Names a file which Zilch displays during the
+     "?" help command.
+
+   /Initialize=file-spec
+     Names  a  file  containing  Zilch   keyboard
+     commands  which  are executed before control
+     is given to the terminal.
+
+   /Terminal=term
+     Overrides  Zilch's  default   selection   of
+     terminal   type.   "term"  may  be  one  of:
+     VT100, VT52, ADM3A, or ADM5.
+
+   /Length=n
+     Specifies the screen length of the terminal.   
+
+   /Width=n
+     Specifies the width of the terminal.
+
+   /CAse=case
+     Sets the default initial case  for  buffers.
+     "case" may be UPPER or LOWER.
+
+   /FORMAP=file-spec
+     Names  a   file   which   contains   mapping
+     characters for Fortran programs.
+
+   /PASMAP=file-spec
+     Names  a   file   which   contains   mapping
+     characters for Pascal programs.
+
+   /RATMAP=file-spec
+     Names  a   file   which   contains   mapping
+     characters for Ratfiv programs.
+
+   /TEXTMAP=file-spec
+     Names  a   file   which   contains   mapping
+     characters for text files.
+
+
+   Pascal Mapping Characters:
+
+   [       BEGIN
+             END (* <structure> *);
+   A       READ
+   B       WRITE
+   C       CASE ... OF
+             END (* CASE *);
+   D       DOWNTO
+   E       ELSE
+   F       FOR ... DO
+   G       PROCEDURE ... EXTERN;
+   H       FUNCTION ... EXTERN;
+   I       IF ... THEN
+   J       ELSE IF ... THEN
+   M       MODULE
+           END (** MODULE **).
+   P       PACKED
+   R       REPEAT
+             UNTIL
+   T       TO
+   V       WITH ... DO
+   W       WHILE ... DO
+   X       PROGRAM
+           BEGIN (* PROGRAM *)
+           END (** PROGRAM **).
+   Y       PROCEDURE
+           BEGIN (* PROC *)                         
+           END (** PROC **);
+   Z       FUNCTION
+           BEGIN (* FUNC *)
+           END (** FUNC **);
+   0       RECORD
+             END (* RECORD *);
+   1       CONST
+   2       TYPE
+   3       VAR
+   4       : INTEGER;
+   5       : BOOLEAN;
+   6       : CHAR;
+   7       ARRAY [...] OF
+   8       : REAL;
+   9       : SET OF
+   /       DIV
+   {       (* ... *)
+   @       %INCLUDE '
+   =       =
+   ,       <
+   <       <=
+   .       >
+   >       >=
+   #       <>
+   <space> =
+   :       :=
+   ;       :=
+   <tab>   <tab>
+
+
+   Fortran Mapping Characters:
+
+   A       ACCEPT
+   B       BYTE
+   C       CONTINUE
+   D       DO
+   E       ELSE
+   F       FORMAT (
+   G       GO TO
+   H       COMMON /
+   I       IF ( ... THEN
+             ENDIF
+   1       CHARACTER*
+   2       INTEGER*2
+   4       INTEGER*4
+   8       REAL*8
+   6       REAL*16
+   J       DIMENSION
+   K       CALL
+   L       LOGICAL
+   M       END
+   N       FUNCTION
+   O       READ (
+   P       PARAMETER
+   Q       IF (
+   R       RETURN
+   S       SUBROUTINE
+   T       TYPE                                     
+   U       REAL
+   W       WRITE (
+   X       DO WHILE (
+             ENDDO
+   Z       ELSE IF ( ... THEN
+   =       EQUIVALENCE (
+   -       IMPLICIT INTEGER*4 (A - Z)
+   (       OPEN (UNIT=
+   )       CLOSE (UNIT=
+   {       !
+   @       INCLUDE '
+   <space> =
+   <tab>   <tab>
+
+
+   Ratfiv Mapping Characters:
+
+   [       {
+             }
+   A       ACCEPT
+   B       BYTE
+   C       CONTINUE
+   D       DO
+   E       ELSE
+   F       FOR (
+   G       GOTO
+   H       COMMON /
+   I       IF (
+   1       CHARACTER*
+   2       INTEGER*2
+   4       INTEGER*4
+   8       REAL*8
+   6       REAL*16
+   J       DIMENSION
+   K       CALL
+   L       LOGICAL
+   M       END
+   N       FUNCTION
+   O       READ (
+   P       PARAMETER
+   Q       SWITCH ( ... {
+             }
+   R       RETURN                                   
+   S       SUBROUTINE
+   T       TYPE
+   U       REAL
+   W       WRITE (
+   X       WHILE (
+   Z       ELSE IF (
+   =       EQUIVALENCE (
+   -       IMPLICIT INTEGER*4 (A - Z)
+   (       OPEN (UNIT =
+   )       CLOSE (UNIT =
+   @       INCLUDE "
+   {       #
+   <space> =
+   <tab>   <tab>
+
+
+   Runoff Mapping Characters:
+
+   C       .CENTER;
+   P       .PARAGRAPH
+   S       .SKIP
+   H       .HEADER LEVEL
+   L       .LIST
+           .END LIST
+   E       .LE;
+   G       .PAGE
+   B       .BREAK
+   I       .INDENT
+   M       .LEFT MARGIN
+   R       .RIGHT MARGIN
+   N       .NOTE
+           .END NOTE
+   F       .FOOTNOTE
+           .END FOOTNOTE
+   T       .TEST PAGE
+   K       .BLANK
+   X       .INDEX
+   Y       .ENTRY
+   Z       .PAGE SIZE
+   >       \\ ... ^^
+   <       ^< ... ^^
+   *       ^* ... \*
+   &       ^& ... \&
+   _       .LITERAL                                 
+           .END LITERAL
+   <tab>   .TAB STOPS
+   <space> .SPACING
+   {       !
+   @       .REQUIRE "

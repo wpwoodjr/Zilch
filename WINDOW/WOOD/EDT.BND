@@ -1,0 +1,21 @@
+%keypad					application
+
+%mode					2
+mode_0					^[1
+mode_2					^[\O\t
+mode_3					^[\O\u
+%include				edt01
+search_forward				^[\O\P^[\O\R
+next_line				^[\O\p
+
+%mode					3
+mode_0					^[1
+mode_2					^[\O\t
+mode_3					^[\O\u
+%include				edt01
+search_reverse				^[\O\P^[\O\R
+previous_line				^[\O\p
+
+%include				keypad
+mode_2					^[1
+enter_insert_mode			^[^[

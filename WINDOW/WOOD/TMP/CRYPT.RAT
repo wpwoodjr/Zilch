@@ -1,0 +1,25 @@
+define(header,implicit integer (a-p,r-z); implicit logical (q))
+
+# crypt - encrypt and decrypt standard input
+  subroutine crypt(key, keylen)
+  header
+  real ran
+  byte key(ARB), c, r, b1(4)
+  equivalence (i1, b1)
+
+  i1 = 0
+  for ([j = 1; i = 1]; i <= keylen; [j = mod(j, 4) + 1; i = i + 1])
+    b1(j) = b1(j) + key(i)
+  if (mod(i1, 2) == 0)
+    i1 = i1 + 1
+  while (q_getch(c, STDIN)) {
+    if (c != NEWLINE) {
+      r = ran(i1)*256
+      r = c .xor. r
+      if (r != NEWLINE)
+	c = r
+      }
+    call putch(c, STDOUT)
+    }
+  return
+  end

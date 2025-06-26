@@ -1,0 +1,34 @@
+$ search *.* dpc
+
+******************************
+ANL$DISK:[MATTES.ZILCH]LOGIN.COM;3
+
+$	assign 'this_dir' dpc_edit
+$	assign 'this_dir' dpc_doc
+				  /help=dpc_edit:zhelp.hlp-
+				  /ratmap=dpc_edit:ratmap.-
+				  /formap=dpc_edit:formap.-
+				  /pasmap=dpc_edit:pasmap.-
+				  /textmap=dpc_edit:rnomap.-
+$	assign dpc_edit:	zcai$
+
+******************************
+ANL$DISK:[MATTES.ZILCH]MAILEDIT.COM;31
+
+$ ! The symbol DPC_MAILEDITOR may be predefined as Z (Zilch) or E (EDT) to
+$ editor := 'dpc_maileditor'
+$ zilch/save=nl:/init=dpc_edit:zmail.ini 'p2'
+
+******************************
+ANL$DISK:[MATTES.ZILCH]WOOD.ZIL;1
+
+%SEARCH-F-WRITEERR, error writing SYS$OUTPUT:
+-RMS-F-SYS, QIO system service request failed
+-SYSTEM-F-MBTOOSML, mailbox is too small for request
+  WOOD         job terminated at 22-JAN-1985 12:55:24.89
+
+  Accounting information:
+  Buffered I/O count:          213      Peak working set size:   234
+  Direct I/O count:             22      Peak page file size:     965
+  Page faults:                 215      Mounted volumes:           0
+  Elapsed CPU time:     0 00:00:03.60   Elapsed time:     0 00:00:08.69

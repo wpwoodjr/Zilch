@@ -1,0 +1,5 @@
+declare int in_nchars;
+
+declare char
+	in_cr,
+	in_deol;

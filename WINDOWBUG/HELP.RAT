@@ -1,0 +1,24 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "memory.cmn"
+include "spfiles.cmn"
+include "session.cmn")
+
+  function q_he_help
+  header
+  string nohelp "Can't read Help file!"
+
+  q_he_help = false
+  bu = sp_read_buffer("Help",sp_help,nohelp)
+  if (bu == null)
+    call ms_error(nohelp)
+  else {
+    q_he_help = true
+    call pa_switch(-1)
+    call q_switch_to_buffer("Help")
+    call delete_other_windows
+    call ms_message("Type carriage-return to exit Help.")
+    }
+  return
+  end

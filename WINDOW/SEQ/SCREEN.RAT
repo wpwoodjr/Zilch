@@ -1,0 +1,277 @@
+#	Zilch Screen Editor, Copyright (c) 1982, 1986 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "session.cmn"
+  include "screen.cmn"
+  include "memory.cmn"
+  include "terminal.cmn")
+
+  subroutine sc_initialize
+  header
+
+  sc_size = min(ti_length, SCREEN_SIZE)
+  sc_width = ti_width
+  sc_error_occurred = false
+  do i = 1, SCREEN_SIZE {
+    sc_new_length(i) = 0
+    sc_reverse_video(i,sc_old) = false
+    sc_reverse_video(i,sc_new) = false
+    }
+  call redraw
+  return
+  end
+
+  subroutine sc_fill_line(n,txt,len)
+  header
+  byte txt(ARB)
+
+  sc_modified(n) = true
+  sc_new_length(n) = min(len,sc_width)
+  if (len > 0) {
+    call movc(txt,sc_buffer(1,n,sc_new),sc_new_length(n))
+    if (len >= sc_width)
+      sc_buffer(sc_width,n,sc_new) = "$"
+    }
+  return
+  end
+
+  subroutine sc_add_to_line(n,txt,len)
+  header
+  byte txt(ARB)
+
+  sc_modified(n) = true
+  l = min(len, sc_width - sc_new_length(n))
+  if (l > 0) {
+    call movc(txt,sc_buffer(sc_new_length(n)+1,n,sc_new),l)
+    sc_new_length(n) = sc_new_length(n) + l
+    if (sc_new_length(n) >= sc_width)
+      sc_buffer(sc_width,n,sc_new) = "$"
+    }
+  return
+  end
+
+  subroutine redraw
+  header
+
+  sc_redraw = true
+  return
+  end
+
+  subroutine sc_fill_new
+  header
+  logical seedot
+  byte blanks(54)
+  data blanks /54*" "/
+
+  n = 1
+  wi_map(se_windows,wi) {
+    seedot = true
+    if (wi_modified(wi) == 0)
+      if (! q_sc_find_cursor(wi,n)) {
+	seedot = false
+	wi_modified(wi) = 1
+	}
+    if (wi_modified(wi) == 0)
+      n = n + wi_size(wi)
+    else {
+      if (bu_type(wi_buffer(wi)) == SEQ)
+	call seq_fill_window(wi,wi_size(wi),n,seedot,sc_buffer(0,1,sc_new))
+      else
+	call sc_fill_window(wi,wi_size(wi),n,seedot,sc_buffer(0,1,sc_new))
+      n = n + wi_size(wi)
+      sc_new_length(n) = 0
+      sc_modified(n) = true
+      if (wi_mode_line(wi) == null)
+	sc_reverse_video(n,sc_new) = false
+      else {
+	if (te_rv)
+	  sc_reverse_video(n,sc_new) = true
+	else {
+	  sc_reverse_video(n,sc_new) = false
+	  call sc_fill_line(n,blanks,54)
+	  }
+	call sc_add_to_line(n,
+	    st_buffer(wi_mode_line(wi)),
+	    ho_length(st_buffer(wi_mode_line(wi))))
+	}
+      }
+    n = n+1
+    wi_modified(wi) = 0
+    }
+  return
+  end
+
+
+define(addchar, {
+    if (nc < sc_width) {
+      nc = nc+1
+      buffer(nc,i) = $1
+      }
+    })
+
+define(nextc, {
+	      if ($1 >= gap)			# inline coding of tx_address
+		$2 = tx_text($1+gapsiz)
+	      else
+		$2 = tx_text($1)})
+
+define(nextc_inc,{ nextc($1,$2); $1 = $1+1 })
+
+  subroutine sc_fill_window(wi, size, n, seedot, buffer)
+  header
+  byte char, buffer(0:SCREEN_WIDTH,_incr(SCREEN_SIZE))
+  logical seedot
+
+  bu = wi_buffer(wi)
+  base = bu_base(bu)
+  gap = bu_gap(bu)
+  gapsiz = bu_gap_size(bu)
+  dot = base + wi_dot(wi)
+  repeat {
+    if (! seedot) {
+      tx = base + wi_dot(wi)
+      for (i = (size-1)/2; i >= 0 & tx > base; i = i-1)
+	for (tx = tx-1; tx > base; tx = tx-1) {
+	  nextc(tx,char)
+	  if (char == NEWLINE)
+	    break
+	  }
+      wi_bow(wi) = tx+1-base
+      }
+    seedot = false
+    tx = base + wi_bow(wi)
+    do i = n, n+size-1 {
+      sc_reverse_video(i,sc_new) = false
+      sc_modified(i) = true
+      nc = 0
+      repeat {
+	if (tx == dot) {
+	  seedot = true
+	  if (wi == se_current_window & ! se_in_prompt) {
+	    sc_cursor_x = min(sc_width,nc+1)
+	    sc_cursor_y = i
+	    }
+	  }
+	nextc_inc(tx,char)
+	if (char >= " " & char <= "~") {
+	  addchar(char)
+	  }
+	else if (char == NEWLINE) {
+	  break
+	  }
+	else if (char == TAB) {
+	  for (j = min(nc + 8 - mod(nc, 8), sc_width); nc < j; )
+	    addchar(" ")
+	  }
+	else if (char >= 0 & char <= 8%37) {
+	  addchar("^")
+	  addchar(char+8%100)
+	  }
+	else {
+	  addchar("\")
+	  ichar = char
+	  addchar('0' + (ichar & 8%300)/8%100)
+	  addchar('0' + (ichar & 8%70)/8%10)
+	  addchar('0' + (ichar & 8%7))
+	  }
+	}
+      if (nc == sc_width)
+	buffer(nc,i) = "$"
+      sc_new_length(i) = nc
+      }
+    } until (seedot)
+  return
+  end
+
+  function q_sc_dot_is_visible(wi,bu)
+  header
+  byte c
+
+  if (wi_bow(wi) > wi_dot(wi))
+    return(false)
+  else {
+    dot = bu_base(bu) + wi_dot(wi)
+    tx = bu_base(bu) + wi_bow(wi)
+    if (bu_type(bu) == SEQ)
+      size = max(1, wi_size(wi) - 2)
+    else
+      size = wi_size(wi)
+    do i = 1, size {
+      call tx_find_newline(tx,bu_gap(bu),bu_gap_size(bu),tx_text)
+      if (dot < tx)
+	return(true)
+      }
+    return(false)
+    }
+  end
+
+  function q_sc_find_cursor(wi,n)
+  header
+  byte c
+
+  if (wi_bow(wi) > wi_dot(wi))
+    return(false)
+  else {
+    bu = wi_buffer(wi)
+    base = bu_base(bu)
+    gap = bu_gap(bu)
+    gapsiz = bu_gap_size(bu)
+    dot = base + wi_dot(wi)
+    tx = base + wi_bow(wi)
+    if (bu_type(bu) == SEQ)
+      size = max(1, wi_size(wi) - 2)
+    else
+      size = wi_size(wi)
+    do i = n, n+size-1 {
+      bl = tx
+      call tx_find_newline(tx,gap,gapsiz,tx_text)
+      if (dot < tx) {				# find cursor
+	if (wi == se_current_window & ! se_in_prompt) {
+	  sc_cursor_y = i
+	  sc_cursor_x = 0
+	  for (tx = bl; tx < dot; ) {
+	    nextc_inc(tx,c)
+	    if (c >= " " & c <= "~")
+	      sc_cursor_x = sc_cursor_x+1
+	    else if (c == TAB)
+	      sc_cursor_x = sc_cursor_x+8-mod(sc_cursor_x,8)
+	    else if (c >= 0 & c <= 8%37)
+	      sc_cursor_x = sc_cursor_x+2
+	    else
+	      sc_cursor_x = sc_cursor_x+4
+	    }
+	  sc_cursor_x = min(sc_cursor_x + 1,sc_width)
+	  }
+	return(true)
+	}
+      }
+    return(false)
+    }
+  end
+
+  subroutine seq_fill_window(wi, size, n, seedot, buffer)
+  header
+  logical seedot, junk
+  byte buffer(0:SCREEN_WIDTH,_incr(SCREEN_SIZE))
+
+  if (size == 1)
+    line = n
+  else if (size >= 2) {
+    line = n+size-1
+    sc_reverse_video(line-1,sc_new) = false
+    sc_new_length(line-1) = 0
+    sc_modified(line-1) = true
+    }
+  junk = true
+  if (wi == wi_seq(wi)) {
+    if (size > 2)
+      call sc_fill_window(wi_parent(wi),size-2,n,junk,buffer)
+    call sc_fill_window(wi,1,line,seedot,buffer)
+    }
+  else {
+    call sc_fill_window(wi_seq(wi),1,line,junk,buffer)
+    if (size > 2)
+      call sc_fill_window(wi_parent(wi),size-2,n,seedot,buffer)
+    }
+  return
+  end

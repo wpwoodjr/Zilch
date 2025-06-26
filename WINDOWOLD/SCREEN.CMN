@@ -1,0 +1,14 @@
+common /screen/ _
+	sc_size,
+	sc_width,
+	sc_cursor_x,
+	sc_cursor_y,
+	sc_old_length(_arith(SCREEN_SIZE,+,1)),
+	sc_new_length(SCREEN_SIZE),
+	sc_error_occurred,
+	sc_redraw,
+	sc_modified(SCREEN_SIZE),
+	sc_buffer(0:SCREEN_WIDTH,_incr(SCREEN_SIZE),0:1)
+
+  logical*1 sc_error_occurred, sc_redraw, sc_modified
+  byte sc_buffer

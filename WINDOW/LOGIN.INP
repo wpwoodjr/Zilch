@@ -1,0 +1,14 @@
+$ assign icr$program:zbind.exe zilchbind ! Shared Keybindings Image
+$ username := 'f$getjpi(0,"USERNAME")'
+$ z*ilch :== $icr$program:zilch -	! "Zilch" -- screen editor
+  /save='f$extract(0,9,username)'.zil -
+  /restore='f$extract(0,9,username)'.zil -
+  /help=sys$public:zhelp. -
+  /ratmap=sys$public:ratmap. -
+  /formap=sys$public:formap. -
+  /pasmap=sys$public:pasmap. -
+  /textmap=sys$public:rnomap. -
+  /cross_lines
+$ z5 :== 'zilch'/terminal=adm5		! zilch for adm5
+$ assign 'f$logical("ICR$STUFF")' zcai$
+$ zcai :== @zcai$:zcai.com		! zilch computer aided instruction

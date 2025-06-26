@@ -1,0 +1,13 @@
+external cs_adm3a_clear
+external cs_adm3a_replace
+external cs_adm3a_delete
+
+external cs_adm5_replace
+
+external cs_vt100_clear
+external cs_vt100_replace
+external cs_vt100_insert
+external cs_vt100_delete
+
+external cs_vt52_clear
+external cs_vt52_replace

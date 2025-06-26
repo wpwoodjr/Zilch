@@ -1,0 +1,27 @@
+
+	\	
+b	break
+c	continue
+d	do0+	until (0-
+e	else-+
+f	for (0+
+g	goto 
+i	if (0+
+mmain(int argc, char *argv[], char *env[]){}
+n\\n", 
+p	printf("
+r	return
+s	struct {0+
+t\\t
+u	union {0+
+w	while (0+
+z	else if (-+
+@#include 
+({}
+//* 00 */
+{/* 00 */
+  = 
++ += 
+- -= 
+* *= 
+;;	

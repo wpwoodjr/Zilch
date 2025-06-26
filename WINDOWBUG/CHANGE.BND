@@ -1,0 +1,83 @@
+  # Zilch Screen Editor, Copyright (c) 1982,1986 William P. Wood, Jr.
+  # Change bindings and function definitions for standard Zilch
+  # This file is %included by ZBIND.BND
+
+%mode					change
+  define(header,implicit integer (a-p,r-z); implicit logical (q)
+    include "session.cmn"
+    include "memory.cmn")
+
+  define(unbound_key_sequence,
+	break)
+  define(qio_error,
+	break)
+  define(qio_error_in_insert_mode,		# can't happen here
+	continue)
+  define(control_y_interrupt,
+	call redraw
+	break)
+  define(end_function_definition,
+	next)
+
+  subroutine query_replace_string(count)
+  header
+  logical do_all
+  string help_
+  "' 'change '!'change all '.'change&stop 'n'no change '='return here '^G'stop"
+
+  st = st_allocate(MAX_PROMPT)
+  if (q_sr_get_search_string("Old string? "))
+    if (q_pr_read_prompt("New string? ",st,len)) {
+      dot = wi_dot(se_current_window)
+      bow = wi_bow(se_current_window)
+      mode = bi_use_keymap(CHANGE_MODE)
+      do_all = false
+      for (n = 0; n < count | count == 1; ) {
+	if (! q_tx_search_forward(se_current_buffer,
+    				wi_dot(se_current_window),
+    				bu_size(se_current_buffer),
+    				st_buffer(se_search_string),
+    				st_buffer(se_search_mask),
+    				se_search_length,
+    				wi_dot(se_current_window)))
+	  break
+	else {
+	  wi_dot(se_current_window) = wi_dot(se_current_window) +
+							se_search_length
+	  if (count > 1 | do_all)
+	    goto 20
+  10	  call ms_message(help)
+	  cmd = bi_get_command()
+sr_replace				\40		# space
+	  continue
+  20	  call sr_replace(st_buffer(st),len)
+	  n = n+1
+sr_replace				y
+sr_replace_all				!
+	  call sr_replace(st_buffer(st),len)
+	  n = n+1
+	  do_all = true
+sr_no_replace				n
+	  continue
+sr_replace_and_stop			.
+	  call sr_replace(st_buffer(st),len)
+	  n = n+1
+	  break
+sr_return_here				=
+	  dot = wi_dot(se_current_window)
+	  bow = wi_bow(se_current_window)
+	  goto 10
+	  }
+	}
+      if (n > 0)
+	call ms_report_number2("Replaced ",n," occurrence."," occurrences.")
+      else
+	call ms_message("No replacements done.")
+      wi_dot(se_current_window) = dot
+      wi_set_bow(se_current_window,bow)
+      mode = bi_use_keymap(mode)
+      }
+  call st_deallocate(st)
+  count = 0
+  return
+  end

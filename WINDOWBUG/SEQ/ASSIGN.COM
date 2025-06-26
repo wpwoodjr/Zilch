@@ -1,0 +1,1 @@
+$ assign/nolog/job COM$8:[WOOD.WINDOW.SEQ]SCREEN SCREEN

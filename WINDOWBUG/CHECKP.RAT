@@ -1,0 +1,87 @@
+#	Zilch Screen Editor, Copyright (c) 1982,1986 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "session.cmn"
+  include "memory.cmn")
+
+  subroutine checkpoint_modified_files
+  header
+
+  nch = 0
+  bu_map(se_buffers,bu)
+    if (bu_modified(bu) == 1 & bu_file_name(bu) != null)
+      if (q_ch_buffer(bu))
+	nch = nch + 1
+      else {
+	call ms_message2("Error checkpointing buffer ",bu_name(bu))
+	call ms_error(EOS)
+	}
+  if (nch > 0)
+    call ms_report_number2("Checkpointed ", nch, " file.", " files.")
+  return
+  end
+
+  function q_ch_buffer(bu)
+  header
+  byte name(FILENAMESIZE)
+
+  q_ch_buffer = q_ch_name(st_buffer(bu_name(bu)),name)
+  if (q_ch_buffer) {
+    q_ch_buffer = q_fi_write_file(bu,name,'U',stat)
+    bu_modified(bu) = 1
+    }
+  return
+  end
+
+  function q_ch_name(buname,chname)
+  header
+  byte buname(ARB), chname(ARB)
+  string ckp1 ".ckp", ckp2 "_ckp"
+
+  ver = ho_indexq(buname,';')
+  len = ho_length(buname)
+  if (ver == 0)
+    ver = len+1
+  lver = len+1-ver
+  len = min(ver-1,FILENAMESIZE-5-lver)
+  call movc(buname, chname, len)
+  chname(len+1) = EOS
+  i = ho_indexq(chname,'.')
+  if (i == 0)
+    call movc(ckp1, chname(len+1), 5)
+  else if (i == len)
+    call movc(ckp1, chname(len), 5)
+  else					# assume EXTSIZE-5-lver >= 1 here...
+    call movc(ckp2, chname(min(len+1,i+EXTSIZE-5-lver)), 5)
+  if (lver > 0) {
+    len = ho_length(chname)
+    call movc(buname(ver), chname(len+1), lver)
+    chname(len+1) = '_'
+    chname(len+lver+1) = EOS
+    }
+  return(! q_ho_equal(buname, chname))
+  end
+
+  subroutine ch_delete(bu)
+  header
+  byte name(FILENAMESIZE)
+
+  if (q_ch_name(st_buffer(bu_name(bu)),name))
+    call q_fi_delete(WRITE_UNIT,name)
+  return
+  end
+
+  function q_ch_recover(bu)
+  header
+  byte name(FILENAMESIZE)
+
+  if (q_ch_name(st_buffer(bu_name(bu)),name))
+    if (q_fi_read_file(bu,name,'C',true)) {
+      call ms_message2("Recovered ",bu_file_name(bu))
+      call ms_add_to_message(" from ")
+      call ms_add_to_message(name)
+      bu_modified(bu) = 1
+      return(true)
+      }
+  return(false)
+  end

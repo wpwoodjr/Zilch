@@ -1,0 +1,127 @@
+1 ZILCH
+ Zilch is a screen editor which can display and edit one or more  files
+ at  a  time.   Complete documentation is in DPC_DOC:ZILCH.DOC.  Typing
+ ZCAI INTRO invokes an interactive beginner's tutorial on using  Zilch.
+ Typing  ZCAI  ADVANCED  invokes  an  advanced tutorial on using Zilch.
+ Documentation for the tutorials is in DPC_DOC:ZCAI.DOC.
+
+ Format:
+
+      ZILCH [file-spec [...]]
+2 Parameters
+ [file-spec [...]]
+
+ Specifies one or more files to be edited.  The files are displayed  in
+ separate  windows  on  the  screen  if the file names are separated by
+ spaces, or on separate pages  if  the  file  names  are  separated  by
+ commas.  Wild card file names are allowed.
+
+ If file-spec is omitted, Zilch tries to  restore  a  previous  editing
+ session  from  the  file  specified  in  the  /Restore  qualifier.  By
+ default, Zilch is defined in the system login command file to save and
+ restore  sessions  from 'username'.zil where 'username' is the first 9
+ letters of the currently logged in user's name.
+
+2 Qualifiers
+/Restore=file-spec
+ Specifies a file from which Zilch restores a previous editing  session
+ if  no files were specified on the command line.  By default, Zilch is
+ defined in the system login command file to save and restore  sessions
+ from  'username'.zil  where  'username'  is the first 9 letters of the
+ currently logged in user's name.
+
+/Save=file-spec
+ Specifies a file in which Zilch saves the current editing session when
+ it  exits.   By  default, Zilch is defined in the system login command
+ file to save and restore sessions from 'username'.zil where 'username'
+ is the first 9 letters of the currently logged in user's name.
+
+/Help=file-spec
+ Specifies a file which Zilch displays during the "?" help command.  By
+ default,  Zilch  is  defined  in the system login command file to read
+ DPC_EDIT:ZHELP.
+
+/Initialize=file-spec
+ Specifies a file containing Zilch keyboard commands which are executed
+ before  control  is  given  to  the  terminal.   There  is  no default
+ initialization file.
+
+/Terminal=term
+ Overrides Zilch's default selection  of  terminal  type.   By  default
+ Zilch  assumes  the terminal is a VT52 if the system terminal type (as
+ displayed by the SHOW TERMINAL command) is  VT52.   Otherwise  if  the
+ terminal has the DECCRT characteristic Zilch assumes that the terminal
+ is a VT100 compatible terminal.  Otherwise Zilch assumes the  terminal
+ is  an  ADM3A.   To  use  an  ADM5,  /TERM=ADM5 should be specified on
+ Zilch's command line, or the DCL command "Z5" may be used.
+
+ "term" may be one of the following:
+
+     1.  VT100
+
+     2.  VT52
+
+     3.  ADM3A
+
+     4.  ADM5
+
+
+/Length=n
+ Specifies the page size of the terminal.   24  lines  is  the  default
+ length.  The following terminals accept the following lengths:
+
+     1.  VT100 - 3-24 lines
+
+     2.  VT52 - 3-24 lines
+
+     3.  ADM3A - 3-24 lines
+
+     4.  ADM5 - 3-24 lines
+
+
+/Width=n
+ Specifies the width of the terminal.  80 columns is the default width.
+ The following terminals accept the following widths:
+
+     1.  VT100 - 1-132 columns
+
+     2.  VT52 - 1-80 columns
+
+     3.  ADM3A - 1-80 columns
+
+     4.  ADM5 - 1-80 columns
+
+
+/INDent=n
+ Specifies  the  incremental  indent.   Two  columns  is  the   default
+ incremental   indent.   The  incremental  indent  affects  the  indent
+ performed by the Control-B and Control-V command mode commands and the
+ Control-W, Control-E, and mapping character indent functions in insert
+ mode.
+
+/CAse=case
+ Sets the default initial case for buffers.  "case"  may  be  UPPER  or
+ LOWER.   If  the /CAse switch isn't specified, Zilch uses LOWER as the
+ initial case, which allows insertion of upper or lower case characters
+ in the buffer.
+
+/FORMAP=file-spec
+ Specifies  a  file  which  contains  mapping  characters  for  Fortran
+ programs.   By  default,  Zilch is defined in the system login command
+ file to read DPC_EDIT:FORMAP.
+
+/PASMAP=file-spec
+ Specifies  a  file  which  contains  mapping  characters  for   Pascal
+ programs.   By  default,  Zilch is defined in the system login command
+ file to read DPC_EDIT:PASMAP.
+
+/RATMAP=file-spec
+ Specifies  a  file  which  contains  mapping  characters  for   Ratfiv
+ programs.   By  default,  Zilch is defined in the system login command
+ file to read DPC_EDIT:RATMAP.
+
+/TEXTMAP=file-spec
+ Specifies a file which contains mapping characters for text files.  By
+ default,  Zilch  is  defined  in the system login command file to read
+ DPC_EDIT:RNOMAP.
+

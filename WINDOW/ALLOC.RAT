@@ -1,0 +1,139 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "memory.cmn")
+
+  function me_allocate(size)
+  header
+
+_ifnotdef(REAL_VM)
+
+#
+#  routine to manage dynamic memory allocation
+#  free space is represented by a linked list of free blocks with a
+#  list head me_mem(0) pointing to the first block. ( me_mem(1)=0 )
+#  2 words are required to represent a free block
+#	word		meaning
+#	 1		link to next free block
+#	 2		size of this block(words)
+#  arguments
+#	size - size of entry to allocate
+#  returns
+#	ptr to entry, size of entry is stored at me_mem(ptr-1)
+#
+#
+  for ([pre = 0; ptr = me_next(0)]; ptr != null;
+	[pre = ptr; ptr = me_next(ptr)])
+    if (me_block_size(ptr) >= (size + 1)) {	# will block fit here
+      if (me_block_size(ptr) == (size + 1))
+	me_next(pre) = me_next(ptr)	# yes exactly - link around block 
+      else {
+	i = ptr + (size + 1)		# yes with some left over
+	me_next(pre) = i		# link pred. to left over block
+	me_next(i) = me_next(ptr)	# link left over block to suc.
+	me_block_size(i) = me_block_size(ptr) - (size + 1)	# adjust size
+	}
+      me_mem(ptr) = size		# save size of block
+      return(ptr + 1)			# return index of entry
+      }
+
+_elsedef
+
+  if (lib$get_vm((size + 1)*CHARS_PER_INT, ptr)) {
+    if (mod(ptr,CHARS_PER_INT) != 0 | mod(%loc(me_mem),CHARS_PER_INT) != 0)
+      stop "ptr or me_mem not on longword boundary in me_allocate!"
+    ptr = (ptr - %loc(me_mem))/CHARS_PER_INT
+    me_mem(ptr) = size
+    return(ptr + 1)
+    }
+
+_enddef
+
+  call ti_kill
+  call te_clear
+  call te_finish
+  call te_pos(1,1)
+  call send_message_to_terminal( _
+"Dynamic memory overflow! All modified file buffers are being checkpointed...")
+  call ti_finish
+  call dcl_finish
+  call checkpoint_modified_files
+  call exit
+  end
+
+  subroutine me_deallocate(tptr)
+  header
+
+_ifnotdef(REAL_VM)
+
+#
+#  routine to deallocate a block and return it to available space
+#  where
+#	tptr - index to block
+#
+#
+  if (tptr == null)
+    return
+  ptr = tptr - 1
+  size = me_mem(ptr) + 1
+  for ([pre = 0; suc = me_next(0)]; suc != null & ptr > suc;
+      [pre = suc; suc = me_next(suc)])
+    ;
+#  place found - link pred. to this block and this block to suc.
+  me_next(pre) = ptr
+  me_next(ptr) = suc
+  me_block_size(ptr) = size
+#  make pred. and this block one block if contiguous
+  if(pre + me_block_size(pre) == ptr) {
+    me_next(pre) = suc
+    me_block_size(pre) = me_block_size(pre) + size
+    ptr = pre
+    }
+#  make this block and suc one block if contiguous
+#  if this block fills in hole between pred. and suc. make one block
+#  to replace all three
+  if(ptr + me_block_size(ptr) == suc) {
+    me_next(ptr) = me_next(suc)
+    me_block_size(ptr) = me_block_size(ptr) + me_block_size(suc)
+    }
+
+_elsedef
+
+  if (tptr == null)
+    return
+  ptr = tptr - 1
+  if (! lib$free_vm((me_mem(ptr) + 1)*CHARS_PER_INT,
+		      ptr*CHARS_PER_INT + %loc(me_mem)))
+    call send_message_to_terminal(_
+			"Error freeing virtual memory!!!!!!!!!!!!!!!")
+
+_enddef
+
+  return
+  end
+
+  function me_size(bl)
+  header
+  return(me_mem(bl-1))
+  end
+
+_ifdef(DEBUG)
+
+  subroutine me_display
+  header
+
+_ifnotdef(REAL_VM)
+
+  for (ptr = me_next(0); ptr != null; ptr = me_next(ptr))
+    write(6,(" Block at "i7", size = "i7)) ptr,me_block_size(ptr)
+
+_elsedef
+
+  call lib$show_vm
+
+_enddef
+
+  return
+  end
+
+_enddef

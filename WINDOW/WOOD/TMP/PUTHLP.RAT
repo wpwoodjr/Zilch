@@ -1,0 +1,178 @@
+#-h- puthlp
+ ## puthlp - help routine for rput
+ #------------------------------------------------------------
+  subroutine puthlp(buf, len, outlev, lininc, font)
+  implicit integer (a - z)
+  character buf(ARB), outbuf(MAXOUT, MAXBACK), outfon(MAXOUT, MAXBACK)
+  real lininc
+  integer fonts(10)
+  logical fonprt, isnb(MAXBACK,10)
+  include cpage
+  include cparam
+  data outbuf /_arith(MAXOUT,*,MAXBACK)*BLANK/
+
+  if (print == YES) {
+    level = 0
+    fonprt = font == fontlv | fontlv == -1
+    bslev = 1
+    bp = tival + 1
+    bpmax = bp
+    nfonts = 1
+    fonts(1) = font
+    f = 1
+    do i = 1, MAXBACK
+      isnb(i,1) = .false.
+    for (i = 1; i <= len; i = i + 1)
+      if (buf(i) == supch)
+	level = level + 1
+      else if (buf(i) == subch)
+	level = level - 1
+      else if (buf(i) == fontch) {
+	if (i < len) {
+	  i = i + 1
+	  tfont = buf(i) - '0'
+	  if (tfont < 0 | tfont > 9)			# literal character
+	    goto 10					# argh!
+	  if (font != tfont) {
+	    font = tfont
+	    fonprt = font == fontlv | fontlv == -1
+	    if (fontlv == -1) {
+	      for (f = 1; f <= nfonts & fonts(f) != font; f = f + 1)
+		;
+	      if (f > nfonts) {
+		do j = 1, MAXBACK
+		  isnb(j,f) = .false.
+		nfonts = nfonts + 1
+		fonts(nfonts) = font
+		}
+	      }
+	    }
+	  }
+	}
+      else if (buf(i) == BLANK | buf(i) == spacch)
+	bp = bp + 1
+      else if (buf(i) == BACKSPACE) {
+	bpmax = max(bp, bpmax)
+	bp = max(1, bp - 1)
+	}
+      else {
+10	if (fonprt & level == outlev & bp <= MAXOUT) {
+	  if (buf(i) == UNDERLINE) {
+	    for (j = MAXBACK; outbuf(bp, j) != BLANK & j >= 1; j = j - 1)
+	      ;
+	    if (j < 1)
+	      call error("Too many character overstrikes!")
+	    else {
+	      outbuf(bp, j) = UNDERLINE
+	      outfon(bp, j) = font
+	      bslev = max(bslev, j)
+	      isnb(j,f) = .true.
+	      }
+	    }
+	  else if (outbuf(bp, 1) == BLANK) {
+	    outbuf(bp, 1) = buf(i)
+	    outfon(bp, 1) = font
+	    isnb(1,f) = .true.
+	    }
+	  else {
+	    for (j = 2; outbuf(bp, j) != BLANK & j <= MAXBACK; j = j + 1)
+	      ;
+	    if (j > MAXBACK)
+	      call error("Too many character overstrikes!")
+	    else {
+	      outbuf(bp, j) = buf(i)
+	      outfon(bp, j) = font
+	      bslev = max(bslev, j)
+	      isnb(j,f) = .true.
+	      }
+	    }
+	  bp = bp + 1
+	  }
+	else
+	  bp = bp + 1
+	}
+    bp = max(bp, bpmax)
+    if (nfonts == 1)
+      do i = 1, bslev {
+	if (isnb(i,1)) {
+	  call putfon(fonts(1))
+	  for (j = 1; j <= offset; j = j + 1)
+	    call putc(BLANK)
+	  call putln2(outbuf(1, i), bp - 1)
+	  if (i < bslev)
+	    call putnwl(0)
+	  }
+	}
+    else {
+      firfon = 1
+      for (i = 1; i <= bslev; i = i + 1)		# find non-blank font
+	for (f = 1; f <= nfonts; f = f + 1)
+	  if (isnb(i, f)) {
+	    if (firfon == 0)
+	      call putnwl(0)
+	    firfon = 0
+	    fonlev = fonts(f)
+	    call putfon(fonlev)
+	    for (j = 1; j <= offset; j = j + 1)
+	      call putc(BLANK)
+	    for (j = 1; j < bp; j = j + 1)
+	      if (outfon(j, i) == fonlev)
+		call putc(outbuf(j, i))
+	      else
+		call putc(BLANK)
+	    }
+      }
+    if (lininc == 0.5)
+      call putnwl(1)
+    else
+      call putnwl(2)
+    call fillc(outbuf, bslev*(MAXOUT+1), BLANK)
+    }
+  if (varspc == YES | lininc == 1.0)
+    lineno = lineno + lininc
+  return
+  end
+  subroutine putnwl(n)
+  implicit integer (a-z)
+  include cparam
+  include cpage
+
+  if (lasnew >= 0 & n >= 0)
+    lasnew = lasnew + n
+  else {
+    switch (lasnew) {
+      case -1:
+      case  0:
+	if (supch != EOS) {
+	  call putc(supch)
+	  call putc(supch)
+	  call putc(NEWLINE)
+	  }
+	else
+	  call putc(CR)
+      case -2:
+	call putc(CR)
+      default:
+	if (mod(lasnew, 2) == 1)
+	  call putc(supch)
+	for (i = 2; i <= lasnew + 1; i = i + 2)
+	  call putc(NEWLINE)
+      }
+    lasnew = n
+    }
+  return
+  end
+
+  subroutine putfon(n)
+  implicit integer (a-z)
+  include cpage
+  include cparam
+
+  if (n != oufont) {
+    call putc(fontch)
+    call putc(n + '0')
+    oufont = n
+    }
+  call putnwl(-1)
+  return
+  end

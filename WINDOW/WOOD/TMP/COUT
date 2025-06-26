@@ -1,0 +1,12 @@
+ #  common block /cout/
+ #  put on a file called 'cout'
+ #  used only the text formatter
+ 
+ 
+ common /cout/ outp, outw, outwds, prep, outbuf(MAXOUT)
+   integer outp      # last char position in outbuf; init = 0
+   integer outw      # width of text currently in outbuf; init = 0
+   integer prep      # last charac position of next to last
+                    # word in outbuf; init=0
+   integer outwds      # number of words in outbuf; init = 0
+   character outbuf      # lines to be filled collect here

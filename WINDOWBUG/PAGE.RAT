@@ -1,0 +1,124 @@
+#	Zilch Screen Editor, Copyright (c) 1982,1986 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "memory.cmn"
+  include "session.cmn")
+
+  subroutine pa_switch(n)
+  header
+
+  pa_map(se_pages,pa)
+    if (pa_number(pa) == n)
+      goto 10
+  pa = pa_new(n)	# page doesn't exist; make a copy of current page
+  p = null
+  wi_map(se_windows,wi) {
+    wn = wi_copy(wi)
+    if (p == null)
+      pa_windows(pa) = wn
+    else
+      wi_next(p) = wn
+    wi_prev(wn) = p
+    p = wn
+    if (wi == se_current_window)
+      pa_current_window(pa) = wn
+    }
+10
+  wi_map(se_windows,wi)				# save window locations
+    if (wi_buffer(wi) != null) {
+      bu_dot(wi_buffer(wi)) = wi_dot(wi)
+      bu_bow(wi_buffer(wi)) = wi_bow(wi)
+      }
+  pa_current_window(se_current_page) = se_current_window
+  se_current_page = pa
+  se_current_window = pa_current_window(pa)
+  wi_map(se_windows,wi)
+    wi_modified(wi) = 1
+  return
+  end
+
+  function pa_generate(n)
+  header
+
+  for (i = n+1; ; i = i+1) {		# find new page number
+    pa_map(se_pages,pa)
+      if (pa_number(pa) == i)
+	next 2
+    break
+    }
+  return(pa_switch(i))
+  end
+
+  function pa_new(n)
+  header
+
+  pa_new = me_allocate(pa_sizeof)
+  for ([p = null; pa = se_pages]; pa != null; [p = pa; pa = pa_next(pa)])
+    if (n <= pa_number(pa))
+      break
+  if (p == null) {
+    pa_next(pa_new) = se_pages
+    se_pages = pa_new
+    }
+  else {
+    pa_next(pa_new) = pa_next(p)
+    pa_next(p) = pa_new
+    }
+  pa_number(pa_new) = n
+  pa_windows(pa_new) = null
+  pa_current_window(pa_new) = null
+  return
+  end
+
+  subroutine switch_to_page(n)
+  header
+
+  call pa_switch(n)
+  call ms_report_number("Page ",n,EOS)
+  call pa_ready(se_current_page)
+  return
+  end
+
+  subroutine pa_ready(pa)
+  header
+
+  wi_map(pa_windows(pa),wi) {
+    call bu_ready(wi_buffer(wi))
+    call wi_ready(wi)
+    }
+  return
+  end
+
+  subroutine pa_next_page
+  header
+
+  pa_map(pa_next(se_current_page),pa)
+    if (pa_number(pa) >= 0)
+      break
+  if (pa == null)
+    call ms_error("This is the last page!")
+  else
+    call switch_to_page(pa_number(pa))
+  return
+  end
+
+  subroutine pa_previous_page
+  header
+
+  for (pa = pa_prev(se_current_page); pa != null; pa = pa_prev(pa))
+    if (pa_number(pa) >= 0)
+      break
+  if (pa == null)
+    call ms_error("This is the first page!")
+  else
+    call switch_to_page(pa_number(pa))
+  return
+  end
+
+  function pa_prev(page)
+  header
+
+  for ([pa = se_pages; prev = null]; pa != page; [prev = pa; pa = pa_next(pa)])
+    ;
+  return(prev)
+  end

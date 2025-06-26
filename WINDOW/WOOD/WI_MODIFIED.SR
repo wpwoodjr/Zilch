@@ -1,0 +1,103 @@
+$ sr wi_modified
+
+******************************
+COM$8:[WOOD.WINDOW]BUFFER.RAT;200
+
+	wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW]FILEIO.RAT;168
+
+	wi_modified(wi) = 1
+      wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW]INSERT.RAT;79
+
+  wi_modified(se_current_window) = 1
+  wi_modified(se_current_window) = 1
+  if (wi_modified(se_current_window) == 0) {
+    wi_modified(se_current_window) = 0
+	if (wi_modified(se_current_window) == 0 &
+	  wi_modified(se_current_window) = 0
+
+******************************
+COM$8:[WOOD.WINDOW]PAGE.RAT;75
+
+    wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW]SCREEN.RAT;124
+
+    if (wi_modified(wi) == 0)
+	wi_modified(wi) = 1
+    if (wi_modified(wi) == 0)
+    wi_modified(wi) = 0
+
+******************************
+COM$8:[WOOD.WINDOW]TEXT.RAT;125
+
+	wi_modified(wi) = 1
+      wi_modified(wi) = 1
+	wi_modified(wi) = 1
+	wi_modified(wi) = 1
+	wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW]WINDOW.RAT;81
+
+    wi_modified(se_current_window) = 1
+  wi_modified(wi_new) = 1
+	wi_modified(wi2) = 1
+	wi_modified(wi2) = 1
+      wi_modified(wi) = 1
+    wi_modified(wi_next(wi)) = 1
+    wi_modified(wi_prev(wi)) = 1
+  wi_modified(wi) = 1
+  wi_modified(se_current_window) = 1
+    wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW.SEQ]BUFFER.RAT;7
+
+	  wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW.SEQ]FILEIO.RAT;173
+
+    wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW.SEQ]MAPPINGS.RAT;185
+
+      wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW.SEQ]SCREEN.RAT;125
+
+    if (wi_modified(wi) == 0)
+	wi_modified(wi) = 1
+    if (wi_modified(wi) == 0)
+    wi_modified(wi) = 0
+
+******************************
+COM$8:[WOOD.WINDOW.SEQ]SEQ.RAT;1
+
+	wi_modified(se_current_window) = 1
+	  wi_modified(se_current_window) = 1
+
+******************************
+COM$8:[WOOD.WINDOW.SEQ]SEQIO.RAT;37
+
+    wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW.WOOD]INTERFACE.RAT;19
+
+      wi_modified(wi) = 1
+
+******************************
+COM$8:[WOOD.WINDOW.WOOD]ZBIND.RAT;133
+
+	wi_modified(se_current_window) = 1
+	  wi_modified(se_current_window) = 1

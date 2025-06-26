@@ -1,0 +1,17 @@
+.po 10
+.m1 1
+.he /Page #
+.m2 0
+.ti 2
+..ul
+hi t_h_e_r_e_~2`1234
+.br
+.bd
+this is a\0
+.br
+again
+aaaa
+.br
+\0a\1b\0a
+.br
+hi

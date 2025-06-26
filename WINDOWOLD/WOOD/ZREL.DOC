@@ -1,0 +1,135 @@
+			    ZILCH Release Notes
+
+There are a number of changes made in ZILCH.  These are described below.
+
+1.	A new switch, /CRoss_lines, determines whether or not the cursor
+	crosses line boundaries on  DELETE and WORD MOVEMENT commands.
+	The default is no line crossing.
+
+2.	THE FOLLOWING FUNCTION WAS REMOVED OCT 30, 1986; it was useless:
+	Jump mode search - @ key in standard Zilch
+
+3.	Zilch uses the operating system's terminal width and page length
+	to determine the screen width unless the /WIDTH or /LENGTH qualifiers
+	are specified on Zilch's command line. Also the screen width is reset
+	upon exiting Zilch if changed by the /WIDTH qualifier.
+
+4.	Zilch will now support terminals with up to 52 lines.
+
+5.	The DCL function doesn't delete the created subprocess when you logoff
+	the subprocess. Zilch redefines LO*GOFF to be ATTACH "process name"
+	in the subprocess,
+	where "process name" is the name of the parent process in double
+	quotes. Then when you enter DCL again, Zilch tries to reattach to the
+	subprocess instead of creating a new one. The subprocess is deleted
+	when you exit Zilch unless you CONTROL-Y out of Zilch.
+
+6.	Mailbox for broadcasts, checkpoints and saves session on disconnect.
+
+7.	Can now restore with a different width or page length eg. z/wid=132
+
+8.	What was formerly refered to as the VT bindings have been merged with
+	the default keys.  In addition to the standard keys, the following
+	keys now function as shown:
+
+	Key		Function:
+	-------------	-----------------------------------------------------
+	` (acc. grave)	Now works to switch between control and insert mode.
+			this will be especially useful with the DEC LK201 
+			keyboard.
+	F11 (ESC)	Now works to switch modes between control and insert
+			whether the terminal in VT200 or VT100 mode.
+	F12 (BS)	Now works as previous character in both control and
+			insert mode whether the terminal is in VT200 or VT100
+			mode.
+	F13 (LF)	Now works as next line in both control and insert mode
+			whether the terminal is in VT200 or VT100 mode.
+	HELP (F15)	Invokes the help function (as does ?).
+	INSERT HERE	Switches back and forth between overstrike mode (see
+			below).
+	PREVIOUS SCREEN	Goes back to top of last screen (equivalent to typing
+			WTY).
+	NEXT SCREEN	Goes to top of next screen (equivalent to typing WTN).
+	arrow keys	Work as expected in both modes.
+	PF1		Search again in reverse (equivalent to typing \<CR>).
+	PF2		Search again forward (equivalent to typing /<CR>).
+	PF3		Delete word backwards.
+	PF4		Delete word forward.
+	KEYPAD -	Previous window (equivalent to typing WP).
+	KEYPAD ,	Next window (equivalent to typing WN).
+	KEYPAD 0	Execute the most recently defined macro.
+	KEYPAD 1-9	Execute macros saved as 1-9.
+	KEYPAD .	Followed by a keypad number causes it to move the
+			currently defined macro (keypad 0) into the new keypad
+			key.
+9.	Defaults carry through from one file to the next during
+		visit files and on the command line, eg:
+
+		$ zilch x.dat y
+	   or
+
+		wv x.dat y
+
+	   both load in x.dat and y.dat
+
+10.	^P writes marked region to a local printer or regular printer
+
+11.	WL shows files before buffers  (also, from before, has nicer looking
+	output).
+
+12.	Zilch does not warn about modified buffers without file names
+		(ie. buffers not associated with a file)
+		before exiting, as it used to, unless you are in a window
+		on a modified buffer.  Then it asks "Save file [y]?"
+		This makes it convenient to use buffers for scratch storage.
+
+13.	WOOD'S WORK IN PROGRESS -- SUBJECT TO CHANGE WITHOUT NOTICE!
+	~ puts you into a new mode, OVERSTRIKE mode, in which typed
+	characters replace previous characters.  OVERSTRIKE is smart about
+	writing over TABS, but not so smart about adding TABS.
+	The arrow keys work in OVERSTRIKE mode, also ^H, ^J, ^K, ^L, and DEL.
+	Use `, ESC, F11 (ESC)or ^Z to exit OVERSTRIKE.  THE INSERT HERE KEY
+	will change modes between overstrike and insert.
+
+14.	WOOD'S WORK IN PROGRESS -- SUBJECT TO CHANGE WITHOUT NOTICE!
+	new command line switch:
+
+	  /word=characters
+
+	lets you define your own set of characters which define what a
+	word is for word movement commands, for example:
+
+	  z/word="A-Za-z0-9"
+
+	is the default and specifies capital and little letters and 0
+	through 9 as word characters.
+
+	  z/word="\0-\177"
+
+	defines every character from NUL to DEL as a word character.
+
+	  z/word="a"""
+
+	defines " and little a as word characters.
+
+	  z/word="A-Za-z0-9,)"
+
+	defines two classes of word characters, one is A-Za-z0-9 and the
+	other is )   (the comma separates the classes.  For a literal
+	comma, use "\," )
+	At this time, 9 word classes may be defined by the user.
+
+15.	The W# command sets the size below which a window will not be pushed
+	by size changes in other windows.
+	This command causes an incompatibility between new Zilch save files
+	and old ones, so that new save files may not be used with old versions
+	of Zilch.
+
+16.	The WS (window shrink) and WE (window enlarge) commands do not produce
+	an error beep when they cannot shrink or expand the window.
+	This means they can be used in macros without terminating the macro
+	because of an error status.
+
+17.	New algorithm for computing screen update's output buffer size.
+	Also, X# displays selected buffer size. It takes awhile for Zilch to
+	select the buffer size.

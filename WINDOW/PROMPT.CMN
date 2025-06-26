@@ -1,0 +1,8 @@
+define(MAX_RECALL,7)
+
+common /prompt/ recall, recall_len, recall_last
+
+  byte recall(MAX_PROMPT, MAX_RECALL)		# circular recall buffer
+  integer recall_len(MAX_RECALL), recall_last
+
+  data recall_len /MAX_RECALL*-1/, recall_last /1/

@@ -1,0 +1,59 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+  include "memory.cmn"
+  include "session.cmn"
+  include "[.wood.tmp]czilch")
+
+  subroutine if_run(subr,outbuf,pr)
+  header
+  byte outbuf(ARB),pr(ARB)
+  logical busame
+
+  st = st_allocate(MAX_PROMPT)
+  if (pr(1) != EOS)
+    if (! q_pr_read_prompt(pr, st, len))
+      goto 10
+  bu_in = se_current_buffer
+  bu_in_dot = 1
+  bu_out_marker = 1
+  bu_in_marker = wi_dot(se_current_window)
+  if (q_bu_find_window(outbuf)) {
+    if (bu_size(bu_in) > 0)
+      if (tx_text(tx_address(bu_in, bu_size(bu_in))) != NEWLINE)
+	call tx_insert_character(bu_in, NEWLINE, bu_size(bu_in) + 1)
+    busame = false
+    bu_out = se_current_buffer
+    if (bu_out == bu_in) {
+      if (! q_copy_region_to_buffer("interface", 1, bu_size(bu_in) + 1))
+	goto 10
+      bu_in = bu_find_by_name("interface")
+      busame = true
+      }
+    call tx_set_gap(bu_in, 1)
+    tx_in_pointer = tx_address(bu_in, 1) - 1
+    call bu_clear_text(bu_out)
+    call subr(st_buffer(st), len)
+    wi_dot(se_current_window) = bu_out_marker
+    if (se_error_occurred) {
+      if (busame) {
+	call bu_clear_text(bu_out)
+	call tx_copy_text(bu_in, 1, bu_out, 1, bu_size(bu_in))
+	}
+      else
+	call previous_window
+      wi_dot(se_current_window) = bu_in_dot
+      }
+    if (busame) {
+      call bu_clear_text(bu_in)
+      bu_modified(bu_out) = 1
+      }
+    else
+      bu_modified(bu_out) = 0
+    bu_map_windows(bu_out,wi)
+      wi_modified(wi) = 1
+    }
+10
+  call st_deallocate(st)
+  return
+  end

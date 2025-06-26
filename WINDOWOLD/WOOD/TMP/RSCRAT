@@ -1,0 +1,10 @@
+#  common block /rscrat/
+ # put on a file called 'rscrat'
+ # used only by the text formatter
+ 
+ 
+common /rscrat/ tbuf1(MAXLINE), tbuf2(MAXLINE), ttl(MAXLINE)
+ 
+  character tbuf1   # scratch arrays for use by puttl and tabs
+  character tbuf2   #
+  character ttl     #

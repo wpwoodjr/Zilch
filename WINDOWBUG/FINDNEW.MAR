@@ -1,0 +1,35 @@
+;	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+	.title	tx_find_newline
+;
+;
+;	call tx_find_newline(tx,tx_gap,tx_gap_size,tx_text)
+;
+;
+
+tx=4
+tx_gap=8
+tx_gap_size=12
+tx_text=16
+newline=10.
+
+	.psect	icr_code,pic,usr,con,rel,lcl,shr,exe,rd,nowrt,novec,long
+tx_find_newline::
+	.word	^m<>
+	addl3	@tx(ap),tx_text(ap),r0
+	subl3	@tx(ap),@tx_gap(ap),r1
+	bleq	20$
+10$:
+	cmpb	(r0)+,#newline
+	beqlu	40$
+	sobgtr	r1,10$
+20$:
+	addl2	@tx_gap_size(ap),r0		; after gap now
+30$:
+	cmpb	(r0)+,#newline
+	bnequ	30$
+	subl2	@tx_gap_size(ap),r0
+40$:
+	subl3	tx_text(ap),r0,@tx(ap)
+	ret
+	.end

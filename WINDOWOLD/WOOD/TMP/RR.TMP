@@ -1,0 +1,63 @@
+We   briefly   review   Pregibon's  approach  (1981)  to  logistic  regression
+diagnostics.  Suppose now that Y ,Y ,...,Y  are independent  random  variables~
+                                1  2      n                                   
+in the exponential family, and that the density Y  is~
+                                                 i   
+               g(y ,  ) = exp y    - a(  ) + b(y ) .~
+                  i  i         i i      i       i   
+Then,      is the natural parameter of Y ,a'(  ) = E(Y ) and a"(  ) = var(Y ).~
+        i                               i     i       i          i         i  
+                                                      P                              ~
+                                                       i____                         ~
+For example, if Y  is  binomial,  then       =  ln              ,  where  P   is  the~
+                 i                        i                 1-P            i         ~
+                                                               i                     
+                                 t                                            ~
+probability of  success.   Let      =  (  ,  ,...,  ) and suppose that   = X ,~
+                                         1  2      n                          
+where   is a d-vector of parameters to be estimated, and  X  is  the  "design"
+matrix.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

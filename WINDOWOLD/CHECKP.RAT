@@ -1,0 +1,56 @@
+#	Zilch Screen Editor, Copyright (c) 1982 William P. Wood, Jr.
+
+define(header,implicit integer (a-p,r-z); implicit logical (q)
+include "session.cmn"
+include "memory.cmn")
+
+  subroutine checkpoint_modified_files
+  header
+
+  bu_map(se_buffers,bu)
+    if (bu_modified(bu) == 1 & bu_file_name(bu) != null)
+      call ch_buffer(bu)
+  return
+  end
+
+  subroutine ch_buffer(bu)
+  header
+  byte name(_arith(NAMESIZE,+,4))
+
+  if (q_ch_name(st_buffer(bu_name(bu)),name)) {
+    if (! q_fi_write_file(bu,name,'U',stat)) {
+      call ms_message2("Error checkpointing buffer ",bu_name(bu))
+      call ms_error(EOS)
+      }
+    else
+      call ms_message("Checkpointed...")
+    bu_modified(bu) = 1
+    }
+  return
+  end
+
+  function q_ch_name(buname,chname)
+  header
+  byte buname(ARB), chname(ARB)
+  string ckp ".ckp"
+
+  i = ho_indexq(buname,'.')
+  if (i == 0)
+    i = ho_length(buname)+1
+  if (q_ho_equal(buname(i), ckp))
+    return(false)
+  i = min(i,NAMESIZE)-1
+  if (i > 0)
+    call movc(buname,chname,i)
+  call movc(ckp, chname(i+1), 5)
+  return(true)
+  end
+
+  subroutine ch_delete(bu)
+  header
+  byte name(_arith(NAMESIZE,+,4))
+
+  if (q_ch_name(st_buffer(bu_name(bu)),name))
+    call q_fi_delete(WRITE_UNIT,name)
+  return
+  end

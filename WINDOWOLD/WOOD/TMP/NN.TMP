@@ -1,0 +1,26 @@
+    if (nfonts == 1)
+      do i = 1, bslev
+	call putln2(outbuf(1, i), bp - 1)
+    else
+      for ([i = 1; f = 1]; i <= bslev; ) {
+	for (j = 1; j < bp; j = j + 1)
+	  if (outfon(j, i) == fonlev)
+	    call putc(outbuf(j, i))
+	  else
+	    call putc(BLANK)
+	for ( ; i <= bslev; [i = i + 1; f = 0])		# find non-blank font
+	  for (f = f + 1; f <= nfonts; f = f + 1)
+	    if (isnb(i, f)) {
+	      call putc(fontch)
+	      call putc(fonts(f) + '0')
+	      fonlev = fonts(f)
+	      if (supch != EOS) {
+		call putc(supch)
+		call putc(supch)
+		call putc(NEWLINE)
+		}
+	      else
+		call putc(CR)
+	      break
+	      }
+	}

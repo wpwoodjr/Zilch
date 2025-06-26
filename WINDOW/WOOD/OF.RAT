@@ -1,0 +1,50 @@
+# lib$find_file bugs:
+# when flag = 2
+#	*.rat twice in a row - second time returns nothing
+#	*.rat, then blank - returns aa.rat over and over
+# when flag = 0
+#	junk.rat - returns FNF
+#	junk.rat again - returns no more files
+
+define(debug)
+define(success,(($1 & 1) != 0))
+# icr_find_file - return matching file names one at a time
+  integer function icr_find_file(file, def_str, nselec, out_file)
+  character*(*) file, out_file, def_str
+  integer nselec
+  integer icr_$parse, icr_$search
+
+  if (nselec == 0) {			# then initialize
+    icr_find_file = icr_$parse(file, def_str, out_file)
+    if (! success(icr_find_file))
+      return
+    def_str = out_file
+    }
+  icr_find_file = icr_$search(out_file)
+  if (success(icr_find_file))
+    nselec = nselec+1
+  else
+    nselec = 0
+  return
+  end
+
+_ifdef(debug)
+character arg*60,def*60
+integer status
+
+call lib$get_foreign(arg, , len)
+def = ' '
+repeat {
+  n = 0
+  repeat {
+    status = icr_find_file(arg, def, n, arg)
+    write(6, (i10,1x,a)) n,arg
+    if (n == 0)
+      break
+    }
+  read(5,(a),end=10) arg
+  }
+10
+call exit(status)
+end
+_enddef
